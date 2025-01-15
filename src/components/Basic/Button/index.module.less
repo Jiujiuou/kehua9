@@ -1,0 +1,128 @@
+.buttonContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+  font-family: "SF Mono", "Monaco", "Inconsolata", "Roboto Mono",
+    "Source Code Pro", "Menlo", "Consolas", monospace;
+  letter-spacing: 0.4px;
+
+  /* 图标样式 */
+  &Icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 按钮类型 */
+  &.typePrimary {
+    background: var(--accent-color);
+    color: var(--bg-primary);
+    border: 1px solid var(--accent-color);
+
+    &:hover:not(.buttonDisabled) {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+      box-shadow: var(--shadow);
+    }
+
+    [data-theme="dark"] & {
+      background: #fafafa;
+      color: #0a0a0a;
+      border: 1px solid #fafafa;
+
+      &:hover:not(.buttonDisabled) {
+        background: #e4e4e7;
+        border-color: #e4e4e7;
+        box-shadow: var(--shadow-md);
+      }
+    }
+  }
+
+  &.typeSecondary {
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+
+    &:hover:not(.buttonDisabled) {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border-color: var(--accent-color);
+      box-shadow: var(--shadow);
+    }
+
+    [data-theme="dark"] & {
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+
+      &:hover:not(.buttonDisabled) {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+        border-color: #fafafa;
+        box-shadow: var(--shadow-md);
+      }
+    }
+  }
+
+  &.typeDanger {
+    background: #dc3545;
+    color: white;
+    border: 1px solid #dc3545;
+
+    &:hover:not(.buttonDisabled) {
+      background: #c82333;
+      border-color: #bd2130;
+      box-shadow: var(--shadow);
+    }
+
+    [data-theme="dark"] & {
+      background: #dc3545;
+      color: white;
+      border: 1px solid #dc3545;
+
+      &:hover:not(.buttonDisabled) {
+        background: #c82333;
+        border-color: #bd2130;
+        box-shadow: var(--shadow-md);
+      }
+    }
+  }
+
+  /* 按钮大小 */
+  &.sizeSmall {
+    padding: 8px 12px;
+    font-size: 12px;
+    min-height: 32px;
+  }
+
+  &.sizeMedium {
+    padding: 10px 16px;
+    font-size: 14px;
+    min-height: 40px;
+  }
+
+  &.sizeLarge {
+    padding: 12px 24px;
+    font-size: 16px;
+    min-height: 48px;
+  }
+
+  /* 禁用状态 */
+  &Disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+
+    [data-theme="dark"] & {
+      opacity: 0.4;
+    }
+  }
+}

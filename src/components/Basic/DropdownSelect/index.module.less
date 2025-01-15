@@ -1,0 +1,255 @@
+.dropdownFormGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dropdownFormLabel {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-family: "SF Mono", "Monaco", "Inconsolata", "Roboto Mono",
+    "Source Code Pro", "Menlo", "Consolas", monospace;
+  letter-spacing: 0.4px;
+  user-select: none;
+}
+
+.dropdownFormSelect {
+  position: relative;
+}
+
+.dropdownSelectInputWrapper {
+  position: relative;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-card);
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+
+  &:hover {
+    border-color: var(--accent-color);
+    box-shadow: var(--shadow);
+  }
+
+  &:focus-within {
+    border-color: var(--ring-color);
+    box-shadow: 0 0 0 3px rgba(24, 24, 27, 0.1);
+  }
+
+  [data-theme="dark"] &:focus-within {
+    box-shadow: 0 0 0 3px rgba(250, 250, 250, 0.1);
+  }
+}
+
+.dropdownSelectInputContainer {
+  position: relative;
+  width: 100%;
+}
+
+.dropdownSelectInput {
+  width: 100%;
+  min-height: 41px; /* 保持与之前input相同的高度 */
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+}
+
+.dropdownSelectInputText {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  max-width: calc(100% - 56px); /* 减去左右padding和箭头空间 */
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: "SF Mono", "Monaco", "Inconsolata", "Roboto Mono",
+    "Source Code Pro", "Menlo", "Consolas", monospace;
+  letter-spacing: 0.4px;
+  pointer-events: auto;
+  user-select: none;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  padding: 2px 4px;
+  border-radius: 4px;
+  line-height: 1.2;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.08);
+  }
+}
+
+[data-theme="dark"] .dropdownSelectInputText:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.dropdownSelectInputPlaceholder {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-family: "SF Mono", "Monaco", "Inconsolata", "Roboto Mono",
+    "Source Code Pro", "Menlo", "Consolas", monospace;
+  letter-spacing: 0.4px;
+  pointer-events: none; /* 让点击事件穿透到父级 */
+  user-select: none;
+  cursor: pointer;
+}
+
+.dropdownSelectArrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.open {
+    transform: translateY(-50%) rotate(180deg);
+    color: var(--accent-color);
+  }
+}
+
+.dropdownSelectDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  z-index: 50;
+  margin-top: 8px;
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  max-height: 360px; /* 增加最大高度以容纳更多选项 */
+}
+
+/* 选项容器 - 可滚动部分 */
+.dropdownOptionsContainer {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0; /* 允许flex子项缩小 */
+}
+
+/* 自定义添加部分 - 固定在底部 */
+.dropdownCustomAddSection {
+  flex-shrink: 0; /* 防止被压缩 */
+  background: var(--bg-card);
+  border-top: 1px solid var(--border-color);
+  border-radius: 0 0 8px 8px;
+}
+
+.dropdownSelectOption {
+  width: 100%;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* 改为顶部对齐，适应多行文本 */
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-primary);
+  font-family: "SF Mono", "Monaco", "Inconsolata", "Roboto Mono",
+    "Source Code Pro", "Menlo", "Consolas", monospace;
+  letter-spacing: 0.4px;
+  min-height: 44px; /* 确保选项有足够高度 */
+
+  &:hover {
+    background: var(--bg-secondary);
+  }
+
+  &.customAdd {
+    color: var(--accent-color);
+    font-weight: 500;
+    font-size: 14px;
+
+    &:hover {
+      background: var(--bg-tertiary);
+    }
+  }
+
+  /* 选项文本容器 */
+  > span:first-child {
+    flex: 1;
+    min-width: 0; /* 允许flex项目缩小 */
+    word-break: break-all; /* 长单词强制换行 */
+    white-space: pre-wrap; /* 保留换行符并允许换行 */
+    line-height: 1.4;
+    max-height: 3.6em; /* 限制最多3行，超出显示省略号 */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+}
+
+/* 自定义添加按钮容器 */
+.customAddButtonContainer {
+  padding: 8px 12px;
+  display: flex;
+  justify-content: center;
+}
+
+.customAddButton {
+  width: 100%;
+  text-align: center;
+  justify-content: center;
+}
+
+/* 选项分隔线 */
+.dropdownOptionDivider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 0 12px;
+}
+
+/* 自定义添加选项的分隔线 - 现在由边框替代 */
+.dropdownCustomAddDivider {
+  display: none; /* 隐藏，使用section的边框替代 */
+}
+
+.dropdownDeleteOption {
+  color: var(--accent-color);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: all 0.2s ease;
+  font-size: 12px;
+  font-weight: 500;
+  min-width: 20px;
+  text-align: center;
+  flex-shrink: 0; /* 防止删除按钮被压缩 */
+  align-self: center; /* 让删除按钮在垂直方向居中 */
+
+  &:hover {
+    background: var(--accent-color);
+    color: white;
+  }
+}
+
+/* 暗色模式下悬停状态文字颜色改为黑色，以提供足够对比度 */
+[data-theme="dark"] .dropdownDeleteOption {
+  &:hover {
+    color: #000000;
+  }
+}
+
+.dropdownSelectOption:hover .dropdownDeleteOption {
+  opacity: 1;
+}

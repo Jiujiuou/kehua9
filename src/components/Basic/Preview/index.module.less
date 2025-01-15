@@ -1,0 +1,183 @@
+.preview {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  background-color: #f8f8f8;
+  min-height: 0;
+  min-width: 0; // 确保 flex 子元素可以正确收缩
+}
+
+// 上传区域
+.uploadArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border: 2px dashed #d0d0d0;
+  border-radius: 8px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+
+  &:hover {
+    border-color: #ff6b9d;
+    background-color: #fff5f8;
+  }
+}
+
+.uploadIcon {
+  font-size: 48px;
+  color: #ff6b9d;
+  margin-bottom: 16px;
+  transition: transform 0.3s ease;
+
+  .uploadArea:hover & {
+    transform: scale(1.1);
+  }
+}
+
+.uploadText {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.uploadHint {
+  font-size: 14px;
+  color: #999;
+}
+
+// 加载中状态
+.loadingArea {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.loadingText {
+  font-size: 16px;
+  color: #666;
+}
+
+// 内容区域
+.contentArea {
+  display: flex;
+  flex-direction: column;
+  // gap: 0;
+  max-width: 100%;
+  margin: 0;
+  // padding 通过内联样式动态设置
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: #f8f8f8;
+  box-sizing: border-box;
+
+  // 隐藏滚动条但保持滚动功能
+  scrollbar-width: none; // Firefox
+  -ms-overflow-style: none; // IE and Edge
+
+  &::-webkit-scrollbar {
+    display: none; // Chrome, Safari, Opera
+  }
+}
+
+// 动态项
+.dynamicItem {
+  background-color: #fff;
+  // border-radius 和 padding 通过内联样式动态设置
+  box-shadow: none;
+  border: none;
+  margin-bottom: 12px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.dynamicHeader {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 6px;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.dynamicDate {
+  font-size: 13px;
+  font-weight: 400;
+  color: #B6B6B6;
+  line-height: 1.5;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.dynamicTime {
+  display: none;
+}
+
+.dynamicText {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #333;
+  word-break: break-word;
+  margin-bottom: 0;
+  margin-top: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.dynamicParagraph {
+  margin-bottom: 0.5em;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.dynamicImages {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); // 统一使用3列网格布局
+  // gap 通过内联样式动态设置
+  margin-top: 8px;
+  width: 100%;
+
+  // 所有图片都按1/3宽度排布，方便后续实现大图预览
+  // 每张图片占1列，宽度为父元素宽度的1/3（考虑间距）
+}
+
+.imageWrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%; // 保持正方形比例（多张图片时）
+  overflow: hidden;
+  border-radius: 4px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+}
+
+.dynamicImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
