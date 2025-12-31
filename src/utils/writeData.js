@@ -198,3 +198,91 @@ function parseContentToDynamics(content) {
   return dynamics;
 }
 
+/**
+ * 从文件中删除动态
+ * @param {FileSystemDirectoryHandle} directoryHandle - 文件夹句柄
+ * @param {string} year - 年份，如 "2026"
+ * @param {string} timestamp - 要删除的动态的时间戳（ISO 格式）
+ * @returns {Promise<void>}
+ */
+export async function deleteDynamicFromFile(directoryHandle, year, timestamp) {
+  try {
+    // 首先检查是否是"我的动态"文件夹，或者需要进入"我的动态"文件夹
+    let targetDirectoryHandle = directoryHandle;
+    
+    try {
+      // 尝试获取"我的动态"文件夹
+      const myDynamicHandle = await directoryHandle.getDirectoryHandle('我的动态');
+      targetDirectoryHandle = myDynamicHandle;
+    } catch (error) {
+      // 如果"我的动态"文件夹不存在，直接使用当前文件夹
+      targetDirectoryHandle = directoryHandle;
+    }
+    
+    // 查找年份文件夹
+    const yearFolderName = `${year}年`;
+    let yearFolderHandle;
+    
+    try {
+      yearFolderHandle = await targetDirectoryHandle.getDirectoryHandle(yearFolderName);
+    } catch (error) {
+      throw new Error(`年份文件夹 ${yearFolderName} 不存在`);
+    }
+    
+    // 读取现有的动态内容文件
+    const contentFileName = `${yearFolderName}-动态内容.txt`;
+    let existingContent = '';
+    
+    try {
+      const contentFileHandle = await yearFolderHandle.getFileHandle(contentFileName);
+      const file = await contentFileHandle.getFile();
+      existingContent = await file.text();
+    } catch (error) {
+      throw new Error(`文件 ${contentFileName} 不存在`);
+    }
+    
+    // 解析现有内容，获取所有动态
+    const existingDynamics = parseContentToDynamics(existingContent);
+    
+    // 找到要删除的动态（通过 timestamp 匹配）
+    // 由于写入时使用 toISOString() 可能包含毫秒，而解析时只精确到秒，
+    // 所以需要比较到秒级别
+    const targetTimestamp = new Date(timestamp);
+    const targetTimeSeconds = Math.floor(targetTimestamp.getTime() / 1000);
+    
+    const dynamicIndex = existingDynamics.findIndex((dynamic) => {
+      const dynamicTimestamp = new Date(dynamic.timestamp);
+      const dynamicTimeSeconds = Math.floor(dynamicTimestamp.getTime() / 1000);
+      return dynamicTimeSeconds === targetTimeSeconds;
+    });
+    
+    if (dynamicIndex === -1) {
+      console.error("要删除的时间戳:", timestamp);
+      console.error("文件中的所有动态:", existingDynamics.map(d => ({
+        timestamp: d.timestamp,
+        date: d.date,
+        time: d.time,
+        text: d.text?.substring(0, 20)
+      })));
+      throw new Error("未找到要删除的动态");
+    }
+    
+    // 删除动态
+    existingDynamics.splice(dynamicIndex, 1);
+    
+    // 转换为文件内容格式
+    const newContent = formatDynamicsToContent(existingDynamics);
+    
+    // 写入文件
+    const contentFileHandle = await yearFolderHandle.getFileHandle(contentFileName, { create: true });
+    const writable = await contentFileHandle.createWritable();
+    await writable.write(newContent);
+    await writable.close();
+    
+    console.log(`成功删除动态从 ${contentFileName}`);
+  } catch (error) {
+    console.error("删除文件失败:", error);
+    throw error;
+  }
+}
+

@@ -7,10 +7,13 @@ import {
   useEffect,
 } from "react";
 import { FaPlus } from "react-icons/fa";
+import { MdDeleteOutline } from "react-icons/md";
 import { parseDynamicData } from "@/utils/parseData";
 import PropTypes from "prop-types";
 import ImagePreview from "@/components/Basic/ImagePreview";
 import { useToastHelpers } from "@/components/Basic/Toast";
+import { useConfirmHelper } from "@/components/Basic/Confirm";
+import { deleteDynamicFromFile } from "@/utils/writeData";
 import styles from "./index.module.less";
 
 const Preview = forwardRef(
@@ -30,6 +33,7 @@ const Preview = forwardRef(
       onDynamicsChange = null,
       onScrollChange = null,
       onDirectoryHandleChange = null,
+      directoryHandle = null,
     },
     ref
   ) => {
@@ -42,6 +46,7 @@ const Preview = forwardRef(
     const prevExternalDynamicsRef = useRef(null);
     const isInternalUpdateRef = useRef(false);
     const toast = useToastHelpers();
+    const confirm = useConfirmHelper();
 
     // 当外部传入的 dynamics 变化时，同步更新内部 state
     useEffect(() => {
@@ -50,13 +55,16 @@ const Preview = forwardRef(
         // 使用 JSON.stringify 比较数组内容是否真的变化了
         const currentStr = JSON.stringify(externalDynamics);
         const prevStr = JSON.stringify(prevExternalDynamicsRef.current);
-        
+
         if (currentStr !== prevStr) {
           prevExternalDynamicsRef.current = externalDynamics;
           isInternalUpdateRef.current = false; // 标记为外部更新
           setDynamics(externalDynamics);
         }
-      } else if (externalDynamics === null && prevExternalDynamicsRef.current !== null) {
+      } else if (
+        externalDynamics === null &&
+        prevExternalDynamicsRef.current !== null
+      ) {
         // 如果外部传入 null，且之前不是 null，则清空
         prevExternalDynamicsRef.current = null;
         isInternalUpdateRef.current = false;
@@ -153,13 +161,14 @@ const Preview = forwardRef(
       // 先进行筛选
       let filtered = dynamics.filter((dynamic) => {
         const hasImages = dynamic.images && dynamic.images.length > 0;
+        const hasText = dynamic.text && dynamic.text.trim().length > 0;
 
         if (contentTypeFilter === null) {
-          // 没有选择筛选条件，显示所有
-          return true;
+          // 没有选择筛选条件，显示所有（有文字或图片的都显示）
+          return hasText || hasImages;
         } else if (contentTypeFilter === "textOnly") {
-          // 只显示纯文字
-          return !hasImages;
+          // 只显示纯文字（没有图片，但有文字内容）
+          return !hasImages && hasText;
         } else if (contentTypeFilter === "withImages") {
           // 只显示含图片
           return hasImages;
@@ -212,21 +221,21 @@ const Preview = forwardRef(
       } finally {
         setIsLoading(false);
         // 清空 input 的值，以便可以重复选择同一个文件夹
-        event.target.value = '';
+        event.target.value = "";
       }
     };
 
     const handleUploadClick = async () => {
       // 尝试使用 File System Access API（如果支持）
-      if ('showDirectoryPicker' in window) {
+      if ("showDirectoryPicker" in window) {
         try {
           const directoryHandle = await window.showDirectoryPicker();
-          
+
           // 通知父组件保存文件夹句柄
           if (onDirectoryHandleChange) {
             onDirectoryHandleChange(directoryHandle);
           }
-          
+
           // 从文件夹句柄获取所有文件
           const files = await getFilesFromDirectoryHandle(directoryHandle);
           if (files.length > 0) {
@@ -234,7 +243,7 @@ const Preview = forwardRef(
           }
         } catch (error) {
           // 用户取消选择或其他错误
-          if (error.name !== 'AbortError') {
+          if (error.name !== "AbortError") {
             console.error("选择文件夹失败:", error);
           }
         }
@@ -245,20 +254,23 @@ const Preview = forwardRef(
     };
 
     // 从 DirectoryHandle 递归获取所有文件
-    const getFilesFromDirectoryHandle = async (directoryHandle, path = '') => {
+    const getFilesFromDirectoryHandle = async (directoryHandle, path = "") => {
       const files = [];
       for await (const [name, handle] of directoryHandle.entries()) {
         const currentPath = path ? `${path}/${name}` : name;
-        if (handle.kind === 'file') {
+        if (handle.kind === "file") {
           const file = await handle.getFile();
           // 添加 webkitRelativePath 属性以保持兼容性
-          Object.defineProperty(file, 'webkitRelativePath', {
+          Object.defineProperty(file, "webkitRelativePath", {
             value: currentPath,
             writable: false,
           });
           files.push(file);
-        } else if (handle.kind === 'directory') {
-          const subFiles = await getFilesFromDirectoryHandle(handle, currentPath);
+        } else if (handle.kind === "directory") {
+          const subFiles = await getFilesFromDirectoryHandle(
+            handle,
+            currentPath
+          );
           files.push(...subFiles);
         }
       }
@@ -342,6 +354,51 @@ const Preview = forwardRef(
                   <span className={styles.dynamicDate}>
                     {dynamic.date} {dynamic.time}
                   </span>
+                  {(() => {
+                    // 检查是否是2026年的动态
+                    const year = new Date(dynamic.timestamp).getFullYear();
+                    if (year === 2026 && directoryHandle) {
+                      return (
+                        <MdDeleteOutline
+                          className={styles.deleteIcon}
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            const result = await confirm(
+                              "确定要删除这条动态吗？"
+                            );
+                            if (result) {
+                              try {
+                                const year = new Date(dynamic.timestamp)
+                                  .getFullYear()
+                                  .toString();
+                                await deleteDynamicFromFile(
+                                  directoryHandle,
+                                  year,
+                                  dynamic.timestamp
+                                );
+                                // 从列表中移除
+                                const updatedDynamics = dynamics.filter(
+                                  (d) => d.timestamp !== dynamic.timestamp
+                                );
+                                isInternalUpdateRef.current = true;
+                                prevExternalDynamicsRef.current =
+                                  updatedDynamics;
+                                setDynamics(updatedDynamics);
+                                if (onDynamicsChange) {
+                                  onDynamicsChange(updatedDynamics);
+                                }
+                                toast.success("删除成功");
+                              } catch (error) {
+                                console.error("删除失败:", error);
+                                toast.error("删除失败：" + error.message);
+                              }
+                            }
+                          }}
+                        />
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
                 {dynamic.text && (
                   <div className={styles.dynamicText}>
@@ -358,7 +415,8 @@ const Preview = forwardRef(
                           );
                         }
                         // 判断是否是最后一段
-                        const isLastParagraph = paragraphIndex === array.length - 1;
+                        const isLastParagraph =
+                          paragraphIndex === array.length - 1;
                         return (
                           <div
                             key={paragraphIndex}
@@ -368,7 +426,9 @@ const Preview = forwardRef(
                               fontSize: `${fontSize}px`,
                               fontWeight: fontWeight,
                               marginBottom:
-                                paragraphSpacing && !isLastParagraph ? "1em" : "0.5em",
+                                paragraphSpacing && !isLastParagraph
+                                  ? "1em"
+                                  : "0.5em",
                             }}
                           >
                             {paragraph}
@@ -435,6 +495,7 @@ Preview.propTypes = {
   onDynamicsChange: PropTypes.func,
   onScrollChange: PropTypes.func,
   onDirectoryHandleChange: PropTypes.func,
+  directoryHandle: PropTypes.object,
 };
 
 export default Preview;

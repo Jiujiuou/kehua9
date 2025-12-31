@@ -127,6 +127,7 @@ function App() {
           onDynamicsChange={handleDynamicsChange}
           onScrollChange={handleScrollChange}
           onDirectoryHandleChange={setDirectoryHandle}
+          directoryHandle={directoryHandle}
         />
         <Control
           sortOrder={sortOrder}
