@@ -10,6 +10,7 @@ import { FaPlus } from "react-icons/fa";
 import { parseDynamicData } from "@/utils/parseData";
 import PropTypes from "prop-types";
 import ImagePreview from "@/components/Basic/ImagePreview";
+import { useToastHelpers } from "@/components/Basic/Toast";
 import styles from "./index.module.less";
 
 const Preview = forwardRef(
@@ -40,6 +41,7 @@ const Preview = forwardRef(
     const contentAreaRef = useRef(null);
     const prevExternalDynamicsRef = useRef(null);
     const isInternalUpdateRef = useRef(false);
+    const toast = useToastHelpers();
 
     // 当外部传入的 dynamics 变化时，同步更新内部 state
     useEffect(() => {
@@ -202,10 +204,11 @@ const Preview = forwardRef(
         isInternalUpdateRef.current = true; // 标记为内部更新
         prevExternalDynamicsRef.current = parsedData; // 更新外部引用，避免重复更新
         setDynamics(parsedData);
+        toast.success("数据加载成功");
       } catch (error) {
         console.error("解析数据失败:", error);
         console.error("错误堆栈:", error.stack);
-        alert("解析数据失败，请检查文件格式");
+        toast.error("解析数据失败，请检查文件格式");
       } finally {
         setIsLoading(false);
         // 清空 input 的值，以便可以重复选择同一个文件夹
@@ -272,10 +275,11 @@ const Preview = forwardRef(
         isInternalUpdateRef.current = true; // 标记为内部更新
         prevExternalDynamicsRef.current = parsedData; // 更新外部引用，避免重复更新
         setDynamics(parsedData);
+        toast.success("数据加载成功");
       } catch (error) {
         console.error("解析数据失败:", error);
         console.error("错误堆栈:", error.stack);
-        alert("解析数据失败，请检查文件格式");
+        toast.error("解析数据失败，请检查文件格式");
       } finally {
         setIsLoading(false);
       }

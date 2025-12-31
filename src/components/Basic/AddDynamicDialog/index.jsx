@@ -1,7 +1,6 @@
 import { useState, useRef } from "react";
 import PropTypes from "prop-types";
 import { FaPlus } from "react-icons/fa";
-import { IoCloseCircleSharp } from "react-icons/io5";
 import { IoMdClose } from "react-icons/io";
 import {
   DndContext,
@@ -20,6 +19,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { writeDynamicToFile } from "@/utils/writeData";
+import { useToastHelpers } from "@/components/Basic/Toast";
 import styles from "./index.module.less";
 
 function SortableImageItem({ imageItem, index, onRemove }) {
@@ -84,15 +84,16 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedImages, setSelectedImages] = useState([]);
   const fileInputRef = useRef(null);
+  const toast = useToastHelpers();
 
   const handleAddDynamic = async () => {
     if (!directoryHandle) {
-      alert("请先选择数据文件夹");
+      toast.warning("请先选择数据文件夹");
       return;
     }
 
     if (!newDynamicText.trim() && selectedImages.length === 0) {
-      alert("请输入动态内容或添加图片");
+      toast.warning("请输入动态内容或添加图片");
       return;
     }
 
@@ -109,7 +110,7 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
           uploadedImages.push(imageData);
         } catch (error) {
           console.error("上传图片失败:", error);
-          alert(`上传图片 ${imageItem.name} 失败：${error.message}`);
+          toast.error(`上传图片 ${imageItem.name} 失败：${error.message}`);
         }
       }
 
@@ -138,9 +139,10 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
       setNewDynamicText("");
       setSelectedImages([]);
       onClose();
+      toast.success("动态发布成功");
     } catch (error) {
       console.error("添加动态失败:", error);
-      alert("添加动态失败：" + error.message);
+      toast.error("添加动态失败：" + error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -157,7 +159,7 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
     const imageFiles = files.filter((file) => file.type.startsWith("image/"));
 
     if (imageFiles.length === 0) {
-      alert("请选择图片文件");
+      toast.warning("请选择图片文件");
       return;
     }
 
@@ -166,7 +168,7 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
     const maxCount = 9;
 
     if (currentCount >= maxCount) {
-      alert(`最多只能上传 ${maxCount} 张图片`);
+      toast.warning(`最多只能上传 ${maxCount} 张图片`);
       event.target.value = "";
       return;
     }
@@ -185,7 +187,7 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
 
     const duplicateCount = imageFiles.length - newFiles.length;
     if (duplicateCount > 0) {
-      alert(`检测到 ${duplicateCount} 张重复图片，已自动跳过`);
+      toast.info(`检测到 ${duplicateCount} 张重复图片，已自动跳过`);
     }
 
     if (newFiles.length === 0) {
@@ -198,7 +200,7 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
     const filesToAdd = newFiles.slice(0, remainingSlots);
 
     if (newFiles.length > remainingSlots) {
-      alert(
+      toast.info(
         `最多只能上传 ${maxCount} 张图片，已选择 ${currentCount} 张，将只添加前 ${remainingSlots} 张`
       );
     }
