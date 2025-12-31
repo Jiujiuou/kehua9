@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import styles from "./index.module.less";
 import Header from "@/components/Layout/Header";
 import Preview from "@/components/Basic/Preview";
@@ -32,6 +32,7 @@ function App() {
   const [contentTypeFilter, setContentTypeFilter] = useState(
     savedSettings.contentTypeFilter ?? null
   );
+  const [directoryHandle, setDirectoryHandle] = useState(null);
 
   // 当配置改变时，保存到 localStorage
   useEffect(() => {
@@ -78,9 +79,9 @@ function App() {
     setSortOrder(newOrder);
   };
 
-  const handleDynamicsChange = (newDynamics) => {
+  const handleDynamicsChange = useCallback((newDynamics) => {
     setDynamics(newDynamics);
-  };
+  }, []);
 
   const handleDateClick = (dateStr) => {
     // 先更新选中日期，这样滚动时不会触发更新
@@ -122,8 +123,10 @@ function App() {
           fontSize={fontSize}
           fontWeight={fontWeight}
           contentTypeFilter={contentTypeFilter}
+          dynamics={dynamics}
           onDynamicsChange={handleDynamicsChange}
           onScrollChange={handleScrollChange}
+          onDirectoryHandleChange={setDirectoryHandle}
         />
         <Control
           sortOrder={sortOrder}
@@ -136,6 +139,8 @@ function App() {
           fontSize={fontSize}
           fontWeight={fontWeight}
           contentTypeFilter={contentTypeFilter}
+          directoryHandle={directoryHandle}
+          dynamics={dynamics}
           onSortOrderChange={handleSortOrderChange}
           onImageGapChange={setImageGap}
           onPreviewPaddingChange={setPreviewPadding}
@@ -146,6 +151,7 @@ function App() {
           onFontSizeChange={setFontSize}
           onFontWeightChange={setFontWeight}
           onContentTypeFilterChange={setContentTypeFilter}
+          onDynamicsChange={handleDynamicsChange}
         />
       </div>
     </div>

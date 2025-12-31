@@ -25,8 +25,10 @@ const Preview = forwardRef(
       fontSize = 15,
       fontWeight = 400,
       contentTypeFilter = null,
+      dynamics: externalDynamics = null,
       onDynamicsChange = null,
       onScrollChange = null,
+      onDirectoryHandleChange = null,
     },
     ref
   ) => {
@@ -36,11 +38,36 @@ const Preview = forwardRef(
     const [previewIndex, setPreviewIndex] = useState(0);
     const fileInputRef = useRef(null);
     const contentAreaRef = useRef(null);
+    const prevExternalDynamicsRef = useRef(null);
+    const isInternalUpdateRef = useRef(false);
 
-    // 当动态数据变化时，通知父组件
+    // 当外部传入的 dynamics 变化时，同步更新内部 state
     useEffect(() => {
-      if (onDynamicsChange) {
+      // 只有当 externalDynamics 真正变化时才更新
+      if (externalDynamics !== null && externalDynamics !== undefined) {
+        // 使用 JSON.stringify 比较数组内容是否真的变化了
+        const currentStr = JSON.stringify(externalDynamics);
+        const prevStr = JSON.stringify(prevExternalDynamicsRef.current);
+        
+        if (currentStr !== prevStr) {
+          prevExternalDynamicsRef.current = externalDynamics;
+          isInternalUpdateRef.current = false; // 标记为外部更新
+          setDynamics(externalDynamics);
+        }
+      } else if (externalDynamics === null && prevExternalDynamicsRef.current !== null) {
+        // 如果外部传入 null，且之前不是 null，则清空
+        prevExternalDynamicsRef.current = null;
+        isInternalUpdateRef.current = false;
+        setDynamics([]);
+      }
+    }, [externalDynamics]);
+
+    // 当动态数据变化时，通知父组件（但排除外部更新导致的内部变化）
+    useEffect(() => {
+      // 只有在内部更新时才通知父组件
+      if (onDynamicsChange && isInternalUpdateRef.current) {
         onDynamicsChange(dynamics);
+        isInternalUpdateRef.current = false; // 重置标志
       }
     }, [dynamics, onDynamicsChange]);
 
@@ -172,6 +199,8 @@ const Preview = forwardRef(
         const parsedData = await parseDynamicData(files);
         console.log("解析后的动态数量:", parsedData.length);
         console.log("解析后的数据:", parsedData);
+        isInternalUpdateRef.current = true; // 标记为内部更新
+        prevExternalDynamicsRef.current = parsedData; // 更新外部引用，避免重复更新
         setDynamics(parsedData);
       } catch (error) {
         console.error("解析数据失败:", error);
@@ -184,8 +213,72 @@ const Preview = forwardRef(
       }
     };
 
-    const handleUploadClick = () => {
-      fileInputRef.current?.click();
+    const handleUploadClick = async () => {
+      // 尝试使用 File System Access API（如果支持）
+      if ('showDirectoryPicker' in window) {
+        try {
+          const directoryHandle = await window.showDirectoryPicker();
+          
+          // 通知父组件保存文件夹句柄
+          if (onDirectoryHandleChange) {
+            onDirectoryHandleChange(directoryHandle);
+          }
+          
+          // 从文件夹句柄获取所有文件
+          const files = await getFilesFromDirectoryHandle(directoryHandle);
+          if (files.length > 0) {
+            await handleFiles(files);
+          }
+        } catch (error) {
+          // 用户取消选择或其他错误
+          if (error.name !== 'AbortError') {
+            console.error("选择文件夹失败:", error);
+          }
+        }
+      } else {
+        // 降级到传统的文件输入方式
+        fileInputRef.current?.click();
+      }
+    };
+
+    // 从 DirectoryHandle 递归获取所有文件
+    const getFilesFromDirectoryHandle = async (directoryHandle, path = '') => {
+      const files = [];
+      for await (const [name, handle] of directoryHandle.entries()) {
+        const currentPath = path ? `${path}/${name}` : name;
+        if (handle.kind === 'file') {
+          const file = await handle.getFile();
+          // 添加 webkitRelativePath 属性以保持兼容性
+          Object.defineProperty(file, 'webkitRelativePath', {
+            value: currentPath,
+            writable: false,
+          });
+          files.push(file);
+        } else if (handle.kind === 'directory') {
+          const subFiles = await getFilesFromDirectoryHandle(handle, currentPath);
+          files.push(...subFiles);
+        }
+      }
+      return files;
+    };
+
+    // 处理文件列表
+    const handleFiles = async (files) => {
+      setIsLoading(true);
+      try {
+        const parsedData = await parseDynamicData(files);
+        console.log("解析后的动态数量:", parsedData.length);
+        console.log("解析后的数据:", parsedData);
+        isInternalUpdateRef.current = true; // 标记为内部更新
+        prevExternalDynamicsRef.current = parsedData; // 更新外部引用，避免重复更新
+        setDynamics(parsedData);
+      } catch (error) {
+        console.error("解析数据失败:", error);
+        console.error("错误堆栈:", error.stack);
+        alert("解析数据失败，请检查文件格式");
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     // 如果没有数据，显示上传区域
@@ -334,8 +427,10 @@ Preview.propTypes = {
   fontSize: PropTypes.number,
   fontWeight: PropTypes.number,
   contentTypeFilter: PropTypes.oneOf([null, "textOnly", "withImages"]),
+  dynamics: PropTypes.array,
   onDynamicsChange: PropTypes.func,
   onScrollChange: PropTypes.func,
+  onDirectoryHandleChange: PropTypes.func,
 };
 
 export default Preview;

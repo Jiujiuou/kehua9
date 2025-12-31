@@ -1,7 +1,10 @@
 import PropTypes from "prop-types";
+import { useState } from "react";
+import { FaPlus } from "react-icons/fa";
 import Slider from "@/components/Basic/Slider/Slider";
 import ButtonGroup from "@/components/Basic/ButtonGroup";
 import Radio from "@/components/Basic/Radio";
+import AddDynamicDialog from "@/components/Basic/AddDynamicDialog";
 import styles from "./index.module.less";
 
 function Control({
@@ -15,6 +18,8 @@ function Control({
   fontSize,
   fontWeight,
   contentTypeFilter,
+  directoryHandle,
+  dynamics,
   onSortOrderChange,
   onImageGapChange,
   onPreviewPaddingChange,
@@ -25,9 +30,39 @@ function Control({
   onFontSizeChange,
   onFontWeightChange,
   onContentTypeFilterChange,
+  onDynamicsChange,
 }) {
+  const [showAddDialog, setShowAddDialog] = useState(false);
+
+  const handleAddSuccess = (newDynamic) => {
+    // 添加到当前动态列表
+    if (onDynamicsChange) {
+      const updatedDynamics = [...dynamics, newDynamic].sort((a, b) => {
+        return new Date(a.timestamp) - new Date(b.timestamp);
+      });
+      onDynamicsChange(updatedDynamics);
+    }
+  };
   return (
     <div className={styles.control}>
+      <AddDynamicDialog
+        visible={showAddDialog}
+        directoryHandle={directoryHandle}
+        onClose={() => setShowAddDialog(false)}
+        onSuccess={handleAddSuccess}
+      />
+      <div className={styles.section}>
+        <div className={styles.sectionContent}>
+          <button
+            className={styles.addButton}
+            onClick={() => setShowAddDialog(true)}
+            disabled={!directoryHandle}
+          >
+            <FaPlus />
+            <span>添加动态</span>
+          </button>
+        </div>
+      </div>
       <div className={styles.section}>
         <div className={styles.sectionContent}>
           <ButtonGroup
@@ -223,6 +258,8 @@ Control.propTypes = {
   fontSize: PropTypes.number,
   fontWeight: PropTypes.number,
   contentTypeFilter: PropTypes.oneOf([null, "textOnly", "withImages"]),
+  directoryHandle: PropTypes.object,
+  dynamics: PropTypes.array,
   onSortOrderChange: PropTypes.func,
   onImageGapChange: PropTypes.func,
   onPreviewPaddingChange: PropTypes.func,
@@ -233,6 +270,7 @@ Control.propTypes = {
   onFontSizeChange: PropTypes.func,
   onFontWeightChange: PropTypes.func,
   onContentTypeFilterChange: PropTypes.func,
+  onDynamicsChange: PropTypes.func,
 };
 
 export default Control;
