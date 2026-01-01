@@ -6,7 +6,7 @@ import {
   useImperativeHandle,
   useEffect,
 } from "react";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaSearch } from "react-icons/fa";
 import { MdDeleteOutline } from "react-icons/md";
 import { parseDynamicData } from "@/utils/parseData";
 import PropTypes from "prop-types";
@@ -47,6 +47,8 @@ const Preview = forwardRef(
     const [previewIndex, setPreviewIndex] = useState(0);
     const [previewVideos, setPreviewVideos] = useState([]);
     const [previewVideoIndex, setPreviewVideoIndex] = useState(0);
+    const [searchInput, setSearchInput] = useState("");
+    const [searchKeyword, setSearchKeyword] = useState("");
     const fileInputRef = useRef(null);
     const contentAreaRef = useRef(null);
     const prevExternalDynamicsRef = useRef(null);
@@ -180,6 +182,28 @@ const Preview = forwardRef(
       },
     }));
 
+    // 高亮关键词的函数
+    const highlightKeyword = (text, keyword) => {
+      if (!keyword || !text) return text;
+
+      const regex = new RegExp(
+        `(${keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`,
+        "gi"
+      );
+      const parts = text.split(regex);
+
+      return parts.map((part, index) => {
+        if (part.toLowerCase() === keyword.toLowerCase()) {
+          return (
+            <mark key={index} className={styles.highlight}>
+              {part}
+            </mark>
+          );
+        }
+        return part;
+      });
+    };
+
     // 根据筛选和排序配置对动态进行处理
     const sortedDynamics = useMemo(() => {
       // 先进行筛选
@@ -204,6 +228,36 @@ const Preview = forwardRef(
         return true;
       });
 
+      // 搜索过滤
+      if (searchKeyword.trim()) {
+        const keyword = searchKeyword.trim().toLowerCase();
+        filtered = filtered.filter((dynamic) => {
+          // 搜索文本内容
+          if (dynamic.text && dynamic.text.toLowerCase().includes(keyword)) {
+            return true;
+          }
+          // 搜索图片名称
+          if (
+            dynamic.images &&
+            dynamic.images.some(
+              (img) => img.name && img.name.toLowerCase().includes(keyword)
+            )
+          ) {
+            return true;
+          }
+          // 搜索视频名称
+          if (
+            dynamic.videos &&
+            dynamic.videos.some(
+              (vid) => vid.name && vid.name.toLowerCase().includes(keyword)
+            )
+          ) {
+            return true;
+          }
+          return false;
+        });
+      }
+
       // 再进行排序
       if (sortOrder === "asc") {
         // 正序：从早到晚
@@ -216,7 +270,7 @@ const Preview = forwardRef(
           (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
         );
       }
-    }, [dynamics, sortOrder, contentTypeFilter]);
+    }, [dynamics, sortOrder, contentTypeFilter, searchKeyword]);
 
     const handleFileSelect = async (event) => {
       const files = event.target.files;
@@ -363,6 +417,27 @@ const Preview = forwardRef(
     return (
       <>
         <div className={styles.preview}>
+          <div className={styles.searchBar}>
+            <input
+              type="text"
+              className={styles.searchInput}
+              placeholder="搜索动态..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  setSearchKeyword(searchInput.trim());
+                }
+              }}
+            />
+            <button
+              className={styles.searchButton}
+              onClick={() => setSearchKeyword(searchInput.trim())}
+              title="搜索"
+            >
+              <FaSearch />
+            </button>
+          </div>
           <div
             className={styles.contentArea}
             ref={contentAreaRef}
@@ -461,7 +536,12 @@ const Preview = forwardRef(
                                   : `${lineHeight * 0.5}em`,
                             }}
                           >
-                            {paragraph}
+                            {searchKeyword.trim()
+                              ? highlightKeyword(
+                                  paragraph,
+                                  searchKeyword.trim()
+                                )
+                              : paragraph}
                           </div>
                         );
                       })}
