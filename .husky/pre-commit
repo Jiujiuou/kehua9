@@ -1,2 +1,2 @@
 #!/bin/sh
-npm run build && git add index.html
+npm run build && git add index.html dist/

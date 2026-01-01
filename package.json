@@ -21,7 +21,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run build && git add index.html"
+      "pre-commit": "npm run build && git add index.html dist/"
     }
   },
   "devDependencies": {
