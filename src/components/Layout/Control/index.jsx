@@ -4,7 +4,9 @@ import { FaPlus } from "react-icons/fa";
 import Slider from "@/components/Basic/Slider/Slider";
 import ButtonGroup from "@/components/Basic/ButtonGroup";
 import Radio from "@/components/Basic/Radio";
+import DropdownSelector from "@/components/Basic/DropdownSelector";
 import AddDynamicDialog from "@/components/Basic/AddDynamicDialog";
+import { getSystemFonts } from "@/utils/fonts";
 import styles from "./index.module.less";
 
 function Control({
@@ -17,6 +19,8 @@ function Control({
   paragraphSpacing,
   fontSize,
   fontWeight,
+  fontFamily,
+  lineHeight,
   contentTypeFilter,
   directoryHandle,
   dynamics,
@@ -29,6 +33,8 @@ function Control({
   onParagraphSpacingChange,
   onFontSizeChange,
   onFontWeightChange,
+  onFontFamilyChange,
+  onLineHeightChange,
   onContentTypeFilterChange,
   onDynamicsChange,
 }) {
@@ -76,6 +82,47 @@ function Control({
           />
         </div>
       </div>
+
+      <div className={styles.section}>
+        <div className={styles.sectionContent}>
+          <div className={styles.filterControl}>
+            <span className={styles.filterLabel}>类型</span>
+            <div className={styles.filterOptions}>
+              <Radio
+                id="filter-all"
+                name="contentTypeFilter"
+                value="all"
+                checked={contentTypeFilter === null}
+                onChange={() => {
+                  onContentTypeFilterChange(null);
+                }}
+                label="全部"
+              />
+              <Radio
+                id="filter-text-only"
+                name="contentTypeFilter"
+                value="textOnly"
+                checked={contentTypeFilter === "textOnly"}
+                onChange={() => {
+                  onContentTypeFilterChange("textOnly");
+                }}
+                label="纯文字"
+              />
+              <Radio
+                id="filter-with-images"
+                name="contentTypeFilter"
+                value="withImages"
+                checked={contentTypeFilter === "withImages"}
+                onChange={() => {
+                  onContentTypeFilterChange("withImages");
+                }}
+                label="含图片"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className={styles.section}>
         <div className={styles.sectionContent}>
           <div className={styles.gapControl}>
@@ -146,6 +193,37 @@ function Control({
       </div>
       <div className={styles.section}>
         <div className={styles.sectionContent}>
+          <DropdownSelector
+            label="字体族"
+            options={getSystemFonts().map((font) => ({
+              value: font.value,
+              label: font.label,
+            }))}
+            value={fontFamily}
+            onChange={onFontFamilyChange}
+            placeholder="请选择字体"
+          />
+        </div>
+      </div>
+      <div className={styles.section}>
+        <div className={styles.sectionContent}>
+          <div className={styles.gapControl}>
+            <span className={styles.gapLabel}>行高</span>
+            <div className={styles.gapSliderWrapper}>
+              <Slider
+                min={1.0}
+                max={2.0}
+                step={0.1}
+                value={lineHeight}
+                onChange={onLineHeightChange}
+              />
+            </div>
+            <span className={styles.gapValue}>{lineHeight.toFixed(1)}</span>
+          </div>
+        </div>
+      </div>
+      <div className={styles.section}>
+        <div className={styles.sectionContent}>
           <ButtonGroup
             label="段落首行缩进"
             options={[
@@ -204,45 +282,6 @@ function Control({
           </div>
         </div>
       </div>
-      <div className={styles.section}>
-        <div className={styles.sectionContent}>
-          <div className={styles.filterControl}>
-            <span className={styles.filterLabel}>类型</span>
-            <div className={styles.filterOptions}>
-              <Radio
-                id="filter-all"
-                name="contentTypeFilter"
-                value="all"
-                checked={contentTypeFilter === null}
-                onChange={() => {
-                  onContentTypeFilterChange(null);
-                }}
-                label="全部"
-              />
-              <Radio
-                id="filter-text-only"
-                name="contentTypeFilter"
-                value="textOnly"
-                checked={contentTypeFilter === "textOnly"}
-                onChange={() => {
-                  onContentTypeFilterChange("textOnly");
-                }}
-                label="纯文字"
-              />
-              <Radio
-                id="filter-with-images"
-                name="contentTypeFilter"
-                value="withImages"
-                checked={contentTypeFilter === "withImages"}
-                onChange={() => {
-                  onContentTypeFilterChange("withImages");
-                }}
-                label="含图片"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
@@ -257,6 +296,8 @@ Control.propTypes = {
   paragraphSpacing: PropTypes.bool,
   fontSize: PropTypes.number,
   fontWeight: PropTypes.number,
+  fontFamily: PropTypes.string,
+  lineHeight: PropTypes.oneOf([1.4, 1.5, 1.6, 1.8, 2.0]),
   contentTypeFilter: PropTypes.oneOf([null, "textOnly", "withImages"]),
   directoryHandle: PropTypes.object,
   dynamics: PropTypes.array,
@@ -269,6 +310,8 @@ Control.propTypes = {
   onParagraphSpacingChange: PropTypes.func,
   onFontSizeChange: PropTypes.func,
   onFontWeightChange: PropTypes.func,
+  onFontFamilyChange: PropTypes.func,
+  onLineHeightChange: PropTypes.func,
   onContentTypeFilterChange: PropTypes.func,
   onDynamicsChange: PropTypes.func,
 };

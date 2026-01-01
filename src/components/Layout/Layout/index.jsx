@@ -32,6 +32,12 @@ function App() {
   const [contentTypeFilter, setContentTypeFilter] = useState(
     savedSettings.contentTypeFilter ?? null
   );
+  const [fontFamily, setFontFamily] = useState(
+    savedSettings.fontFamily ?? "system"
+  );
+  const [lineHeight, setLineHeight] = useState(
+    savedSettings.lineHeight ?? 1.6
+  );
   const [directoryHandle, setDirectoryHandle] = useState(null);
 
   // 当配置改变时，保存到 localStorage
@@ -74,6 +80,14 @@ function App() {
   useEffect(() => {
     saveSetting("contentTypeFilter", contentTypeFilter);
   }, [contentTypeFilter]);
+
+  useEffect(() => {
+    saveSetting("fontFamily", fontFamily);
+  }, [fontFamily]);
+
+  useEffect(() => {
+    saveSetting("lineHeight", lineHeight);
+  }, [lineHeight]);
 
   const handleSortOrderChange = (newOrder) => {
     setSortOrder(newOrder);
@@ -122,6 +136,8 @@ function App() {
           paragraphSpacing={paragraphSpacing}
           fontSize={fontSize}
           fontWeight={fontWeight}
+          fontFamily={fontFamily}
+          lineHeight={lineHeight}
           contentTypeFilter={contentTypeFilter}
           dynamics={dynamics}
           onDynamicsChange={handleDynamicsChange}
@@ -139,6 +155,8 @@ function App() {
           paragraphSpacing={paragraphSpacing}
           fontSize={fontSize}
           fontWeight={fontWeight}
+          fontFamily={fontFamily}
+          lineHeight={lineHeight}
           contentTypeFilter={contentTypeFilter}
           directoryHandle={directoryHandle}
           dynamics={dynamics}
@@ -151,6 +169,8 @@ function App() {
           onParagraphSpacingChange={setParagraphSpacing}
           onFontSizeChange={setFontSize}
           onFontWeightChange={setFontWeight}
+          onFontFamilyChange={setFontFamily}
+          onLineHeightChange={setLineHeight}
           onContentTypeFilterChange={setContentTypeFilter}
           onDynamicsChange={handleDynamicsChange}
         />

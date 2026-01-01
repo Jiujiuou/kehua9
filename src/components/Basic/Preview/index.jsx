@@ -14,6 +14,7 @@ import ImagePreview from "@/components/Basic/ImagePreview";
 import { useToastHelpers } from "@/components/Basic/Toast";
 import { useConfirmHelper } from "@/components/Basic/Confirm";
 import { deleteDynamicFromFile } from "@/utils/writeData";
+import { getFontFamily } from "@/utils/fonts";
 import styles from "./index.module.less";
 
 const Preview = forwardRef(
@@ -28,6 +29,8 @@ const Preview = forwardRef(
       paragraphSpacing = false,
       fontSize = 15,
       fontWeight = 400,
+      fontFamily = "system",
+      lineHeight = 1.6,
       contentTypeFilter = null,
       dynamics: externalDynamics = null,
       onDynamicsChange = null,
@@ -425,10 +428,12 @@ const Preview = forwardRef(
                               textIndent: textIndent ? "2em" : "0",
                               fontSize: `${fontSize}px`,
                               fontWeight: fontWeight,
+                              fontFamily: getFontFamily(fontFamily),
+                              lineHeight: lineHeight,
                               marginBottom:
                                 paragraphSpacing && !isLastParagraph
-                                  ? "1em"
-                                  : "0.5em",
+                                  ? `${lineHeight}em`
+                                  : `${lineHeight * 0.5}em`,
                             }}
                           >
                             {paragraph}
@@ -490,6 +495,8 @@ Preview.propTypes = {
   paragraphSpacing: PropTypes.bool,
   fontSize: PropTypes.number,
   fontWeight: PropTypes.number,
+  fontFamily: PropTypes.string,
+  lineHeight: PropTypes.oneOf([1.4, 1.5, 1.6, 1.8, 2.0]),
   contentTypeFilter: PropTypes.oneOf([null, "textOnly", "withImages"]),
   dynamics: PropTypes.array,
   onDynamicsChange: PropTypes.func,

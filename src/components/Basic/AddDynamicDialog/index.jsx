@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 import { FaPlus } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
@@ -148,11 +148,30 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
     }
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setNewDynamicText("");
+    // Revoke all object URLs before closing
+    selectedImages.forEach((img) => URL.revokeObjectURL(img.preview));
     setSelectedImages([]);
     onClose();
-  };
+  }, [selectedImages, onClose]);
+
+  // 监听 ESC 键关闭弹窗
+  useEffect(() => {
+    if (!visible) return;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape" || event.keyCode === 27) {
+        handleClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [visible, handleClose]);
 
   const handleImageSelect = (event) => {
     const files = Array.from(event.target.files || []);
