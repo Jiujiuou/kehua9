@@ -11,6 +11,7 @@ import { MdDeleteOutline } from "react-icons/md";
 import { parseDynamicData } from "@/utils/parseData";
 import PropTypes from "prop-types";
 import ImagePreview from "@/components/Basic/ImagePreview";
+import VideoPreview from "@/components/Basic/VideoPreview";
 import { useToastHelpers } from "@/components/Basic/Toast";
 import { useConfirmHelper } from "@/components/Basic/Confirm";
 import { deleteDynamicFromFile } from "@/utils/writeData";
@@ -44,6 +45,8 @@ const Preview = forwardRef(
     const [isLoading, setIsLoading] = useState(false);
     const [previewImages, setPreviewImages] = useState([]);
     const [previewIndex, setPreviewIndex] = useState(0);
+    const [previewVideos, setPreviewVideos] = useState([]);
+    const [previewVideoIndex, setPreviewVideoIndex] = useState(0);
     const fileInputRef = useRef(null);
     const contentAreaRef = useRef(null);
     const prevExternalDynamicsRef = useRef(null);
@@ -182,17 +185,21 @@ const Preview = forwardRef(
       // 先进行筛选
       let filtered = dynamics.filter((dynamic) => {
         const hasImages = dynamic.images && dynamic.images.length > 0;
+        const hasVideos = dynamic.videos && dynamic.videos.length > 0;
         const hasText = dynamic.text && dynamic.text.trim().length > 0;
 
         if (contentTypeFilter === null) {
-          // 没有选择筛选条件，显示所有（有文字或图片的都显示）
-          return hasText || hasImages;
+          // 没有选择筛选条件，显示所有（有文字、图片或视频的都显示）
+          return hasText || hasImages || hasVideos;
         } else if (contentTypeFilter === "textOnly") {
-          // 只显示纯文字（没有图片，但有文字内容）
-          return !hasImages && hasText;
+          // 只显示纯文字（没有图片和视频，但有文字内容）
+          return !hasImages && !hasVideos && hasText;
         } else if (contentTypeFilter === "withImages") {
-          // 只显示含图片
-          return hasImages;
+          // 只显示含图片（不含视频）
+          return hasImages && !hasVideos;
+        } else if (contentTypeFilter === "withVideos") {
+          // 只显示含视频
+          return hasVideos;
         }
         return true;
       });
@@ -484,6 +491,37 @@ const Preview = forwardRef(
                     ))}
                   </div>
                 )}
+                {dynamic.videos && dynamic.videos.length > 0 && (
+                  <div
+                    className={styles.dynamicImages}
+                    data-image-count={Math.min(dynamic.videos.length, 9)}
+                    style={{ gap: `${imageGap}px` }}
+                  >
+                    {dynamic.videos.slice(0, 9).map((video, vidIndex) => (
+                      <div
+                        key={vidIndex}
+                        className={styles.imageWrapper}
+                        onClick={() => {
+                          setPreviewVideos(dynamic.videos);
+                          setPreviewVideoIndex(vidIndex);
+                        }}
+                      >
+                        <video
+                          src={video.url}
+                          className={styles.dynamicImage}
+                          muted
+                          playsInline
+                          preload="metadata"
+                          onLoadedMetadata={(e) => {
+                            // 加载第一帧作为缩略图
+                            e.target.currentTime = 0.1;
+                          }}
+                        />
+                        <div className={styles.videoPlayIcon}>▶</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -494,6 +532,14 @@ const Preview = forwardRef(
           onClose={() => {
             setPreviewImages([]);
             setPreviewIndex(0);
+          }}
+        />
+        <VideoPreview
+          videos={previewVideos}
+          currentIndex={previewVideoIndex}
+          onClose={() => {
+            setPreviewVideos([]);
+            setPreviewVideoIndex(0);
           }}
         />
       </>
@@ -515,7 +561,12 @@ Preview.propTypes = {
   fontWeight: PropTypes.number,
   fontFamily: PropTypes.string,
   lineHeight: PropTypes.oneOf([1.4, 1.5, 1.6, 1.8, 2.0]),
-  contentTypeFilter: PropTypes.oneOf([null, "textOnly", "withImages"]),
+  contentTypeFilter: PropTypes.oneOf([
+    null,
+    "textOnly",
+    "withImages",
+    "withVideos",
+  ]),
   dynamics: PropTypes.array,
   onDynamicsChange: PropTypes.func,
   onScrollChange: PropTypes.func,

@@ -49,6 +49,13 @@ export function formatDynamicsToContent(dynamics) {
         lines.push(`[图片：${image.name}]`);
       });
     }
+    
+    // 添加视频引用
+    if (dynamic.videos && dynamic.videos.length > 0) {
+      dynamic.videos.forEach((video) => {
+        lines.push(`[视频：${video.name}]`);
+      });
+    }
   });
   
   return lines.join('\n');
@@ -166,7 +173,8 @@ function parseContentToDynamics(content) {
         date: `${yearStr}-${month}-${day}`,
         time: `${hour}:${minute}`,
         text: '',
-        images: []
+        images: [],
+        videos: []
       };
     } else if (currentDynamic) {
       // 匹配图片引用：[图片：20210822-181756-1.jpeg]
@@ -179,12 +187,24 @@ function parseContentToDynamics(content) {
           url: '', // 写入时不需要 URL
           path: ''
         });
-      } else if (line) {
-        // 文本内容
-        if (currentDynamic.text) {
-          currentDynamic.text += '\n' + line;
-        } else {
-          currentDynamic.text = line;
+      } else {
+        // 匹配视频引用：[视频：20210814-170000-1.mp4]
+        const videoMatch = line.match(/\[视频：(.+?)\]/);
+        
+        if (videoMatch) {
+          const videoName = videoMatch[1];
+          currentDynamic.videos.push({
+            name: videoName,
+            url: '', // 写入时不需要 URL
+            path: ''
+          });
+        } else if (line) {
+          // 文本内容
+          if (currentDynamic.text) {
+            currentDynamic.text += '\n' + line;
+          } else {
+            currentDynamic.text = line;
+          }
         }
       }
     }

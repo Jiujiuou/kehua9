@@ -16,7 +16,7 @@ const DEFAULT_SETTINGS = {
   paragraphSpacing: false,
   fontSize: 15,
   fontWeight: 400,
-  contentTypeFilter: null, // null: 全部, 'textOnly': 纯文字, 'withImages': 含图片
+  contentTypeFilter: null, // null: 全部, 'textOnly': 文字, 'withImages': 图片, 'withVideos': 视频
   fontFamily: "system", // 字体值，对应 fonts.js 中的字体列表
   lineHeight: 1.6, // 1.4, 1.5, 1.6, 1.8, 2.0
 };

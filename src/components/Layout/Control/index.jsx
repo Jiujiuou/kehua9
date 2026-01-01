@@ -106,7 +106,7 @@ function Control({
                 onChange={() => {
                   onContentTypeFilterChange("textOnly");
                 }}
-                label="纯文字"
+                label="文字"
               />
               <Radio
                 id="filter-with-images"
@@ -116,7 +116,17 @@ function Control({
                 onChange={() => {
                   onContentTypeFilterChange("withImages");
                 }}
-                label="含图片"
+                label="图片"
+              />
+              <Radio
+                id="filter-with-videos"
+                name="contentTypeFilter"
+                value="withVideos"
+                checked={contentTypeFilter === "withVideos"}
+                onChange={() => {
+                  onContentTypeFilterChange("withVideos");
+                }}
+                label="视频"
               />
             </div>
           </div>
@@ -298,7 +308,7 @@ Control.propTypes = {
   fontWeight: PropTypes.number,
   fontFamily: PropTypes.string,
   lineHeight: PropTypes.oneOf([1.4, 1.5, 1.6, 1.8, 2.0]),
-  contentTypeFilter: PropTypes.oneOf([null, "textOnly", "withImages"]),
+  contentTypeFilter: PropTypes.oneOf([null, "textOnly", "withImages", "withVideos"]),
   directoryHandle: PropTypes.object,
   dynamics: PropTypes.array,
   onSortOrderChange: PropTypes.func,

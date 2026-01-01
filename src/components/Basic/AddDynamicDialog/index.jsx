@@ -83,6 +83,7 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
   const [newDynamicText, setNewDynamicText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedImages, setSelectedImages] = useState([]);
+  const [selectedVideo, setSelectedVideo] = useState(null);
   const fileInputRef = useRef(null);
   const toast = useToastHelpers();
 
@@ -92,8 +93,8 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
       return;
     }
 
-    if (!newDynamicText.trim() && selectedImages.length === 0) {
-      toast.warning("请输入动态内容或添加图片");
+    if (!newDynamicText.trim() && selectedImages.length === 0 && !selectedVideo) {
+      toast.warning("请输入动态内容或添加图片/视频");
       return;
     }
 
@@ -114,6 +115,17 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
         }
       }
 
+      // 上传视频
+      let uploadedVideo = null;
+      if (selectedVideo) {
+        try {
+          uploadedVideo = await uploadVideoToFolder(selectedVideo.file, year);
+        } catch (error) {
+          console.error("上传视频失败:", error);
+          toast.error(`上传视频 ${selectedVideo.name} 失败：${error.message}`);
+        }
+      }
+
       // 创建新动态对象
       const newDynamic = {
         timestamp: now.toISOString(),
@@ -125,6 +137,7 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
         ).padStart(2, "0")}`,
         text: newDynamicText.trim(),
         images: uploadedImages,
+        videos: uploadedVideo ? [uploadedVideo] : [],
       };
 
       // 写入文件
@@ -138,6 +151,10 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
       // 清空输入并关闭对话框
       setNewDynamicText("");
       setSelectedImages([]);
+      if (selectedVideo) {
+        URL.revokeObjectURL(selectedVideo.preview);
+      }
+      setSelectedVideo(null);
       onClose();
       toast.success("动态发布成功");
     } catch (error) {
@@ -153,8 +170,12 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
     // Revoke all object URLs before closing
     selectedImages.forEach((img) => URL.revokeObjectURL(img.preview));
     setSelectedImages([]);
+    if (selectedVideo) {
+      URL.revokeObjectURL(selectedVideo.preview);
+    }
+    setSelectedVideo(null);
     onClose();
-  }, [selectedImages, onClose]);
+  }, [selectedImages, selectedVideo, onClose]);
 
   // 监听 ESC 键关闭弹窗
   useEffect(() => {
@@ -173,65 +194,131 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
     };
   }, [visible, handleClose]);
 
-  const handleImageSelect = (event) => {
+  const handleMediaSelect = (event) => {
     const files = Array.from(event.target.files || []);
+    
+    if (files.length === 0) {
+      return;
+    }
+
+    // 分离图片和视频文件
     const imageFiles = files.filter((file) => file.type.startsWith("image/"));
+    const videoFiles = files.filter((file) => file.type.startsWith("video/"));
 
-    if (imageFiles.length === 0) {
-      toast.warning("请选择图片文件");
-      return;
-    }
-
-    // 检查当前已选择的图片数量
-    const currentCount = selectedImages.length;
-    const maxCount = 9;
-
-    if (currentCount >= maxCount) {
-      toast.warning(`最多只能上传 ${maxCount} 张图片`);
+    // 如果既没有图片也没有视频，提示用户
+    if (imageFiles.length === 0 && videoFiles.length === 0) {
+      toast.warning("请选择图片或视频文件");
       event.target.value = "";
       return;
     }
 
-    // 检测重复文件（通过文件名、大小和最后修改时间判断）
-    const existingFiles = new Set(
-      selectedImages.map(
-        (img) => `${img.file.name}-${img.file.size}-${img.file.lastModified}`
-      )
-    );
-
-    const newFiles = imageFiles.filter((file) => {
-      const fileKey = `${file.name}-${file.size}-${file.lastModified}`;
-      return !existingFiles.has(fileKey);
-    });
-
-    const duplicateCount = imageFiles.length - newFiles.length;
-    if (duplicateCount > 0) {
-      toast.info(`检测到 ${duplicateCount} 张重复图片，已自动跳过`);
-    }
-
-    if (newFiles.length === 0) {
+    // 限制：如果已添加图片，不能再添加视频；如果已添加视频，不能再添加图片
+    if (selectedImages.length > 0 && videoFiles.length > 0) {
+      toast.warning("已添加图片，不能再添加视频。请先删除所有图片后再添加视频。");
       event.target.value = "";
       return;
     }
 
-    // 计算还能添加多少张
-    const remainingSlots = maxCount - currentCount;
-    const filesToAdd = newFiles.slice(0, remainingSlots);
+    if (selectedVideo && imageFiles.length > 0) {
+      toast.warning("已添加视频，不能再添加图片。请先删除视频后再添加图片。");
+      event.target.value = "";
+      return;
+    }
 
-    if (newFiles.length > remainingSlots) {
-      toast.info(
-        `最多只能上传 ${maxCount} 张图片，已选择 ${currentCount} 张，将只添加前 ${remainingSlots} 张`
+    // 检查图片文件大小（限制为 20MB）
+    const maxImageSize = 20 * 1024 * 1024; // 20MB
+    const oversizedImages = imageFiles.filter((file) => file.size > maxImageSize);
+    if (oversizedImages.length > 0) {
+      toast.warning(`图片文件大小不能超过 20MB，已跳过 ${oversizedImages.length} 个文件`);
+      // 移除过大的图片文件
+      imageFiles.splice(0, imageFiles.length, ...imageFiles.filter((file) => file.size <= maxImageSize));
+    }
+
+    // 检查视频文件大小（限制为 100MB）
+    const maxVideoSize = 100 * 1024 * 1024; // 100MB
+    const oversizedVideos = videoFiles.filter((file) => file.size > maxVideoSize);
+    if (oversizedVideos.length > 0) {
+      toast.warning(`视频文件大小不能超过 100MB，已跳过 ${oversizedVideos.length} 个文件`);
+      // 移除过大的视频文件
+      videoFiles.splice(0, videoFiles.length, ...videoFiles.filter((file) => file.size <= maxVideoSize));
+    }
+
+    // 如果所有文件都被过滤掉了，直接返回
+    if (imageFiles.length === 0 && videoFiles.length === 0) {
+      event.target.value = "";
+      return;
+    }
+
+    // 处理视频文件（限制为1个）
+    if (videoFiles.length > 0) {
+      if (selectedVideo) {
+        toast.warning("最多只能上传 1 个视频，已存在视频将被替换");
+        URL.revokeObjectURL(selectedVideo.preview);
+      }
+      
+      const videoFile = videoFiles[0];
+      const videoPreview = {
+        file: videoFile,
+        preview: URL.createObjectURL(videoFile),
+        name: videoFile.name,
+      };
+      setSelectedVideo(videoPreview);
+      
+      if (videoFiles.length > 1) {
+        toast.info(`选择了 ${videoFiles.length} 个视频文件，只使用第一个`);
+      }
+    }
+
+    // 处理图片文件（最多9张）
+    if (imageFiles.length > 0) {
+      // 检查当前已选择的图片数量
+      const currentCount = selectedImages.length;
+      const maxCount = 9;
+
+      if (currentCount >= maxCount) {
+        toast.warning(`最多只能上传 ${maxCount} 张图片`);
+        event.target.value = "";
+        return;
+      }
+
+      // 检测重复文件（通过文件名、大小和最后修改时间判断）
+      const existingFiles = new Set(
+        selectedImages.map(
+          (img) => `${img.file.name}-${img.file.size}-${img.file.lastModified}`
+        )
       );
+
+      const newFiles = imageFiles.filter((file) => {
+        const fileKey = `${file.name}-${file.size}-${file.lastModified}`;
+        return !existingFiles.has(fileKey);
+      });
+
+      const duplicateCount = imageFiles.length - newFiles.length;
+      if (duplicateCount > 0) {
+        toast.info(`检测到 ${duplicateCount} 张重复图片，已自动跳过`);
+      }
+
+      if (newFiles.length > 0) {
+        // 计算还能添加多少张
+        const remainingSlots = maxCount - currentCount;
+        const filesToAdd = newFiles.slice(0, remainingSlots);
+
+        if (newFiles.length > remainingSlots) {
+          toast.info(
+            `最多只能上传 ${maxCount} 张图片，已选择 ${currentCount} 张，将只添加前 ${remainingSlots} 张`
+          );
+        }
+
+        // 创建预览 URL
+        const imagePreviews = filesToAdd.map((file) => ({
+          file,
+          preview: URL.createObjectURL(file),
+          name: file.name,
+        }));
+
+        setSelectedImages((prev) => [...prev, ...imagePreviews]);
+      }
     }
-
-    // 创建预览 URL
-    const imagePreviews = filesToAdd.map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-      name: file.name,
-    }));
-
-    setSelectedImages((prev) => [...prev, ...imagePreviews]);
 
     // 清空 input 值，以便可以重复选择同一文件
     event.target.value = "";
@@ -245,6 +332,14 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
       newImages.splice(index, 1);
       return newImages;
     });
+  };
+
+
+  const handleRemoveVideo = () => {
+    if (selectedVideo) {
+      URL.revokeObjectURL(selectedVideo.preview);
+      setSelectedVideo(null);
+    }
   };
 
   const sensors = useSensors(
@@ -379,6 +474,106 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
     }
   };
 
+  const uploadVideoToFolder = async (videoFile, year) => {
+    try {
+      // 查找或创建年份文件夹
+      let targetDirectoryHandle = directoryHandle;
+
+      try {
+        const myDynamicHandle = await directoryHandle.getDirectoryHandle(
+          "我的动态"
+        );
+        targetDirectoryHandle = myDynamicHandle;
+      } catch {
+        targetDirectoryHandle = directoryHandle;
+      }
+
+      const yearFolderName = `${year}年`;
+      let yearFolderHandle;
+
+      try {
+        yearFolderHandle = await targetDirectoryHandle.getDirectoryHandle(
+          yearFolderName
+        );
+      } catch {
+        yearFolderHandle = await targetDirectoryHandle.getDirectoryHandle(
+          yearFolderName,
+          { create: true }
+        );
+      }
+
+      // 创建或获取"图片&视频"文件夹
+      const imageVideoFolderName = "图片&视频";
+      let imageVideoFolderHandle;
+
+      try {
+        imageVideoFolderHandle = await yearFolderHandle.getDirectoryHandle(
+          imageVideoFolderName
+        );
+      } catch {
+        imageVideoFolderHandle = await yearFolderHandle.getDirectoryHandle(
+          imageVideoFolderName,
+          { create: true }
+        );
+      }
+
+      // 生成文件名（使用历史格式：YYYYMMDD-HHMMSS-序号.扩展名）
+      const now = new Date();
+      const yearStr = String(now.getFullYear());
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      const hour = String(now.getHours()).padStart(2, "0");
+      const minute = String(now.getMinutes()).padStart(2, "0");
+      const second = String(now.getSeconds()).padStart(2, "0");
+
+      // 获取文件扩展名
+      const fileExtension = videoFile.name.split(".").pop() || "mp4";
+
+      // 检查是否有同名文件，如果有则添加序号
+      let fileName = `${yearStr}${month}${day}-${hour}${minute}${second}-1.${fileExtension}`;
+      let counter = 1;
+
+      // 检查文件是否已存在，如果存在则递增序号
+      while (true) {
+        try {
+          await imageVideoFolderHandle.getFileHandle(fileName);
+          // 文件存在，递增序号
+          counter++;
+          fileName = `${yearStr}${month}${day}-${hour}${minute}${second}-${counter}.${fileExtension}`;
+        } catch {
+          // 文件不存在，可以使用这个文件名
+          break;
+        }
+      }
+
+      // 写入视频文件
+      const fileHandle = await imageVideoFolderHandle.getFileHandle(fileName, {
+        create: true,
+      });
+      const writable = await fileHandle.createWritable();
+      await writable.write(await videoFile.arrayBuffer());
+      await writable.close();
+
+      // 读取刚写入的文件，生成 data URL
+      const uploadedFile = await fileHandle.getFile();
+      const videoUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(uploadedFile);
+      });
+
+      return {
+        name: fileName,
+        url: videoUrl,
+        path: imageVideoFolderName,
+      };
+    } catch (error) {
+      console.error("上传视频失败:", error);
+      throw error;
+    }
+  };
+
   if (!visible) {
     return null;
   }
@@ -393,7 +588,7 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
           <button
             className={styles.publishButton}
             onClick={handleAddDynamic}
-            disabled={isSubmitting || !newDynamicText.trim()}
+            disabled={isSubmitting || (!newDynamicText.trim() && selectedImages.length === 0 && !selectedVideo)}
           >
             发布
           </button>
@@ -412,15 +607,16 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/*,video/*"
             multiple
-            onChange={handleImageSelect}
+            onChange={handleMediaSelect}
             style={{ display: "none" }}
           />
           <button
             className={styles.addMediaButton}
             onClick={() => fileInputRef.current?.click()}
             type="button"
+            title="添加图片或视频"
           >
             <FaPlus className={styles.addMediaIcon} />
           </button>
@@ -449,6 +645,27 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
                 </div>
               </SortableContext>
             </DndContext>
+          )}
+          {selectedVideo && (
+            <div className={styles.videoPreviewWrapper}>
+              <div className={styles.videoPreviewItem}>
+                <video
+                  src={selectedVideo.preview}
+                  className={styles.videoPreview}
+                  muted
+                  playsInline
+                  preload="metadata"
+                  onLoadedMetadata={(e) => {
+                    e.target.currentTime = 0.1;
+                  }}
+                />
+                <div className={styles.videoPlayIcon}>▶</div>
+                <IoMdClose
+                  className={styles.removeIcon}
+                  onClick={handleRemoveVideo}
+                />
+              </div>
+            </div>
           )}
         </div>
       </div>

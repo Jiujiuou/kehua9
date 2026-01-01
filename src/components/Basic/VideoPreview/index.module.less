@@ -1,0 +1,88 @@
+.previewOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.videoContainer {
+  max-width: 100vw;
+  max-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  // 防止容器占据整个空间，只包裹视频内容
+  width: auto;
+  height: auto;
+  box-sizing: border-box;
+  // 防止拖拽
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.previewVideo {
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 40px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  // 防止视频被拖拽
+  user-select: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -ms-user-drag: none;
+  // 确保视频完整显示，保持原比例
+  display: block;
+  // 防止拖拽时的默认行为
+  -webkit-touch-callout: none;
+}
+
+.navArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10000;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  user-select: none;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 1);
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  &:active {
+    transform: translateY(-50%) scale(0.95);
+  }
+
+  svg {
+    font-size: 20px;
+    color: #333;
+  }
+
+  &:first-of-type {
+    left: 20px;
+  }
+
+  &:last-of-type {
+    right: 20px;
+  }
+}
+

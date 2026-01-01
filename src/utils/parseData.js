@@ -42,17 +42,18 @@ export async function parseDynamicData(files) {
       yearFolder = pathParts[0];
     }
 
-    if (yearFolder && yearFolder.endsWith('年')) {
-      const year = yearFolder.replace('年', '');
-      if (!yearGroups[year]) {
-        yearGroups[year] = {
-          year,
-          contentFile: null,
-          images: []
-        };
-        console.log("找到年份文件夹:", year);
+      if (yearFolder && yearFolder.endsWith('年')) {
+        const year = yearFolder.replace('年', '');
+        if (!yearGroups[year]) {
+          yearGroups[year] = {
+            year,
+            contentFile: null,
+            images: [],
+            videos: []
+          };
+          console.log("找到年份文件夹:", year);
+        }
       }
-    }
   });
 
   console.log("找到的年份:", Object.keys(yearGroups));
@@ -105,12 +106,12 @@ export async function parseDynamicData(files) {
       };
     }
 
-    // 处理图片文件（只处理图片，不处理视频）
+    // 处理图片和视频文件
     // 路径格式：.../2021年/图片&视频/月份/文件名
     const imageFolderIndex = yearIndex + 1;
     if (pathParts.length > imageFolderIndex && pathParts[imageFolderIndex] === '图片&视频') {
       const fileName = pathParts[pathParts.length - 1];
-      // 只处理图片文件
+      // 处理图片文件
       const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
       const isImage = imageExtensions.some(ext =>
         fileName.toLowerCase().endsWith(ext)
@@ -127,6 +128,24 @@ export async function parseDynamicData(files) {
           file: file
         });
       }
+
+      // 处理视频文件
+      const videoExtensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm', '.flv'];
+      const isVideo = videoExtensions.some(ext =>
+        fileName.toLowerCase().endsWith(ext)
+      );
+
+      if (isVideo) {
+        console.log("找到视频文件:", file.webkitRelativePath);
+        const videoPath = pathParts.slice(imageFolderIndex + 1).join('/');
+        const videoUrl = await readFileAsDataURL(file);
+        yearGroups[year].videos.push({
+          name: fileName,
+          path: videoPath,
+          url: videoUrl,
+          file: file
+        });
+      }
     }
   }
 
@@ -137,7 +156,8 @@ export async function parseDynamicData(files) {
     const group = yearGroups[year];
     console.log(`处理年份 ${year}:`, {
       hasContentFile: !!group.contentFile,
-      imageCount: group.images.length
+      imageCount: group.images.length,
+      videoCount: group.videos.length
     });
 
     if (!group.contentFile) {
@@ -145,7 +165,7 @@ export async function parseDynamicData(files) {
       continue;
     }
 
-    const dynamics = parseYearContent(group.contentFile.content, group.images);
+    const dynamics = parseYearContent(group.contentFile.content, group.images, group.videos);
     console.log(`年份 ${year} 解析出 ${dynamics.length} 条动态`);
     allDynamics.push(...dynamics);
   }
@@ -167,9 +187,10 @@ export async function parseDynamicData(files) {
  * 解析单个年份的动态内容
  * @param {string} content - 文本内容
  * @param {Array} images - 该年份的图片数组
+ * @param {Array} videos - 该年份的视频数组
  * @returns {Array} 动态数组
  */
-function parseYearContent(content, images) {
+function parseYearContent(content, images, videos) {
   const dynamics = [];
   const lines = content.split('\n');
 
@@ -203,7 +224,8 @@ function parseYearContent(content, images) {
         date: `${yearStr}-${month}-${day}`,
         time: `${hour}:${minute}`,
         text: '',
-        images: []
+        images: [],
+        videos: []
       };
     } else if (currentDynamic) {
       // 匹配图片引用：[图片：20210822-181756-1.jpeg]
@@ -220,12 +242,28 @@ function parseYearContent(content, images) {
             path: image.path
           });
         }
-      } else if (line) {
-        // 文本内容
-        if (currentDynamic.text) {
-          currentDynamic.text += '\n' + line;
-        } else {
-          currentDynamic.text = line;
+      } else {
+        // 匹配视频引用：[视频：20210814-170000-1.mp4]
+        const videoMatch = line.match(/\[视频：(.+?)\]/);
+
+        if (videoMatch) {
+          const videoName = videoMatch[1];
+          // 查找对应的视频
+          const video = videos.find(vid => vid.name === videoName);
+          if (video) {
+            currentDynamic.videos.push({
+              name: videoName,
+              url: video.url,
+              path: video.path
+            });
+          }
+        } else if (line) {
+          // 文本内容
+          if (currentDynamic.text) {
+            currentDynamic.text += '\n' + line;
+          } else {
+            currentDynamic.text = line;
+          }
         }
       }
     }
