@@ -14,13 +14,13 @@ fs.copyFile(sourcePath, targetPath, (err) => {
   }
   console.log("File copied successfully!");
 
-  // 删除 dist 文件夹
-  const distPath = path.resolve(__dirname, "dist");
-  fs.rmdir(distPath, { recursive: true }, (err) => {
+  // 将 index.html 复制到 dist 文件夹
+  const distIndexPath = path.resolve(__dirname, "dist", "index.html");
+  fs.copyFile(targetPath, distIndexPath, (err) => {
     if (err) {
-      console.error("Error removing dist folder:", err);
+      console.error("Error copying index.html to dist:", err);
       return;
     }
-    console.log("Dist folder removed successfully!");
+    console.log("index.html copied to dist successfully!");
   });
 });
