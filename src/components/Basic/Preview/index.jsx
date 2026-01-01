@@ -55,11 +55,29 @@ const Preview = forwardRef(
     useEffect(() => {
       // 只有当 externalDynamics 真正变化时才更新
       if (externalDynamics !== null && externalDynamics !== undefined) {
-        // 使用 JSON.stringify 比较数组内容是否真的变化了
-        const currentStr = JSON.stringify(externalDynamics);
-        const prevStr = JSON.stringify(prevExternalDynamicsRef.current);
+        // 使用轻量级比较方法，避免 JSON.stringify 导致字符串过长错误
+        const prev = prevExternalDynamicsRef.current;
+        let hasChanged = false;
 
-        if (currentStr !== prevStr) {
+        // 如果引用相同，则内容相同
+        if (prev === externalDynamics) {
+          hasChanged = false;
+        } else if (!prev || prev.length !== externalDynamics.length) {
+          // 长度不同，肯定变化了
+          hasChanged = true;
+        } else {
+          // 长度相同，比较关键字段（时间戳）来判断是否变化
+          // 只比较第一条和最后一条的时间戳，以及总长度
+          const prevFirst = prev[0]?.timestamp;
+          const currentFirst = externalDynamics[0]?.timestamp;
+          const prevLast = prev[prev.length - 1]?.timestamp;
+          const currentLast =
+            externalDynamics[externalDynamics.length - 1]?.timestamp;
+
+          hasChanged = prevFirst !== currentFirst || prevLast !== currentLast;
+        }
+
+        if (hasChanged) {
           prevExternalDynamicsRef.current = externalDynamics;
           isInternalUpdateRef.current = false; // 标记为外部更新
           setDynamics(externalDynamics);
