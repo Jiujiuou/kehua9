@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
 import { FaChevronDown, FaChevronRight } from "react-icons/fa";
 import styles from "./index.module.less";
@@ -12,6 +12,11 @@ const Catalog = ({
   const [expandedYear, setExpandedYear] = useState(null); // 只保存当前展开的年份键值
   const [expandedMonth, setExpandedMonth] = useState(null); // 只保存当前展开的月份键值
   const [internalSelectedDate, setInternalSelectedDate] = useState(null); // 内部选中的日期（用于点击）
+  const contentRef = useRef(null); // 内容区域的引用
+  const yearRefs = useRef({}); // 存储每个年份元素的引用
+  const dateItemRefs = useRef({}); // 存储每个日期元素的引用
+  const isUserScrollingRef = useRef(false); // 标记是否是用户滚动
+  const isProgrammaticScrollRef = useRef(false); // 标记是否是程序控制的滚动
 
   // 使用外部传入的选中日期，如果没有则使用内部状态
   const selectedDate =
@@ -119,6 +124,10 @@ const Catalog = ({
     const monthKey = `${parseInt(month)}月`;
     const monthKeyFull = `${yearKey}-${monthKey}`;
 
+    // 标记为程序控制的滚动，避免触发自动收起
+    isUserScrollingRef.current = false;
+    isProgrammaticScrollRef.current = true;
+
     // 展开对应的年份
     setExpandedYear(yearKey);
 
@@ -126,9 +135,118 @@ const Catalog = ({
     setExpandedMonth(monthKeyFull);
   }, [externalSelectedDate, dynamics]);
 
+  // 滚动到选中的日期，使其位于可视区域中心
+  const scrollToSelectedDate = useCallback((dateStr) => {
+    const contentElement = contentRef.current;
+    const dateElement = dateItemRefs.current[dateStr];
+
+    if (!contentElement || !dateElement) return;
+
+    const containerRect = contentElement.getBoundingClientRect();
+    const dateRect = dateElement.getBoundingClientRect();
+
+    // 计算容器中心位置
+    const containerCenter = containerRect.top + containerRect.height / 2;
+    // 计算日期元素中心位置
+    const dateCenter = dateRect.top + dateRect.height / 2;
+    // 计算需要滚动的距离
+    const scrollOffset = dateCenter - containerCenter;
+
+    // 执行滚动
+    isProgrammaticScrollRef.current = true;
+    contentElement.scrollBy({
+      top: scrollOffset,
+      behavior: "smooth",
+    });
+
+    // 滚动完成后重置标记
+    setTimeout(() => {
+      isProgrammaticScrollRef.current = false;
+    }, 500);
+  }, []);
+
+  // 当选中日期变化时（无论是外部还是内部），滚动到中心
+  useEffect(() => {
+    if (!selectedDate || dynamics.length === 0) return;
+
+    // 等待展开动画完成后再滚动（CSS 动画是 0.25s）
+    const timer = setTimeout(() => {
+      scrollToSelectedDate(selectedDate);
+    }, 300); // 稍微延迟一点确保动画完成
+
+    return () => clearTimeout(timer);
+  }, [selectedDate, expandedYear, expandedMonth, dynamics, scrollToSelectedDate]);
+
+  // 监听滚动，自动展开当前可见的年份
+  useEffect(() => {
+    const contentElement = contentRef.current;
+    if (!contentElement || years.length === 0) return;
+
+    let scrollTimeout = null;
+
+    const handleScroll = () => {
+      // 如果是程序控制的滚动，不处理
+      if (isProgrammaticScrollRef.current) {
+        return;
+      }
+
+      // 清除之前的定时器
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+
+      // 标记为用户滚动
+      isUserScrollingRef.current = true;
+
+      // 延迟处理，避免频繁触发
+      scrollTimeout = setTimeout(() => {
+        const containerRect = contentElement.getBoundingClientRect();
+        const containerTop = containerRect.top;
+        const containerBottom = containerRect.bottom;
+        const viewportCenter = containerTop + (containerBottom - containerTop) / 2;
+
+        // 找到最接近视口中心的年份
+        let closestYear = null;
+        let minDistance = Infinity;
+
+        years.forEach((yearKey) => {
+          const yearElement = yearRefs.current[yearKey];
+          if (!yearElement) return;
+
+          const yearRect = yearElement.getBoundingClientRect();
+          const yearCenter = yearRect.top + yearRect.height / 2;
+
+          // 如果年份在视口内
+          if (yearRect.top <= containerBottom && yearRect.bottom >= containerTop) {
+            const distance = Math.abs(yearCenter - viewportCenter);
+            if (distance < minDistance) {
+              minDistance = distance;
+              closestYear = yearKey;
+            }
+          }
+        });
+
+        // 如果找到了最接近的年份，且与当前展开的年份不同，则切换
+        if (closestYear && closestYear !== expandedYear) {
+          setExpandedYear(closestYear);
+          setExpandedMonth(null); // 收起月份
+        }
+      }, 150); // 150ms 延迟，避免快速滚动时频繁切换
+    };
+
+    contentElement.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      contentElement.removeEventListener("scroll", handleScroll);
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+    };
+  }, [years, expandedYear]);
+
   return (
     <div className={styles.catalog}>
-      <div className={styles.content}>
+      <div className={styles.content} ref={contentRef}>
         {years.length === 0 ? (
           <div className={styles.emptyState}>
             <div className={styles.emptyText}>暂无数据</div>
@@ -150,7 +268,15 @@ const Catalog = ({
             });
 
             return (
-              <div key={yearKey} className={styles.yearItem}>
+              <div
+                key={yearKey}
+                className={styles.yearItem}
+                ref={(el) => {
+                  if (el) {
+                    yearRefs.current[yearKey] = el;
+                  }
+                }}
+              >
                 <div
                   className={styles.yearHeader}
                   onClick={() => toggleYear(yearKey)}
@@ -165,13 +291,14 @@ const Catalog = ({
                     isYearExpanded ? styles.expanded : ""
                   }`}
                 >
-                  {months.map((monthKey) => {
-                    const monthKeyFull = `${yearKey}-${monthKey}`;
-                    const isMonthExpanded = expandedMonth === monthKeyFull;
-                    const dates = dateStructure[yearKey][monthKey];
+                  <div>
+                    {months.map((monthKey) => {
+                      const monthKeyFull = `${yearKey}-${monthKey}`;
+                      const isMonthExpanded = expandedMonth === monthKeyFull;
+                      const dates = dateStructure[yearKey][monthKey];
 
-                    return (
-                      <div key={monthKey} className={styles.monthItem}>
+                      return (
+                        <div key={monthKey} className={styles.monthItem}>
                         <div
                           className={styles.monthHeader}
                           onClick={() => toggleMonth(yearKey, monthKey)}
@@ -190,25 +317,33 @@ const Catalog = ({
                             isMonthExpanded ? styles.expanded : ""
                           }`}
                         >
-                          {dates.map((dateStr) => {
-                            const [, , day] = dateStr.split("-");
-                            const isSelected = selectedDate === dateStr;
-                            return (
-                              <div
-                                key={dateStr}
-                                className={`${styles.dateItem} ${
-                                  isSelected ? styles.dateItemSelected : ""
-                                }`}
-                                onClick={() => handleDateClick(dateStr)}
-                              >
-                                {parseInt(day)}日
-                              </div>
-                            );
-                          })}
+                          <div>
+                            {dates.map((dateStr) => {
+                              const [, , day] = dateStr.split("-");
+                              const isSelected = selectedDate === dateStr;
+                              return (
+                                <div
+                                  key={dateStr}
+                                  ref={(el) => {
+                                    if (el) {
+                                      dateItemRefs.current[dateStr] = el;
+                                    }
+                                  }}
+                                  className={`${styles.dateItem} ${
+                                    isSelected ? styles.dateItemSelected : ""
+                                  }`}
+                                  onClick={() => handleDateClick(dateStr)}
+                                >
+                                  {parseInt(day)}日
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
                       </div>
                     );
                   })}
+                  </div>
                 </div>
               </div>
             );
