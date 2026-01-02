@@ -1,6 +1,9 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import PropTypes from "prop-types";
 import { FaChevronLeft, FaChevronRight, FaRandom } from "react-icons/fa";
+import { HiDownload } from "react-icons/hi";
+import { toPng } from "html-to-image";
+import download from "downloadjs";
 import logoImage from "@/assets/images/logo_transparent.png";
 import { getFontFamily } from "@/utils/fonts";
 import styles from "./index.module.less";
@@ -19,6 +22,9 @@ const CardPreview = ({
   paragraphSpacing = false,
 }) => {
   const [activeIndex, setActiveIndex] = useState(currentIndex);
+  const [isHovered, setIsHovered] = useState(false);
+  const cardContainerRef = useRef(null);
+  const downloadButtonRef = useRef(null);
 
   // 当外部传入的 currentIndex 变化时，更新内部状态
   useEffect(() => {
@@ -70,6 +76,106 @@ const CardPreview = ({
     },
     [dynamics, activeIndex, onDynamicChange]
   );
+
+  // 格式化日期：YYYY/MM/DD
+  const formatDate = useCallback((timestamp) => {
+    if (!timestamp) return "";
+    const date = new Date(timestamp);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}/${month}/${day}`;
+  }, []);
+
+  const handleDownload = useCallback(async (event) => {
+    event.stopPropagation();
+    if (!cardContainerRef.current) return;
+
+    const currentDynamicData =
+      dynamics && dynamics.length > 0 ? dynamics[activeIndex] : dynamic;
+    if (!currentDynamicData || !currentDynamicData.timestamp) return;
+
+    const formattedDate = formatDate(currentDynamicData.timestamp);
+
+    // 临时隐藏下载按钮
+    let downloadButton = null;
+    let originalDisplay = "";
+    if (downloadButtonRef.current) {
+      downloadButton = downloadButtonRef.current;
+      originalDisplay = downloadButton.style.display;
+      downloadButton.style.display = "none";
+    }
+
+    // 临时移除高度限制和滚动，确保完整内容被导出
+    const element = cardContainerRef.current;
+    const originalMaxHeight = element.style.maxHeight;
+    const originalOverflow = element.style.overflow;
+    
+    // 获取 cardContent 元素（可能有滚动）
+    const cardContentElement = element.querySelector(`.${styles.cardContent}`);
+    const originalContentOverflow = cardContentElement ? cardContentElement.style.overflow : "";
+
+    element.style.maxHeight = "none";
+    element.style.overflow = "visible";
+    if (cardContentElement) {
+      cardContentElement.style.overflow = "visible";
+    }
+
+    // 等待 DOM 更新
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    try {
+      // 获取展开后的完整高度
+      const fullHeight = element.scrollHeight;
+      const width = element.offsetWidth;
+      
+      // 使用缩放因子提高清晰度
+      const scaleFactor = 2;
+
+      // 使用 html-to-image 的 toPng 方法导出高清图片
+      const dataUrl = await toPng(element, {
+        width: width,
+        height: fullHeight,
+        pixelRatio: scaleFactor,
+        backgroundColor: "#fef9f0",
+        cacheBust: true,
+        style: {
+          margin: "0",
+          padding: "0",
+          maxHeight: "none",
+          overflow: "visible",
+        },
+      });
+
+      // 恢复原始样式
+      element.style.maxHeight = originalMaxHeight;
+      element.style.overflow = originalOverflow;
+      if (cardContentElement) {
+        cardContentElement.style.overflow = originalContentOverflow;
+      }
+
+      // 恢复下载按钮显示
+      if (downloadButton) {
+        downloadButton.style.display = originalDisplay;
+      }
+
+      // 使用 downloadjs 下载图片
+      download(dataUrl, `可话动态_${formattedDate.replace(/\//g, "-")}.png`);
+    } catch (error) {
+      console.error("下载图片失败:", error);
+      
+      // 确保在出错时也恢复样式
+      element.style.maxHeight = originalMaxHeight;
+      element.style.overflow = originalOverflow;
+      if (cardContentElement) {
+        cardContentElement.style.overflow = originalContentOverflow;
+      }
+      
+      if (downloadButton) {
+        downloadButton.style.display = originalDisplay;
+      }
+    }
+  }, [cardContainerRef, dynamics, activeIndex, dynamic, formatDate, styles.cardContent]);
 
   // 点击 ESC 键关闭，支持左右箭头键切换
   useEffect(() => {
@@ -131,15 +237,6 @@ const CardPreview = ({
     return null;
   }
 
-  // 格式化日期：YYYY/MM/DD
-  const formatDate = (timestamp) => {
-    const date = new Date(timestamp);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}/${month}/${day}`;
-  };
-
   const formattedDate = formatDate(currentDynamic.timestamp);
 
   return (
@@ -159,103 +256,6 @@ const CardPreview = ({
           <FaChevronLeft />
         </div>
       )}
-      <div className={styles.cardContainer} onClick={handleCardClick}>
-        <div className={styles.cardHeader}>
-          <div className={styles.dateInfo}>{formattedDate} 发布于可话</div>
-        </div>
-
-        {/* 内容区域（可滚动） */}
-        <div className={styles.cardContent}>
-          {/* 中间：文字内容 */}
-          {currentDynamic.text && (
-            <div className={styles.cardText}>
-              {currentDynamic.text
-                .split("\n")
-                .map((paragraph, paragraphIndex, array) => {
-                  // 如果是空段落，只渲染一个空行
-                  if (!paragraph.trim()) {
-                    return (
-                      <div
-                        key={paragraphIndex}
-                        className={styles.textParagraph}
-                      ></div>
-                    );
-                  }
-                  // 判断是否是最后一段
-                  const isLastParagraph = paragraphIndex === array.length - 1;
-                  return (
-                    <div
-                      key={paragraphIndex}
-                      className={styles.textParagraph}
-                      style={{
-                        textIndent: textIndent ? "2em" : "0",
-                        fontSize: `${fontSize}px`,
-                        fontWeight: fontWeight,
-                        fontFamily: getFontFamily(fontFamily),
-                        lineHeight: lineHeight,
-                        marginBottom:
-                          paragraphSpacing && !isLastParagraph
-                            ? `${lineHeight}em`
-                            : `${lineHeight * 0.5}em`,
-                      }}
-                    >
-                      {paragraph}
-                    </div>
-                  );
-                })}
-            </div>
-          )}
-
-          {/* 图片内容 */}
-          {currentDynamic.images && currentDynamic.images.length > 0 && (
-            <div className={styles.cardImages}>
-              {currentDynamic.images.map((image, index) => (
-                <img
-                  key={index}
-                  src={image.url || image}
-                  alt={image.name || `图片 ${index + 1}`}
-                  className={styles.cardImage}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* 视频内容（静态缩略图） */}
-          {currentDynamic.videos && currentDynamic.videos.length > 0 && (
-            <div className={styles.cardVideos}>
-              {currentDynamic.videos.map((video, index) => (
-                <div key={index} className={styles.videoWrapper}>
-                  <video
-                    src={video.url || video}
-                    className={styles.cardVideo}
-                    muted
-                    playsInline
-                    preload="metadata"
-                    onLoadedMetadata={(e) => {
-                      // 加载第一帧作为缩略图
-                      e.target.currentTime = 0.1;
-                    }}
-                  />
-                  <div className={styles.videoPlayIcon}>▶</div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* 底部：推广信息 */}
-        <div className={styles.cardFooter}>
-          <div className={styles.promoText}>
-            <img src={logoImage} alt="可话" className={styles.appLogo} />
-            <span className={styles.promoDesc}>遇见共鸣</span>
-            <img
-              src={logoImage}
-              alt="可话"
-              className={`${styles.appLogo} ${styles.appLogoPlaceholder}`}
-            />
-          </div>
-        </div>
-      </div>
       {hasNext && (
         <div
           className={`${styles.navArrow} ${styles.navArrowRight}`}
@@ -264,6 +264,123 @@ const CardPreview = ({
           <FaChevronRight />
         </div>
       )}
+      <div className={styles.cardWrapper}>
+        <div
+          ref={cardContainerRef}
+          className={styles.cardContainer}
+          onClick={handleCardClick}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          {isHovered && (
+            <div
+              ref={downloadButtonRef}
+              className={styles.downloadButton}
+              onClick={handleDownload}
+              title="下载图片"
+            >
+              <HiDownload />
+            </div>
+          )}
+          <div className={styles.cardInner}>
+            <div className={styles.cardHeader}>
+              <div className={styles.dateInfo}>{formattedDate} 发布于可话</div>
+            </div>
+
+            {/* 内容区域（可滚动） */}
+            <div className={styles.cardContent}>
+              {/* 中间：文字内容 */}
+              {currentDynamic.text && (
+                <div className={styles.cardText}>
+                  {currentDynamic.text
+                    .split("\n")
+                    .map((paragraph, paragraphIndex, array) => {
+                      // 如果是空段落，只渲染一个空行
+                      if (!paragraph.trim()) {
+                        return (
+                          <div
+                            key={paragraphIndex}
+                            className={styles.textParagraph}
+                          ></div>
+                        );
+                      }
+                      // 判断是否是最后一段
+                      const isLastParagraph = paragraphIndex === array.length - 1;
+                      return (
+                        <div
+                          key={paragraphIndex}
+                          className={styles.textParagraph}
+                          style={{
+                            textIndent: textIndent ? "2em" : "0",
+                            fontSize: `${fontSize}px`,
+                            fontWeight: fontWeight,
+                            fontFamily: getFontFamily(fontFamily),
+                            lineHeight: lineHeight,
+                            marginBottom:
+                              paragraphSpacing && !isLastParagraph
+                                ? `${lineHeight}em`
+                                : `${lineHeight * 0.5}em`,
+                          }}
+                        >
+                          {paragraph}
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+
+              {/* 图片内容 */}
+              {currentDynamic.images && currentDynamic.images.length > 0 && (
+                <div className={styles.cardImages}>
+                  {currentDynamic.images.map((image, index) => (
+                    <img
+                      key={index}
+                      src={image.url || image}
+                      alt={image.name || `图片 ${index + 1}`}
+                      className={styles.cardImage}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* 视频内容（静态缩略图） */}
+              {currentDynamic.videos && currentDynamic.videos.length > 0 && (
+                <div className={styles.cardVideos}>
+                  {currentDynamic.videos.map((video, index) => (
+                    <div key={index} className={styles.videoWrapper}>
+                      <video
+                        src={video.url || video}
+                        className={styles.cardVideo}
+                        muted
+                        playsInline
+                        preload="metadata"
+                        onLoadedMetadata={(e) => {
+                          // 加载第一帧作为缩略图
+                          e.target.currentTime = 0.1;
+                        }}
+                      />
+                      <div className={styles.videoPlayIcon}>▶</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 底部：推广信息 */}
+            <div className={styles.cardFooter}>
+              <div className={styles.promoText}>
+                <img src={logoImage} alt="可话" className={styles.appLogo} />
+                <span className={styles.promoDesc}>遇见共鸣</span>
+                <img
+                  src={logoImage}
+                  alt="可话"
+                  className={`${styles.appLogo} ${styles.appLogoPlaceholder}`}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

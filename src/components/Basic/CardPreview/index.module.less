@@ -15,6 +15,16 @@
   overflow-y: auto;
 }
 
+.cardWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 500px;
+  margin: auto;
+}
+
 .cardContainer {
   position: relative;
   max-width: 500px;
@@ -23,14 +33,48 @@
   max-height: calc(100vh - 80px);
   background-color: #fef9f0; // 米白色背景，类似小红书风格
   border-radius: 12px;
-  padding: 40px 30px 0;
+  padding: 0;
   cursor: default;
   box-sizing: border-box;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  margin: auto;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+.downloadButton {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  svg {
+    font-size: 18px;
+    color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+.cardInner {
+  padding: 40px 30px 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .closeButton {
@@ -208,7 +252,7 @@
 }
 
 .navArrow {
-  position: absolute;
+  position: fixed;
   top: 50%;
   transform: translateY(-50%);
   width: 48px;
@@ -219,7 +263,7 @@
   background-color: rgba(255, 255, 255, 0.9);
   border-radius: 50%;
   cursor: pointer;
-  z-index: 10000;
+  z-index: 10001;
   transition: background-color 0.2s ease, transform 0.2s ease;
   user-select: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -240,15 +284,15 @@
 }
 
 .navArrowLeft {
-  left: 20px !important;
+  left: 20px;
 }
 
 .navArrowRight {
-  right: 20px !important;
+  right: 20px;
 }
 
 .randomButton {
-  position: absolute;
+  position: fixed;
   top: 20px;
   right: 20px;
   width: 48px;
@@ -259,7 +303,7 @@
   background-color: rgba(255, 255, 255, 0.9);
   border-radius: 50%;
   cursor: pointer;
-  z-index: 10000;
+  z-index: 10001;
   transition: background-color 0.2s ease, transform 0.2s ease;
   user-select: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
