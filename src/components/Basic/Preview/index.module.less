@@ -177,6 +177,12 @@
   border-bottom: none;
 }
 
+.headerIcons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .dynamicDate {
   font-size: 13px;
   font-weight: 400;
@@ -186,13 +192,29 @@
     "Helvetica Neue", Arial, sans-serif;
 }
 
+.previewIcon {
+  font-size: 18px;
+  color: #B6B6B6;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    color: var(--accent-color);
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
 .deleteIcon {
   font-size: 18px;
   color: #B6B6B6;
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
-  margin-left: 8px;
 
   &:hover {
     color: var(--accent-color);

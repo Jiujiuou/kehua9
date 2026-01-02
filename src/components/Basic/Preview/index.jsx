@@ -8,10 +8,12 @@ import {
 } from "react";
 import { FaPlus, FaSearch } from "react-icons/fa";
 import { MdDeleteOutline } from "react-icons/md";
+import { HiOutlineEye } from "react-icons/hi";
 import { parseDynamicData } from "@/utils/parseData";
 import PropTypes from "prop-types";
 import ImagePreview from "@/components/Basic/ImagePreview";
 import VideoPreview from "@/components/Basic/VideoPreview";
+import CardPreview from "@/components/Basic/CardPreview";
 import { useToastHelpers } from "@/components/Basic/Toast";
 import { useConfirmHelper } from "@/components/Basic/Confirm";
 import { deleteDynamicFromFile } from "@/utils/writeData";
@@ -47,6 +49,7 @@ const Preview = forwardRef(
     const [previewIndex, setPreviewIndex] = useState(0);
     const [previewVideos, setPreviewVideos] = useState([]);
     const [previewVideoIndex, setPreviewVideoIndex] = useState(0);
+    const [cardPreviewDynamic, setCardPreviewDynamic] = useState(null);
     const [searchInput, setSearchInput] = useState("");
     const [searchKeyword, setSearchKeyword] = useState("");
     const fileInputRef = useRef(null);
@@ -457,51 +460,61 @@ const Preview = forwardRef(
                   <span className={styles.dynamicDate}>
                     {dynamic.date} {dynamic.time}
                   </span>
-                  {(() => {
-                    // 检查是否是2026年的动态
-                    const year = new Date(dynamic.timestamp).getFullYear();
-                    if (year === 2026 && directoryHandle) {
-                      return (
-                        <MdDeleteOutline
-                          className={styles.deleteIcon}
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            const result = await confirm(
-                              "确定要删除这条动态吗？"
-                            );
-                            if (result) {
-                              try {
-                                const year = new Date(dynamic.timestamp)
-                                  .getFullYear()
-                                  .toString();
-                                await deleteDynamicFromFile(
-                                  directoryHandle,
-                                  year,
-                                  dynamic.timestamp
-                                );
-                                // 从列表中移除
-                                const updatedDynamics = dynamics.filter(
-                                  (d) => d.timestamp !== dynamic.timestamp
-                                );
-                                isInternalUpdateRef.current = true;
-                                prevExternalDynamicsRef.current =
-                                  updatedDynamics;
-                                setDynamics(updatedDynamics);
-                                if (onDynamicsChange) {
-                                  onDynamicsChange(updatedDynamics);
+                  <div className={styles.headerIcons}>
+                    <HiOutlineEye
+                      className={styles.previewIcon}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCardPreviewDynamic(dynamic);
+                      }}
+                      title="卡片预览"
+                    />
+                    {(() => {
+                      // 检查是否是2026年的动态
+                      const year = new Date(dynamic.timestamp).getFullYear();
+                      if (year === 2026 && directoryHandle) {
+                        return (
+                          <MdDeleteOutline
+                            className={styles.deleteIcon}
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              const result = await confirm(
+                                "确定要删除这条动态吗？"
+                              );
+                              if (result) {
+                                try {
+                                  const year = new Date(dynamic.timestamp)
+                                    .getFullYear()
+                                    .toString();
+                                  await deleteDynamicFromFile(
+                                    directoryHandle,
+                                    year,
+                                    dynamic.timestamp
+                                  );
+                                  // 从列表中移除
+                                  const updatedDynamics = dynamics.filter(
+                                    (d) => d.timestamp !== dynamic.timestamp
+                                  );
+                                  isInternalUpdateRef.current = true;
+                                  prevExternalDynamicsRef.current =
+                                    updatedDynamics;
+                                  setDynamics(updatedDynamics);
+                                  if (onDynamicsChange) {
+                                    onDynamicsChange(updatedDynamics);
+                                  }
+                                  toast.success("删除成功");
+                                } catch (error) {
+                                  console.error("删除失败:", error);
+                                  toast.error("删除失败：" + error.message);
                                 }
-                                toast.success("删除成功");
-                              } catch (error) {
-                                console.error("删除失败:", error);
-                                toast.error("删除失败：" + error.message);
                               }
-                            }
-                          }}
-                        />
-                      );
-                    }
-                    return null;
-                  })()}
+                            }}
+                          />
+                        );
+                      }
+                      return null;
+                    })()}
+                  </div>
                 </div>
                 {dynamic.text && (
                   <div className={styles.dynamicText}>
@@ -620,6 +633,12 @@ const Preview = forwardRef(
           onClose={() => {
             setPreviewVideos([]);
             setPreviewVideoIndex(0);
+          }}
+        />
+        <CardPreview
+          dynamic={cardPreviewDynamic}
+          onClose={() => {
+            setCardPreviewDynamic(null);
           }}
         />
       </>
