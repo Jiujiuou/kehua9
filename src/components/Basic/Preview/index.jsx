@@ -7,7 +7,7 @@ import {
   useEffect,
   useCallback,
 } from "react";
-import { FaPlus, FaSearch } from "react-icons/fa";
+import { FaPlus, FaSearch, FaTimes } from "react-icons/fa";
 import { MdDeleteOutline } from "react-icons/md";
 import { HiOutlineEye } from "react-icons/hi";
 import { parseDynamicData } from "@/utils/parseData";
@@ -258,23 +258,31 @@ const Preview = forwardRef(
     }, [dynamics, sortOrder, contentTypeFilter, searchKeyword]);
 
     // 滚动到指定索引的动态项（需要在 sortedDynamics 定义之后）
-    const scrollToDynamicIndex = useCallback((index) => {
-      if (!contentAreaRef.current || !sortedDynamics || index < 0 || index >= sortedDynamics.length) {
-        return;
-      }
+    const scrollToDynamicIndex = useCallback(
+      (index) => {
+        if (
+          !contentAreaRef.current ||
+          !sortedDynamics ||
+          index < 0 ||
+          index >= sortedDynamics.length
+        ) {
+          return;
+        }
 
-      // 查找对应索引的动态项
-      const targetElement = contentAreaRef.current.querySelector(
-        `[data-dynamic-index="${index}"]`
-      );
+        // 查找对应索引的动态项
+        const targetElement = contentAreaRef.current.querySelector(
+          `[data-dynamic-index="${index}"]`
+        );
 
-      if (targetElement) {
-        targetElement.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-      }
-    }, [sortedDynamics]);
+        if (targetElement) {
+          targetElement.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
+      },
+      [sortedDynamics]
+    );
 
     // 暴露方法给父组件
     useImperativeHandle(ref, () => ({
@@ -462,6 +470,18 @@ const Preview = forwardRef(
             >
               <FaSearch />
             </button>
+            {searchKeyword && (
+              <button
+                className={styles.closeButton}
+                onClick={() => {
+                  setSearchInput("");
+                  setSearchKeyword("");
+                }}
+                title="清除搜索"
+              >
+                <FaTimes />
+              </button>
+            )}
           </div>
           <div
             className={styles.contentArea}
@@ -470,7 +490,7 @@ const Preview = forwardRef(
           >
             {sortedDynamics.map((dynamic, index) => (
               <div
-                key={index}
+                key={dynamic.timestamp}
                 className={styles.dynamicItem}
                 data-date={dynamic.date}
                 data-dynamic-index={index}
