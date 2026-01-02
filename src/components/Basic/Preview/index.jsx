@@ -5,6 +5,7 @@ import {
   forwardRef,
   useImperativeHandle,
   useEffect,
+  useCallback,
 } from "react";
 import { FaPlus, FaSearch } from "react-icons/fa";
 import { MdDeleteOutline } from "react-icons/md";
@@ -50,6 +51,7 @@ const Preview = forwardRef(
     const [previewVideos, setPreviewVideos] = useState([]);
     const [previewVideoIndex, setPreviewVideoIndex] = useState(0);
     const [cardPreviewDynamic, setCardPreviewDynamic] = useState(null);
+    const [cardPreviewIndex, setCardPreviewIndex] = useState(0);
     const [searchInput, setSearchInput] = useState("");
     const [searchKeyword, setSearchKeyword] = useState("");
     const fileInputRef = useRef(null);
@@ -165,26 +167,6 @@ const Preview = forwardRef(
       };
     }, [dynamics, onScrollChange]);
 
-    // 暴露方法给父组件
-    useImperativeHandle(ref, () => ({
-      getContentElement: () => contentAreaRef.current,
-      scrollToDate: (dateStr) => {
-        if (!contentAreaRef.current) return;
-
-        // 查找对应日期的第一个动态项
-        const targetElement = contentAreaRef.current.querySelector(
-          `[data-date="${dateStr}"]`
-        );
-
-        if (targetElement) {
-          targetElement.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-        }
-      },
-    }));
-
     // 高亮关键词的函数
     const highlightKeyword = (text, keyword) => {
       if (!keyword || !text) return text;
@@ -274,6 +256,46 @@ const Preview = forwardRef(
         );
       }
     }, [dynamics, sortOrder, contentTypeFilter, searchKeyword]);
+
+    // 滚动到指定索引的动态项（需要在 sortedDynamics 定义之后）
+    const scrollToDynamicIndex = useCallback((index) => {
+      if (!contentAreaRef.current || !sortedDynamics || index < 0 || index >= sortedDynamics.length) {
+        return;
+      }
+
+      // 查找对应索引的动态项
+      const targetElement = contentAreaRef.current.querySelector(
+        `[data-dynamic-index="${index}"]`
+      );
+
+      if (targetElement) {
+        targetElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+    }, [sortedDynamics]);
+
+    // 暴露方法给父组件
+    useImperativeHandle(ref, () => ({
+      getContentElement: () => contentAreaRef.current,
+      scrollToDate: (dateStr) => {
+        if (!contentAreaRef.current) return;
+
+        // 查找对应日期的第一个动态项
+        const targetElement = contentAreaRef.current.querySelector(
+          `[data-date="${dateStr}"]`
+        );
+
+        if (targetElement) {
+          targetElement.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }
+      },
+      scrollToDynamicIndex,
+    }));
 
     const handleFileSelect = async (event) => {
       const files = event.target.files;
@@ -451,6 +473,7 @@ const Preview = forwardRef(
                 key={index}
                 className={styles.dynamicItem}
                 data-date={dynamic.date}
+                data-dynamic-index={index}
                 style={{
                   padding: `${contentGap}px`,
                   borderRadius: `${borderRadius}px`,
@@ -466,6 +489,7 @@ const Preview = forwardRef(
                       onClick={(e) => {
                         e.stopPropagation();
                         setCardPreviewDynamic(dynamic);
+                        setCardPreviewIndex(index);
                       }}
                       title="卡片预览"
                     />
@@ -637,8 +661,25 @@ const Preview = forwardRef(
         />
         <CardPreview
           dynamic={cardPreviewDynamic}
+          dynamics={sortedDynamics}
+          currentIndex={cardPreviewIndex}
+          fontSize={fontSize}
+          fontWeight={fontWeight}
+          fontFamily={fontFamily}
+          lineHeight={lineHeight}
+          textIndent={textIndent}
+          paragraphSpacing={paragraphSpacing}
           onClose={() => {
+            // 关闭时滚动到当前查看的动态
+            scrollToDynamicIndex(cardPreviewIndex);
             setCardPreviewDynamic(null);
+            setCardPreviewIndex(0);
+          }}
+          onDynamicChange={(newDynamic, newIndex) => {
+            setCardPreviewDynamic(newDynamic);
+            setCardPreviewIndex(newIndex);
+            // 切换动态时，滚动列表到对应位置
+            scrollToDynamicIndex(newIndex);
           }}
         />
       </>
