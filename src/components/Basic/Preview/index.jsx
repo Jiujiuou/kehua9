@@ -7,7 +7,7 @@ import {
   useEffect,
   useCallback,
 } from "react";
-import { FaPlus, FaSearch, FaTimes } from "react-icons/fa";
+import { FaPlus, FaSearch, FaTimes, FaChartBar } from "react-icons/fa";
 import { MdDeleteOutline } from "react-icons/md";
 import { HiOutlineEye } from "react-icons/hi";
 import { parseDynamicData } from "@/utils/parseData";
@@ -15,6 +15,8 @@ import PropTypes from "prop-types";
 import ImagePreview from "@/components/Basic/ImagePreview";
 import VideoPreview from "@/components/Basic/VideoPreview";
 import CardPreview from "@/components/Basic/CardPreview";
+import AnnualReport from "@/components/AnnualReport";
+import ReportSelector from "@/components/AnnualReport/ReportSelector";
 import { useToastHelpers } from "@/components/Basic/Toast";
 import { useConfirmHelper } from "@/components/Basic/Confirm";
 import { deleteDynamicFromFile } from "@/utils/writeData";
@@ -54,6 +56,9 @@ const Preview = forwardRef(
     const [cardPreviewIndex, setCardPreviewIndex] = useState(0);
     const [searchInput, setSearchInput] = useState("");
     const [searchKeyword, setSearchKeyword] = useState("");
+    const [showAnnualReport, setShowAnnualReport] = useState(false);
+    const [showReportSelector, setShowReportSelector] = useState(false);
+    const [reportYear, setReportYear] = useState(null);
     const fileInputRef = useRef(null);
     const contentAreaRef = useRef(null);
     const prevExternalDynamicsRef = useRef(null);
@@ -482,6 +487,14 @@ const Preview = forwardRef(
                 <FaTimes />
               </button>
             )}
+            <button
+              className={styles.reportButton}
+              onClick={() => setShowReportSelector(true)}
+              title="年度报告"
+            >
+              <FaChartBar />
+              <span className={styles.reportButtonText}>年度报告</span>
+            </button>
           </div>
           <div
             className={styles.contentArea}
@@ -702,6 +715,26 @@ const Preview = forwardRef(
             scrollToDynamicIndex(newIndex);
           }}
         />
+
+        {/* 年度报告选择器 */}
+        {showReportSelector && (
+          <ReportSelector
+            onSelect={(year) => {
+              setReportYear(year);
+              setShowAnnualReport(true);
+            }}
+            onClose={() => setShowReportSelector(false)}
+          />
+        )}
+
+        {/* 年度报告 */}
+        {showAnnualReport && (
+          <AnnualReport
+            dynamics={dynamics}
+            year={reportYear}
+            onClose={() => setShowAnnualReport(false)}
+          />
+        )}
       </>
     );
   }

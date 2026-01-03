@@ -1,0 +1,299 @@
+.endingPage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+
+  .content {
+    max-width: 700px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    animation: fadeIn 0.8s ease;
+  }
+
+  .mainMessage {
+    margin-bottom: 20px;
+
+    .icon {
+      font-size: 50px;
+      margin-bottom: 16px;
+      animation: pulse 2s infinite;
+    }
+
+    .title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #333333;
+      margin-bottom: 20px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .timelineBox {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding: 16px 0;
+      background: transparent;
+      backdrop-filter: none;
+      border-radius: 0;
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+      .timelineItem {
+        flex: 1;
+
+        .timelineLabel {
+          font-size: 10px;
+          color: #999;
+          margin-bottom: 8px;
+          font-weight: 300;
+          letter-spacing: 0.5px;
+        }
+
+        .timelineValue {
+          font-size: 13px;
+          font-weight: 300;
+          color: #333;
+          letter-spacing: 0.5px;
+        }
+      }
+
+      .timelineDivider {
+        font-size: 20px;
+        color: #999999;
+      }
+    }
+
+    .daysBox {
+      margin-bottom: 20px;
+
+      .daysValue {
+        font-size: 48px;
+        font-weight: 200;
+        color: #ea425f;
+        line-height: 1.2;
+        margin-bottom: 12px;
+        letter-spacing: -2px;
+      }
+
+      .daysLabel {
+        font-size: 13px;
+        color: #999;
+        font-weight: 300;
+        letter-spacing: 0.5px;
+      }
+    }
+
+    .message {
+      margin-bottom: 16px;
+
+      p {
+        font-size: 12px;
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 8px;
+        font-weight: 300;
+
+        &.highlight {
+          font-size: 13px;
+          font-weight: 300;
+          color: #ea425f;
+          margin-top: 16px;
+        }
+      }
+    }
+
+    .farewell {
+      padding: 16px 0;
+
+      p {
+        font-size: 11px;
+        color: #999;
+        line-height: 1.6;
+        margin-bottom: 6px;
+        font-weight: 300;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+
+    .divider {
+      width: 60px;
+      height: 1px;
+      background: rgba(0, 0, 0, 0.1);
+      margin: 20px auto;
+    }
+  }
+
+  .actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+
+    .shareButton {
+      background: linear-gradient(135deg, #ea425f 0%, #d6364f 100%);
+      border: none;
+      border-radius: 50px;
+      padding: 12px 40px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 3px 10px rgba(234, 66, 95, 0.4);
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 16px rgba(234, 66, 95, 0.5);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+
+      .emoji {
+        font-size: 16px;
+      }
+    }
+
+    .closeButton {
+      background: transparent;
+      border: 2px solid rgba(234, 66, 95, 0.3);
+      border-radius: 50px;
+      padding: 10px 30px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #666666;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: rgba(234, 66, 95, 0.05);
+        border-color: rgba(234, 66, 95, 0.5);
+        color: #333333;
+      }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@media (max-width: 768px) {
+  .endingPage {
+    .mainMessage {
+      margin-bottom: 40px;
+
+      .icon {
+        font-size: 60px;
+        margin-bottom: 20px;
+      }
+
+      .title {
+        font-size: 28px;
+        margin-bottom: 30px;
+      }
+
+      .timelineBox {
+        flex-direction: column;
+        gap: 12px;
+        padding: 24px;
+        margin-bottom: 30px;
+
+        .timelineItem {
+          .timelineLabel {
+            font-size: 12px;
+          }
+
+          .timelineValue {
+            font-size: 16px;
+          }
+        }
+
+        .timelineDivider {
+          font-size: 24px;
+          transform: rotate(90deg);
+        }
+      }
+
+      .daysBox {
+        margin-bottom: 30px;
+
+        .daysValue {
+          font-size: 56px;
+        }
+
+        .daysLabel {
+          font-size: 18px;
+        }
+      }
+
+      .message {
+        margin-bottom: 30px;
+
+        p {
+          font-size: 16px;
+
+          &.highlight {
+            font-size: 18px;
+          }
+        }
+      }
+
+      .farewell {
+        padding: 20px 0;
+
+        p {
+          font-size: 12px;
+        }
+      }
+
+      .divider {
+        width: 80px;
+        margin: 24px auto;
+      }
+    }
+
+    .actions {
+      .shareButton {
+        padding: 14px 36px;
+        font-size: 16px;
+      }
+
+      .closeButton {
+        padding: 10px 28px;
+        font-size: 14px;
+      }
+    }
+  }
+}

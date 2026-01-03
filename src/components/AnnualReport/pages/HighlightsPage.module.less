@@ -1,0 +1,139 @@
+.highlightsPage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+
+  .content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    animation: fadeIn 0.6s ease;
+  }
+
+  .title {
+    font-size: 24px;
+    font-weight: 300;
+    color: #333;
+    text-align: center;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+    color: #999;
+    text-align: center;
+    font-weight: 300;
+  }
+
+  // 文案区域
+  .textSection {
+    // margin-bottom: 20px;
+    padding: 20px 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex-shrink: 0;
+
+    .textItem {
+      font-size: 13px;
+      font-weight: 300;
+      color: #666;
+      line-height: 1.8;
+      letter-spacing: 0.5px;
+      text-align: left;
+    }
+  }
+
+  .dynamicsSection {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-height: 0;
+    overflow-y: auto;
+
+    .dynamicCard {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      border-radius: 0;
+      padding: 16px 0;
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .sectionTitle {
+        font-size: 12px;
+        font-weight: 300;
+        color: #666;
+        margin-bottom: 12px;
+        text-align: left;
+        letter-spacing: 0.5px;
+      }
+
+      .dynamicDate {
+        font-size: 13px;
+        font-weight: 300;
+        color: #ea425f;
+        margin-bottom: 10px;
+        text-align: left;
+        letter-spacing: 0.5px;
+      }
+
+      .dynamicContent {
+        flex: 1;
+        font-size: 11px;
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 8px;
+        overflow-y: auto;
+        font-weight: 300;
+      }
+
+      .dynamicMeta {
+        font-size: 10px;
+        color: #999;
+        text-align: left;
+        font-weight: 300;
+      }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .highlightsPage {
+    .title {
+      font-size: 28px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+    }
+
+    .textSection {
+      .textItem {
+        font-size: 14px;
+      }
+    }
+  }
+}

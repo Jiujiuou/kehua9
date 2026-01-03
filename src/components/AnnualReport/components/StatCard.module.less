@@ -1,0 +1,74 @@
+.statCard {
+  background: transparent;
+  border-radius: 0;
+  padding: 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .icon {
+    display: none;
+  }
+
+  .content {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+  }
+
+  .title {
+    font-size: 11px;
+    color: #999;
+    margin-bottom: 8px;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+  }
+
+  .value {
+    font-size: 22px;
+    font-weight: 200;
+    color: #EA425F;
+    line-height: 1.2;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 2px;
+    letter-spacing: -0.5px;
+
+    .suffix {
+      font-size: 12px;
+      font-weight: 300;
+      color: #999;
+      margin-left: 2px;
+    }
+  }
+
+  .description {
+    font-size: 10px;
+    color: #999;
+    margin-top: 4px;
+    font-weight: 300;
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .statCard {
+    padding: 16px 0;
+
+    .value {
+      font-size: 28px;
+
+      .suffix {
+        font-size: 14px;
+      }
+    }
+  }
+}
+

@@ -102,6 +102,46 @@
   }
 }
 
+.reportButton {
+  flex-shrink: 0;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 6px;
+  background: #EA425F;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(234, 66, 95, 0.25);
+
+  &:hover {
+    background: #d6364f;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(234, 66, 95, 0.35);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  svg {
+    font-size: 16px;
+  }
+
+  .reportButtonText {
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+}
+
 // 上传区域
 .uploadArea {
   display: flex;

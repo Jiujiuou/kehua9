@@ -248,13 +248,20 @@ function parseYearContent(content, images, videos) {
 
         if (videoMatch) {
           const videoName = videoMatch[1];
+          console.log('[parseYearContent] 找到视频引用:', videoName);
           // 查找对应的视频
           const video = videos.find(vid => vid.name === videoName);
           if (video) {
+            console.log('[parseYearContent] 匹配到视频文件:', video);
             currentDynamic.videos.push({
               name: videoName,
               url: video.url,
               path: video.path
+            });
+          } else {
+            console.warn('[parseYearContent] 未找到匹配的视频文件:', {
+              videoName,
+              availableVideos: videos.map(v => v.name)
             });
           }
         } else if (line) {
@@ -273,6 +280,20 @@ function parseYearContent(content, images, videos) {
   if (currentDynamic) {
     dynamics.push(currentDynamic);
   }
+
+  // 统计解析结果
+  const totalVideos = dynamics.reduce((count, d) => count + (d.videos?.length || 0), 0);
+  const videoDynamics = dynamics.filter(d => d.videos && d.videos.length > 0);
+  console.log('[parseYearContent] 解析完成:', {
+    totalDynamics: dynamics.length,
+    totalVideos,
+    videoDynamicsCount: videoDynamics.length,
+    videoDynamics: videoDynamics.map(d => ({
+      timestamp: d.timestamp,
+      videoCount: d.videos.length,
+      videos: d.videos.map(v => v.name)
+    }))
+  });
 
   return dynamics;
 }

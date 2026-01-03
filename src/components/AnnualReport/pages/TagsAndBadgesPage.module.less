@@ -1,0 +1,168 @@
+.tagsAndBadgesPage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+
+  .content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    animation: fadeIn 0.6s ease;
+  }
+
+  .title {
+    font-size: 24px;
+    font-weight: 300;
+    color: #333;
+    text-align: center;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+    color: #999;
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 300;
+  }
+
+  .section {
+    margin-bottom: 16px;
+    flex-shrink: 0;
+
+    &:last-child {
+      margin-bottom: 0;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sectionTitle {
+      font-size: 13px;
+      font-weight: 300;
+      color: #666;
+      margin-bottom: 12px;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  .tagsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+
+    .tagCard {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      border-radius: 0;
+      padding: 12px 0;
+      text-align: left;
+      transition: all 0.3s ease;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .tagTitle {
+        font-size: 12px;
+        font-weight: 300;
+        color: #333;
+        margin-bottom: 6px;
+        letter-spacing: 0.5px;
+      }
+
+      .tagDesc {
+        font-size: 10px;
+        color: #999;
+        line-height: 1.5;
+        font-weight: 300;
+      }
+    }
+  }
+
+  .badgesGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    flex: 1;
+    align-content: start;
+
+    .badgeCard {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      border-radius: 0;
+      padding: 12px 0;
+      text-align: left;
+      transition: all 0.3s ease;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .badgeTitle {
+        font-size: 12px;
+        font-weight: 300;
+        color: #333;
+        margin-bottom: 6px;
+        letter-spacing: 0.5px;
+      }
+
+      .badgeDesc {
+        font-size: 10px;
+        color: #999;
+        line-height: 1.5;
+        font-weight: 300;
+      }
+    }
+  }
+
+  .emptyState {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    .emptyText {
+      font-size: 12px;
+      color: #999;
+      font-weight: 300;
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .tagsAndBadgesPage {
+    .title {
+      font-size: 28px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+    }
+
+    .tagsGrid,
+    .badgesGrid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+  }
+}

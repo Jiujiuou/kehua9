@@ -1,0 +1,160 @@
+.firstMeetingPage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+
+  .content {
+    text-align: center;
+    width: 100%;
+    padding: 40px 20px;
+    animation: fadeInUp 0.8s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+  }
+
+  .dateText {
+    font-size: 18px;
+    font-weight: 400;
+    color: #000;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+  }
+
+  .meetingText {
+    font-size: 20px;
+    font-weight: 300;
+    color: #000;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+  }
+
+  .figureContainer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 30px 0;
+    position: relative;
+  }
+
+  .figure {
+    width: 100px;
+    height: 160px;
+    position: relative;
+    animation: float 3s ease-in-out infinite;
+
+    // 创建人物剪影效果 - 身体
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(255, 255, 255, 0.85) 30%,
+      rgba(255, 255, 255, 0.7) 60%,
+      rgba(255, 255, 255, 0.5) 100%
+    );
+    border-radius: 50% 50% 40% 40% / 50% 50% 30% 30%;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.8),
+      0 0 40px rgba(255, 255, 255, 0.5), 0 0 60px rgba(255, 255, 255, 0.3);
+    filter: blur(0.5px);
+
+    // 头部
+    &::before {
+      content: "";
+      position: absolute;
+      top: -15%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 35%;
+      height: 25%;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 50%;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.9),
+        0 0 30px rgba(255, 255, 255, 0.6);
+    }
+  }
+
+  .daysText {
+    font-size: 18px;
+    font-weight: 300;
+    color: #000;
+    margin-top: 20px;
+    letter-spacing: 1px;
+
+    .daysNumber {
+      font-size: 28px;
+      font-weight: 600;
+      color: #000;
+      margin: 0 8px;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+  }
+
+  .yearsText {
+    font-size: 16px;
+    font-weight: 300;
+    color: #000;
+    margin-top: 10px;
+    letter-spacing: 1px;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+@media (max-width: 768px) {
+  .firstMeetingPage {
+    .content {
+      padding: 30px 16px;
+      gap: 25px;
+    }
+
+    .dateText {
+      font-size: 16px;
+    }
+
+    .meetingText {
+      font-size: 18px;
+    }
+
+    .figure {
+      width: 100px;
+      height: 150px;
+    }
+
+    .daysText {
+      font-size: 16px;
+
+      .daysNumber {
+        font-size: 24px;
+      }
+    }
+
+    .yearsText {
+      font-size: 14px;
+    }
+  }
+}

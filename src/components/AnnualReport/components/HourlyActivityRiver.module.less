@@ -1,0 +1,142 @@
+.riverContainer {
+  position: relative;
+  width: 100%;
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.dayNightBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  z-index: 0;
+
+  .nightEarly {
+    background: linear-gradient(
+      to right,
+      rgba(99, 102, 241, 0.03),
+      rgba(139, 92, 246, 0.02)
+    );
+  }
+
+  .day {
+    background: linear-gradient(
+      to right,
+      rgba(251, 191, 36, 0.02),
+      rgba(252, 211, 77, 0.015),
+      rgba(251, 191, 36, 0.02)
+    );
+  }
+
+  .nightLate {
+    background: linear-gradient(
+      to right,
+      rgba(139, 92, 246, 0.02),
+      rgba(99, 102, 241, 0.03)
+    );
+  }
+}
+
+.riverSvg {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: auto;
+  max-height: 240px;
+}
+
+.riverPath {
+  transition: all 0.3s ease;
+
+  &:hover {
+    filter: brightness(1.1);
+  }
+}
+
+.peakMarker {
+  animation: pulseMarker 2s ease-in-out infinite;
+
+  circle {
+    filter: drop-shadow(0 2px 4px rgba(234, 66, 95, 0.3));
+  }
+}
+
+@keyframes pulseMarker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.peakLabel {
+  font-size: 24px;
+  fill: #333;
+
+  .peakTime {
+    font-size: 26px;
+    font-weight: 600;
+    fill: #ea425f;
+  }
+
+  .peakCount {
+    font-size: 20px;
+    font-weight: 400;
+    fill: #666;
+  }
+}
+
+.timeMarker {
+  .timeLabel {
+    font-size: 20px;
+    font-weight: 300;
+    fill: rgba(0, 0, 0, 0.5);
+    letter-spacing: 0.5px;
+  }
+}
+
+.emptyState {
+  width: 100%;
+  height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, 0.3);
+  font-size: 14px;
+  font-weight: 300;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .riverContainer {
+    min-height: 220px;
+  }
+
+  .riverSvg {
+    max-height: 220px;
+  }
+
+  .peakLabel {
+    font-size: 22px;
+
+    .peakTime {
+      font-size: 24px;
+    }
+
+    .peakCount {
+      font-size: 20px;
+    }
+  }
+
+  .timeMarker .timeLabel {
+    font-size: 18px;
+  }
+}

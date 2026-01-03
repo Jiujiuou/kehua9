@@ -1,0 +1,103 @@
+.yearCalendar {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px 12px;
+  padding: 10px;
+  box-sizing: border-box;
+  align-items: start;
+}
+
+.monthContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.monthName {
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.7);
+  text-align: left;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.daysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  grid-auto-rows: 1fr;
+}
+
+.day {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+
+  &.active {
+    background: #d2e0fc;
+    box-shadow: 0 0 3px rgba(136, 197, 247, 0.8), 0 1px 2px rgba(0, 0, 0, 0.08);
+    animation: lightUp 0.4s ease-out;
+
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 4px rgba(136, 197, 247, 0.9), 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  &.inactive {
+    background: #fff;
+    box-shadow: 0 0 2px rgba(253, 255, 253, 0.6),
+      0 0 4px rgba(253, 255, 253, 0.3), 1px 1px 2px rgba(0, 0, 0, 0.06);
+  }
+}
+
+/* 点亮动画 */
+@keyframes lightUp {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+    background: #fff;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .yearCalendar {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px 10px;
+  }
+
+  .monthName {
+    font-size: 12px;
+  }
+
+  .daysGrid {
+    gap: 2px;
+  }
+}
+
+@media (max-width: 480px) {
+  .yearCalendar {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px 10px;
+  }
+
+  .monthName {
+    font-size: 11px;
+  }
+
+  .daysGrid {
+    gap: 1.5px;
+  }
+}

@@ -1,0 +1,278 @@
+.annualReport {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10000;
+  overflow: hidden;
+  user-select: none;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+
+  .background {
+    display: none;
+  }
+
+  .closeButton {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    color: #333;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10001;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+    &:hover {
+      background: rgba(255, 255, 255, 1);
+      transform: scale(1.1);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+
+  .pageContainer {
+    position: relative;
+    width: 90vw;
+    max-width: 450px;
+    aspect-ratio: 9 / 14;
+    max-height: 90vh;
+    background: url("../../assets/images/background.jpg") center/cover no-repeat;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: fadeIn 0.5s ease;
+    cursor: default;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  .downloadButton {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    svg {
+      font-size: 18px;
+      color: rgba(0, 0, 0, 0.6);
+    }
+  }
+
+  .navigation {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10001;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+
+    .dots {
+      display: flex;
+      gap: 12px;
+      padding: 12px 20px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 30px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #ccc;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 0;
+
+        &:hover {
+          background: #999;
+          transform: scale(1.2);
+        }
+
+        &.active {
+          background: #ea425f;
+          width: 24px;
+          border-radius: 5px;
+        }
+      }
+    }
+
+    .navButtons {
+      display: none;
+    }
+  }
+
+  .pageIndicator {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 20px;
+    color: #666;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 10001;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .error {
+    text-align: center;
+    padding: 40px;
+
+    p {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 24px;
+    }
+
+    button {
+      padding: 12px 32px;
+      background: #ea425f;
+      border: none;
+      border-radius: 8px;
+      color: #ffffff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #d6364f;
+      }
+    }
+  }
+
+  .navArrow {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10001;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 1);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    &:active {
+      transform: translateY(-50%) scale(0.95);
+    }
+
+    svg {
+      font-size: 20px;
+      color: #333;
+    }
+  }
+
+  .navArrowLeft {
+    left: 20px;
+  }
+
+  .navArrowRight {
+    right: 20px;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .annualReport {
+    .closeButton {
+      top: 12px;
+      right: 12px;
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+    }
+
+    .navigation {
+      bottom: 20px;
+      gap: 12px;
+
+      .dots {
+        padding: 8px 16px;
+        gap: 8px;
+
+        .dot {
+          width: 8px;
+          height: 8px;
+
+          &.active {
+            width: 20px;
+          }
+        }
+      }
+
+      .navButtons {
+        gap: 12px;
+
+        .prevButton,
+        .nextButton {
+          width: 40px;
+          height: 40px;
+          font-size: 20px;
+        }
+      }
+    }
+
+    .pageIndicator {
+      top: 12px;
+      left: 12px;
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+  }
+}
