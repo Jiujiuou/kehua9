@@ -19,6 +19,7 @@ import { useToastHelpers } from "@/components/Basic/Toast";
 import { useConfirmHelper } from "@/components/Basic/Confirm";
 import { deleteDynamicFromFile } from "@/utils/writeData";
 import { getFontFamily } from "@/utils/fonts";
+import { track } from "@/utils/track";
 import styles from "./index.module.less";
 
 const Preview = forwardRef(
@@ -329,6 +330,11 @@ const Preview = forwardRef(
         prevExternalDynamicsRef.current = parsedData; // 更新外部引用，避免重复更新
         setDynamics(parsedData);
         toast.success("数据加载成功");
+
+        // 埋点：导入数据成功
+        track("导入数据", {
+          dynamicCount: parsedData.length,
+        });
       } catch (error) {
         console.error("解析数据失败:", error);
         console.error("错误堆栈:", error.stack);
@@ -403,6 +409,11 @@ const Preview = forwardRef(
         prevExternalDynamicsRef.current = parsedData; // 更新外部引用，避免重复更新
         setDynamics(parsedData);
         toast.success("数据加载成功");
+
+        // 埋点：导入数据成功
+        track("导入数据", {
+          dynamicCount: parsedData.length,
+        });
       } catch (error) {
         console.error("解析数据失败:", error);
         console.error("错误堆栈:", error.stack);
@@ -459,13 +470,25 @@ const Preview = forwardRef(
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  setSearchKeyword(searchInput.trim());
+                  const keyword = searchInput.trim();
+                  setSearchKeyword(keyword);
+                  // 埋点：搜索动态
+                  if (keyword) {
+                    track("搜索");
+                  }
                 }
               }}
             />
             <button
               className={styles.searchButton}
-              onClick={() => setSearchKeyword(searchInput.trim())}
+              onClick={() => {
+                const keyword = searchInput.trim();
+                setSearchKeyword(keyword);
+                // 埋点：搜索动态
+                if (keyword) {
+                  track("搜索");
+                }
+              }}
               title="搜索"
             >
               <FaSearch />
@@ -510,6 +533,8 @@ const Preview = forwardRef(
                         e.stopPropagation();
                         setCardPreviewDynamic(dynamic);
                         setCardPreviewIndex(index);
+                        // 埋点：查看预览卡片
+                        track("预览动态卡片");
                       }}
                       title="卡片预览"
                     />

@@ -20,6 +20,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { writeDynamicToFile } from "@/utils/writeData";
 import { useToastHelpers } from "@/components/Basic/Toast";
+import { track } from "@/utils/track";
 import styles from "./index.module.less";
 
 function SortableImageItem({ imageItem, index, onRemove }) {
@@ -161,6 +162,9 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
       setSelectedVideo(null);
       onClose();
       toast.success("动态发布成功");
+
+      // 埋点：发布新动态
+      track("发布新动态成功");
     } catch (error) {
       console.error("添加动态失败:", error);
       toast.error("添加动态失败：" + error.message);

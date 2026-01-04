@@ -5,6 +5,7 @@ import Preview from "@/components/Basic/Preview";
 import Control from "@/components/Layout/Control";
 import Catalog from "@/components/Layout/Catalog";
 import { loadSettings, saveSetting } from "@/utils/storage";
+import { track } from "@/utils/track";
 
 function App() {
   const previewRef = useRef(null);
@@ -35,10 +36,13 @@ function App() {
   const [fontFamily, setFontFamily] = useState(
     savedSettings.fontFamily ?? "system"
   );
-  const [lineHeight, setLineHeight] = useState(
-    savedSettings.lineHeight ?? 1.6
-  );
+  const [lineHeight, setLineHeight] = useState(savedSettings.lineHeight ?? 1.6);
   const [directoryHandle, setDirectoryHandle] = useState(null);
+
+  // 页面加载时发送页面展现埋点
+  useEffect(() => {
+    track("页面访问");
+  }, []);
 
   // 当配置改变时，保存到 localStorage
   useEffect(() => {

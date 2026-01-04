@@ -6,6 +6,7 @@ import Switch from "@/components/Basic/Switch";
 import DropdownSelector from "@/components/Basic/DropdownSelector";
 import AddDynamicDialog from "@/components/Basic/AddDynamicDialog";
 import { getSystemFonts } from "@/utils/fonts";
+import { track } from "@/utils/track";
 import styles from "./index.module.less";
 
 function Control({
@@ -60,7 +61,11 @@ function Control({
         <div className={styles.sectionContent}>
           <button
             className={styles.addButton}
-            onClick={() => setShowAddDialog(true)}
+            onClick={() => {
+              setShowAddDialog(true);
+              // 埋点：点击「添加动态」
+              track("点击添加动态");
+            }}
             disabled={!directoryHandle}
           >
             <FaPlus />
