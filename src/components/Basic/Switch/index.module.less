@@ -1,268 +1,100 @@
-.switchToggle {
-  display: flex;
-  flex-direction: row;
+.switchContainer {
+  position: relative;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 9999px;
-  padding: 4px;
-  cursor: pointer;
-  transition: all 0.5s ease;
+  border-radius: 100px;
+  padding: 3px;
+  gap: 0;
   box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+
+  /* Small 尺寸 */
+  &Small {
+    padding: 4px;
+    box-shadow: none;
+    border: none;
+    background: var(--button-background);
+
+    .switchOption {
+      min-height: 20px;
+      padding: 0 8px;
+      gap: 4px;
+
+      &Label {
+        font-size: 12px;
+      }
+
+      &Icon {
+        font-size: 14px;
+      }
+
+      &Selected {
+        color: #fff;
+      }
+    }
+
+    .switchSlider {
+      background: var(--accent-color);
+    }
+  }
+}
+
+/* 滑动背景层 */
+.switchSlider {
+  position: absolute;
+  background: var(--accent-color);
+  border-radius: 100px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0;
+}
+
+.switchOption {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 8px;
+  min-height: 32px;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 100px;
+  white-space: nowrap;
+  font-family: "SF Mono", "Monaco", "Inconsolata", "Roboto Mono",
+    "Source Code Pro", "Menlo", "Consolas", monospace;
+  letter-spacing: 0.4px;
+  color: var(--text-secondary);
+  background: transparent;
+  transition: all 0.3s ease-in-out;
+  z-index: 1;
 
-  &[data-checked="true"] {
-    background: rgba(24, 24, 27, 0.05);
-  }
-
-  [data-theme="dark"] &[data-checked="true"] {
-    background: rgba(250, 250, 250, 0.1);
-  }
-
-  &:hover {
-    background: var(--bg-tertiary);
-    box-shadow: var(--shadow);
-
-    .switchTipsText {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .switchTipsTop {
-      transform: translateX(-50%) translateY(0);
-    }
-
-    .switchTipsBottom {
-      transform: translateX(-50%) translateY(0);
-    }
-
-    .switchTipsTopLeft,
-    .switchTipsTopRight {
-      transform: translateY(0);
-    }
-
-    .switchTipsBottomLeft,
-    .switchTipsBottomRight {
-      transform: translateY(0);
-    }
-  }
-
-  // 滑块背景
-  &::before {
-    content: "";
-    position: absolute;
-    width: calc(50% - 4px);
-    height: 24px;
-    border-radius: 9999px;
-    background: var(--accent-color);
-    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    z-index: 1;
-    left: 4px;
-    top: 50%;
-    transform: translateY(-50%) translateX(0) scale(1);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  }
-
-  &[data-checked="true"]::before {
-    left: calc(50% + 0px);
-    transform: translateY(-50%) scale(1.05);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-  }
-
-  &:active::before {
-    transform: translateY(-50%) translateX(0) scale(0.95);
-  }
-
-  &[data-checked="true"]:active::before {
-    transform: translateY(-50%) scale(0.95);
-  }
-
-  [data-theme="dark"] &::before {
-    background: #fafafa;
-  }
-
-  .switchIcon {
-    flex: 1;
-    min-width: 0;
-    height: 24px;
-    padding: 4px 8px;
-    border-radius: 9999px;
-    transition: all 0.3s ease;
+  &Icon {
     display: flex;
-    flex-direction: row;
     align-items: center;
     justify-content: center;
-    user-select: none;
-    color: var(--text-secondary);
+    font-size: 18px;
+    line-height: 1;
+    transition: color 0.3s ease-in-out;
+  }
+
+  &Label {
     font-size: 14px;
-    position: relative;
-    z-index: 2;
-    opacity: 0.5;
-    transform: scale(0.85);
-    white-space: nowrap;
-
-    &.active {
-      color: var(--bg-primary);
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  .switchTipsText {
-    position: absolute;
-    background: var(--accent-color);
-    color: var(--bg-primary);
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
     font-weight: 500;
-    white-space: nowrap;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-    pointer-events: none;
-    z-index: 100;
-    box-shadow: var(--shadow-sm);
+    line-height: 1;
+    transition: color 0.3s ease-in-out;
   }
 
-  [data-theme="dark"] & .switchTipsText {
-    background: #fafafa;
-    color: #0a0a0a;
-    box-shadow: var(--shadow-md);
+  /* 未选中状态 hover */
+  &:hover:not(.switchOptionSelected) {
+    color: var(--text-primary);
+    background: var(--bg-hover);
   }
 
-  // 默认顶部显示
-  .switchTipsTop {
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%) translateY(-5px);
-    margin-bottom: 5px;
-
-    &:after {
-      content: "";
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      border-left: 5px solid transparent;
-      border-right: 5px solid transparent;
-      border-top: 5px solid var(--accent-color);
-    }
-
-    [data-theme="dark"] &:after {
-      border-top-color: #fafafa;
-    }
-  }
-
-  // 底部显示
-  .switchTipsBottom {
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%) translateY(5px);
-    margin-top: 5px;
-
-    &:after {
-      content: "";
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      border-left: 5px solid transparent;
-      border-right: 5px solid transparent;
-      border-bottom: 5px solid var(--accent-color);
-    }
-
-    [data-theme="dark"] &:after {
-      border-bottom-color: #fafafa;
-    }
-  }
-
-  // 顶部靠左显示
-  .switchTipsTopLeft {
-    bottom: 100%;
-    right: 0;
-    transform: translateY(-5px);
-    margin-bottom: 5px;
-
-    &:after {
-      content: "";
-      position: absolute;
-      top: 100%;
-      right: 10px;
-      border-left: 5px solid transparent;
-      border-right: 5px solid transparent;
-      border-top: 5px solid var(--accent-color);
-    }
-
-    [data-theme="dark"] &:after {
-      border-top-color: #fafafa;
-    }
-  }
-
-  // 顶部靠右显示
-  .switchTipsTopRight {
-    bottom: 100%;
-    left: 0;
-    transform: translateY(-5px);
-    margin-bottom: 5px;
-
-    &:after {
-      content: "";
-      position: absolute;
-      top: 100%;
-      left: 10px;
-      border-left: 5px solid transparent;
-      border-right: 5px solid transparent;
-      border-top: 5px solid var(--accent-color);
-    }
-
-    [data-theme="dark"] &:after {
-      border-top-color: #fafafa;
-    }
-  }
-
-  // 底部靠左显示
-  .switchTipsBottomLeft {
-    top: 100%;
-    right: 0;
-    transform: translateY(5px);
-    margin-top: 5px;
-
-    &:after {
-      content: "";
-      position: absolute;
-      bottom: 100%;
-      right: 10px;
-      border-left: 5px solid transparent;
-      border-right: 5px solid transparent;
-      border-bottom: 5px solid var(--accent-color);
-    }
-
-    [data-theme="dark"] &:after {
-      border-bottom-color: #fafafa;
-    }
-  }
-
-  // 底部靠右显示
-  .switchTipsBottomRight {
-    top: 100%;
-    left: 0;
-    transform: translateY(5px);
-    margin-top: 5px;
-
-    &:after {
-      content: "";
-      position: absolute;
-      bottom: 100%;
-      left: 10px;
-      border-left: 5px solid transparent;
-      border-right: 5px solid transparent;
-      border-bottom: 5px solid var(--accent-color);
-    }
-
-    [data-theme="dark"] &:after {
-      border-bottom-color: #fafafa;
-    }
+  /* 选中状态 */
+  &Selected {
+    color: #fff;
   }
 }

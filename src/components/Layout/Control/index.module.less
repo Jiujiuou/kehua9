@@ -6,12 +6,12 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  border-left: 1px solid #e5e7eb;
+  border-left: 1px solid var(--border-color);
   user-select: none;
   overflow-y: auto;
   overflow-x: hidden;
   min-height: 0;
-  background-color: #fafafa;
+  background-color: var(--bg-tertiary);
 
   // 隐藏滚动条但保持滚动功能
   scrollbar-width: none; // Firefox
@@ -23,7 +23,7 @@
 }
 
 .section {
-  margin-bottom: 24px;
+  margin-bottom: 18px;
 
   &:last-child {
     margin-bottom: 0;
@@ -33,7 +33,7 @@
 .sectionTitle {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-content);
   margin-bottom: 12px;
 }
 
@@ -51,7 +51,7 @@
 
 .sortLabel {
   font-size: 14px;
-  color: #000;
+  color: var(--text-content);
   font-weight: 500;
 }
 
@@ -65,7 +65,7 @@
 
 .gapLabel {
   font-size: 14px;
-  color: #000;
+  color: var(--text-content);
   font-weight: 500;
   flex-shrink: 0;
 }
@@ -77,7 +77,7 @@
 
 .gapValue {
   font-size: 14px;
-  color: #333;
+  color: var(--text-content);
   font-weight: 600;
   flex-shrink: 0;
   min-width: 40px;
@@ -93,7 +93,7 @@
 
 .filterLabel {
   font-size: 14px;
-  color: #000;
+  color: var(--text-content);
   font-weight: 500;
   flex-shrink: 0;
   width: auto;
@@ -109,6 +109,21 @@
   align-items: center;
 }
 
+.switchControl {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.switchLabel {
+  font-size: 14px;
+  color: var(--text-content);
+  font-weight: 500;
+  flex-shrink: 0;
+  width: auto;
+  min-width: fit-content;
+}
 
 .addButton {
   width: 100%;
@@ -117,7 +132,7 @@
   justify-content: center;
   gap: 8px;
   padding: 10px 16px;
-  background-color: #eb425f;
+  background-color: var(--accent-color);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -127,11 +142,11 @@
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background-color: #d6364f;
+    background-color: var(--accent-hover);
   }
 
   &:disabled {
-    background-color: #ccc;
+    background-color: var(--text-quaternary);
     cursor: not-allowed;
     opacity: 0.6;
   }
@@ -140,4 +155,3 @@
     font-size: 16px;
   }
 }
-

@@ -2,8 +2,7 @@ import PropTypes from "prop-types";
 import { useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import Slider from "@/components/Basic/Slider/Slider";
-import ButtonGroup from "@/components/Basic/ButtonGroup";
-import Radio from "@/components/Basic/Radio";
+import Switch from "@/components/Basic/Switch";
 import DropdownSelector from "@/components/Basic/DropdownSelector";
 import AddDynamicDialog from "@/components/Basic/AddDynamicDialog";
 import { getSystemFonts } from "@/utils/fonts";
@@ -71,64 +70,36 @@ function Control({
       </div>
       <div className={styles.section}>
         <div className={styles.sectionContent}>
-          <ButtonGroup
-            label="时间顺序"
-            options={[
-              { value: "asc", label: "正序" },
-              { value: "desc", label: "倒序" },
-            ]}
-            value={sortOrder}
-            onChange={onSortOrderChange}
-          />
+          <div className={styles.switchControl}>
+            <span className={styles.switchLabel}>时间顺序</span>
+            <Switch
+              options={[
+                { value: "asc", label: "正序" },
+                { value: "desc", label: "倒序" },
+              ]}
+              value={sortOrder}
+              onChange={onSortOrderChange}
+              size="small"
+            />
+          </div>
         </div>
       </div>
 
       <div className={styles.section}>
         <div className={styles.sectionContent}>
-          <div className={styles.filterControl}>
-            <span className={styles.filterLabel}>类型</span>
-            <div className={styles.filterOptions}>
-              <Radio
-                id="filter-all"
-                name="contentTypeFilter"
-                value="all"
-                checked={contentTypeFilter === null}
-                onChange={() => {
-                  onContentTypeFilterChange(null);
-                }}
-                label="全部"
-              />
-              <Radio
-                id="filter-text-only"
-                name="contentTypeFilter"
-                value="textOnly"
-                checked={contentTypeFilter === "textOnly"}
-                onChange={() => {
-                  onContentTypeFilterChange("textOnly");
-                }}
-                label="文字"
-              />
-              <Radio
-                id="filter-with-images"
-                name="contentTypeFilter"
-                value="withImages"
-                checked={contentTypeFilter === "withImages"}
-                onChange={() => {
-                  onContentTypeFilterChange("withImages");
-                }}
-                label="图片"
-              />
-              <Radio
-                id="filter-with-videos"
-                name="contentTypeFilter"
-                value="withVideos"
-                checked={contentTypeFilter === "withVideos"}
-                onChange={() => {
-                  onContentTypeFilterChange("withVideos");
-                }}
-                label="视频"
-              />
-            </div>
+          <div className={styles.switchControl}>
+            <span className={styles.switchLabel}>类型</span>
+            <Switch
+              options={[
+                { value: null, label: "全部" },
+                { value: "textOnly", label: "文字" },
+                { value: "withImages", label: "图片" },
+                { value: "withVideos", label: "视频" },
+              ]}
+              value={contentTypeFilter}
+              onChange={onContentTypeFilterChange}
+              size="small"
+            />
           </div>
         </div>
       </div>
@@ -203,16 +174,18 @@ function Control({
       </div>
       <div className={styles.section}>
         <div className={styles.sectionContent}>
-          <DropdownSelector
-            label="字体族"
-            options={getSystemFonts().map((font) => ({
-              value: font.value,
-              label: font.label,
-            }))}
-            value={fontFamily}
-            onChange={onFontFamilyChange}
-            placeholder="请选择字体"
-          />
+          <div className={styles.switchControl}>
+            <span className={styles.switchLabel}>字体族</span>
+            <DropdownSelector
+              options={getSystemFonts().map((font) => ({
+                value: font.value,
+                label: font.label,
+              }))}
+              value={fontFamily}
+              onChange={onFontFamilyChange}
+              placeholder="系统字体"
+            />
+          </div>
         </div>
       </div>
       <div className={styles.section}>
@@ -234,28 +207,34 @@ function Control({
       </div>
       <div className={styles.section}>
         <div className={styles.sectionContent}>
-          <ButtonGroup
-            label="段落首行缩进"
-            options={[
-              { value: false, label: "关闭" },
-              { value: true, label: "开启" },
-            ]}
-            value={textIndent}
-            onChange={onTextIndentChange}
-          />
+          <div className={styles.switchControl}>
+            <span className={styles.switchLabel}>段落首行缩进</span>
+            <Switch
+              options={[
+                { value: false, label: "关闭" },
+                { value: true, label: "开启" },
+              ]}
+              value={textIndent}
+              onChange={onTextIndentChange}
+              size="small"
+            />
+          </div>
         </div>
       </div>
       <div className={styles.section}>
         <div className={styles.sectionContent}>
-          <ButtonGroup
-            label="段落后空行"
-            options={[
-              { value: false, label: "否" },
-              { value: true, label: "是" },
-            ]}
-            value={paragraphSpacing}
-            onChange={onParagraphSpacingChange}
-          />
+          <div className={styles.switchControl}>
+            <span className={styles.switchLabel}>段落后空行</span>
+            <Switch
+              options={[
+                { value: false, label: "否" },
+                { value: true, label: "是" },
+              ]}
+              value={paragraphSpacing}
+              onChange={onParagraphSpacingChange}
+              size="small"
+            />
+          </div>
         </div>
       </div>
       <div className={styles.section}>
@@ -308,7 +287,12 @@ Control.propTypes = {
   fontWeight: PropTypes.number,
   fontFamily: PropTypes.string,
   lineHeight: PropTypes.oneOf([1.4, 1.5, 1.6, 1.8, 2.0]),
-  contentTypeFilter: PropTypes.oneOf([null, "textOnly", "withImages", "withVideos"]),
+  contentTypeFilter: PropTypes.oneOf([
+    null,
+    "textOnly",
+    "withImages",
+    "withVideos",
+  ]),
   directoryHandle: PropTypes.object,
   dynamics: PropTypes.array,
   onSortOrderChange: PropTypes.func,

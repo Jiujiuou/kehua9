@@ -3,15 +3,15 @@
   flex-direction: column;
   width: 250px;
   height: 100%;
-  background-color: #ffffff;
-  border-right: 1px solid #e5e5e5;
+  background-color: var(--bg-card);
+  border-right: 1px solid var(--border-color);
   overflow: hidden;
 }
 
 .title {
   font-size: 16px;
   font-weight: 600;
-  color: #000;
+  color: var(--text-primary);
 }
 
 .content {
@@ -70,11 +70,11 @@
   margin: 2px 8px;
 
   &:hover {
-    background-color: #f8f8f8;
+    background-color: var(--bg-hover);
   }
 
   &:active {
-    background-color: #f0f0f0;
+    background-color: var(--bg-active);
     transition: background-color 0.1s ease;
   }
 }
@@ -117,11 +117,11 @@
   margin: 2px 4px;
 
   &:hover {
-    background-color: #f8f8f8;
+    background-color: var(--bg-hover);
   }
 
   &:active {
-    background-color: #f0f0f0;
+    background-color: var(--bg-active);
     transition: background-color 0.1s ease;
   }
 }
@@ -131,20 +131,20 @@
   cursor: pointer;
   user-select: none;
   transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
-  color: #666;
+  color: var(--text-tertiary);
   font-size: 14px;
   border-radius: 6px;
   margin: 1px 4px;
   position: relative;
 
   &:hover {
-    background-color: #f8f8f8;
-    color: #333;
+    background-color: var(--bg-hover);
+    color: var(--text-secondary);
     transform: translateX(2px);
   }
 
   &:active {
-    background-color: #f0f0f0;
+    background-color: var(--bg-active);
     transform: translateX(1px);
     transition: background-color 0.1s ease, color 0.1s ease,
       transform 0.05s ease;
@@ -153,8 +153,8 @@
 
 .dateItemSelected {
   font-weight: 600;
-  color: #eb425f;
-  background-color: #fff5f7;
+  color: var(--accent-color);
+  background-color: var(--accent-bg);
 
   &::before {
     content: "";
@@ -164,13 +164,13 @@
     transform: translateY(-50%);
     width: 4px;
     height: 16px;
-    background-color: #eb425f;
+    background-color: var(--accent-color);
     border-radius: 2px;
   }
 
   &:hover {
-    background-color: #ffeef1;
-    color: #eb425f;
+    background-color: var(--accent-bg-hover);
+    color: var(--accent-color);
   }
 }
 
@@ -181,7 +181,7 @@
   width: 16px;
   height: 16px;
   margin-right: 8px;
-  color: #666;
+  color: var(--text-tertiary);
   font-size: 10px;
   flex-shrink: 0;
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.15s ease;
@@ -193,21 +193,21 @@
 
   .yearHeader:hover &,
   .monthHeader:hover & {
-    color: #333;
+    color: var(--text-secondary);
   }
 }
 
 .yearText {
   font-size: 15px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
   letter-spacing: 0.2px;
 }
 
 .monthText {
   font-size: 14px;
   font-weight: 500;
-  color: #333;
+  color: var(--text-secondary);
   letter-spacing: 0.1px;
 }
 
@@ -225,7 +225,7 @@
 
 .emptyText {
   font-size: 14px;
-  color: #999;
+  color: var(--text-quaternary);
   margin-bottom: 8px;
   text-align: center;
   width: 100%;
@@ -233,7 +233,7 @@
 
 .emptyHint {
   font-size: 12px;
-  color: #ccc;
+  color: var(--text-quaternary);
   text-align: center;
   width: 100%;
 }

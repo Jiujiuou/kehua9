@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { FaChevronDown } from "react-icons/fa";
 import styles from "./index.module.less";
 
-function DropdownSelector({ label, options, value, onChange, placeholder = "请选择" }) {
+function DropdownSelector({ options, value, onChange, placeholder = "请选择" }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -32,43 +32,39 @@ function DropdownSelector({ label, options, value, onChange, placeholder = "请�
   };
 
   return (
-    <div className={styles.dropdownControl}>
-      {label && <span className={styles.dropdownLabel}>{label}</span>}
-      <div className={styles.dropdownWrapper} ref={dropdownRef}>
-        <button
-          className={styles.dropdownButton}
-          onClick={() => setIsOpen(!isOpen)}
-          type="button"
-        >
-          <span className={styles.dropdownButtonText}>
-            {selectedOption ? selectedOption.label : placeholder}
-          </span>
-          <FaChevronDown
-            className={`${styles.dropdownIcon} ${isOpen ? styles.open : ""}`}
-          />
-        </button>
-        {isOpen && (
-          <div className={styles.dropdownMenu}>
-            {options.map((option) => (
-              <div
-                key={option.value}
-                className={`${styles.dropdownItem} ${
-                  value === option.value ? styles.selected : ""
-                }`}
-                onClick={() => handleSelect(option.value)}
-              >
-                {option.label}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+    <div className={styles.dropdownWrapper} ref={dropdownRef}>
+      <button
+        className={styles.dropdownButton}
+        onClick={() => setIsOpen(!isOpen)}
+        type="button"
+      >
+        <span className={styles.dropdownButtonText}>
+          {selectedOption ? selectedOption.label : placeholder}
+        </span>
+        <FaChevronDown
+          className={`${styles.dropdownIcon} ${isOpen ? styles.open : ""}`}
+        />
+      </button>
+      {isOpen && (
+        <div className={styles.dropdownMenu}>
+          {options.map((option) => (
+            <div
+              key={option.value}
+              className={`${styles.dropdownItem} ${
+                value === option.value ? styles.selected : ""
+              }`}
+              onClick={() => handleSelect(option.value)}
+            >
+              {option.label}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 DropdownSelector.propTypes = {
-  label: PropTypes.string,
   options: PropTypes.arrayOf(
     PropTypes.shape({
       value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import styles from "./index.module.css";
+import styles from "./index.module.less";
 
 const Slider = ({ min = 0, max = 100, step = 1, value, onChange }) => {
   const [currentValue, setCurrentValue] = useState(value || min);

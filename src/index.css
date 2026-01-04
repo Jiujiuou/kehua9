@@ -15,17 +15,99 @@ body {
   height: 100vh;
 }
 
+/* 亮色模式变量 */
 :root {
+  /* 边框和圆角 */
   --border-color: #e5e7eb;
-  --botton-background-color: #f4f4f5;
-  --botton-hover-background-color: #f6f6f7;
   --border-radius: 8px;
+
+  /* 背景色 */
+  --bg-primary: #fff;
+  --bg-secondary: #f8f8f8;
+  --bg-tertiary: #fafafa;
+  --bg-card: #ffffff;
+  --bg-list: #f8f8f8;
+  --bg-close-button: #f5f5f5;
+  --bg-hover: #f8f8f8;
+  --bg-active: #f0f0f0;
+
+  /* 文字颜色 */
+  --text-primary: #1a1a1a;
+  --text-secondary: #333;
+  --text-tertiary: #666;
+  --text-quaternary: #999;
+  --text-placeholder: #999;
+  --text-time: #b6b6b6;
+  --text-content: #333;
+
+  /* 按钮颜色 */
+  --button-background: #f4f4f5;
+  --button-hover-background: #f6f6f7;
+
+  /* 主题色 */
+  --accent-color: #eb425f;
+  --accent-hover: #d6364f;
+  --accent-bg: #fff5f7;
+  --accent-bg-hover: #ffeef1;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  /* 其他 */
   --semi-color-primary: #000 !important;
   --text-color: #09090b;
   --tw-shadow: 0 0 #0000;
   --tw-ring-shadow: 0 0 #0000;
   --tw-ring-offset-shadow: 0 0 #0000;
-  --accent-color: #eb425f;
+}
+
+/* 深色模式变量 */
+[data-theme="dark"] {
+  /* 边框 */
+  --border-color: #27272a;
+
+  /* 背景色 */
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #151515;
+  --bg-tertiary: #1a1a1a;
+  --bg-card: #1c1c1c;
+  --bg-list: #151515;
+  --bg-close-button: #303032;
+  --bg-hover: #27272a;
+  --bg-active: #303032;
+
+  /* 文字颜色 */
+  --text-primary: #fafafa;
+  --text-secondary: #e5e5e5;
+  --text-tertiary: #a1a1a1;
+  --text-quaternary: #737373;
+  --text-placeholder: #404040;
+  --text-time: #5a5a5a;
+  --text-content: #c9c9c9;
+
+  /* 按钮颜色 */
+  --button-background: #27272a;
+  --button-hover-background: #303032;
+
+  /* 主题色 */
+  --accent-color: #d63f5c;
+  --accent-hover: #c43650;
+  --accent-bg: #2a1a1f;
+  --accent-bg-hover: #3a2229;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+}
+
+/* 深色模式全局样式 */
+[data-theme="dark"] html,
+[data-theme="dark"] body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 @font-face {
