@@ -20,6 +20,7 @@
   align-items: center;
   justify-content: center;
   cursor: default;
+  position: relative;
   // 防止容器占据整个空间，只包裹图片内容
   width: auto;
   height: auto;
@@ -84,5 +85,36 @@
 
   &:last-of-type {
     right: 20px;
+  }
+}
+
+.downloadButton {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10000;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  user-select: none;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  svg {
+    font-size: 20px;
+    color: #333;
   }
 }

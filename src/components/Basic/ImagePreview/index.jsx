@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { HiDownload } from "react-icons/hi";
 import styles from "./index.module.less";
 
 const ImagePreview = ({ images = [], currentIndex = 0, onClose }) => {
   const [activeIndex, setActiveIndex] = useState(currentIndex);
+  const [isHovered, setIsHovered] = useState(false);
 
   // 当外部传入的 currentIndex 变化时，更新内部状态
   useEffect(() => {
@@ -75,6 +77,56 @@ const ImagePreview = ({ images = [], currentIndex = 0, onClose }) => {
     }
   };
 
+  const handleDownload = async (event) => {
+    event.stopPropagation();
+    try {
+      const imageUrl = currentImage.url || currentImage;
+      
+      // 如果图片对象有 file 字段，直接使用原文件下载（保证原画质）
+      if (currentImage.file && currentImage.file instanceof File) {
+        const url = window.URL.createObjectURL(currentImage.file);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = currentImage.name || currentImage.file.name || `image-${activeIndex + 1}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        return;
+      }
+      
+      // 如果是 data URL，直接下载（data URL 包含完整的原图数据）
+      if (imageUrl.startsWith("data:")) {
+        const link = document.createElement("a");
+        link.href = imageUrl;
+        link.download = currentImage.name || `image-${activeIndex + 1}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        return;
+      }
+      
+      // 其他情况，fetch 下载（可能是 blob URL 或其他 URL）
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      
+      // 从 URL 中提取文件名，如果没有则使用默认名称
+      const urlParts = imageUrl.split("/");
+      const fileName = currentImage.name || urlParts[urlParts.length - 1] || `image-${activeIndex + 1}.jpg`;
+      link.download = fileName;
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("下载图片失败:", error);
+    }
+  };
+
   if (!currentImage || !images || images.length === 0) {
     return null;
   }
@@ -89,7 +141,12 @@ const ImagePreview = ({ images = [], currentIndex = 0, onClose }) => {
           <FaChevronLeft />
         </div>
       )}
-      <div className={styles.imageContainer} onClick={handleImageContainerClick}>
+      <div
+        className={styles.imageContainer}
+        onClick={handleImageContainerClick}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <img
           src={currentImage.url || currentImage}
           alt="预览"
@@ -97,6 +154,15 @@ const ImagePreview = ({ images = [], currentIndex = 0, onClose }) => {
           draggable="false"
           onDragStart={(e) => e.preventDefault()}
         />
+        {isHovered && (
+          <div
+            className={styles.downloadButton}
+            onClick={handleDownload}
+            title="下载图片"
+          >
+            <HiDownload />
+          </div>
+        )}
       </div>
       {hasNext && (
         <div
