@@ -9,7 +9,7 @@ import {
 } from "react";
 import { FaPlus, FaSearch, FaTimes } from "react-icons/fa";
 import { MdDeleteOutline } from "react-icons/md";
-import { HiOutlineEye } from "react-icons/hi";
+import { HiOutlineEye, HiDownload } from "react-icons/hi";
 import { parseDynamicData } from "@/utils/parseData";
 import PropTypes from "prop-types";
 import ImagePreview from "@/components/Basic/ImagePreview";
@@ -55,6 +55,7 @@ const Preview = forwardRef(
     const [cardPreviewIndex, setCardPreviewIndex] = useState(0);
     const [searchInput, setSearchInput] = useState("");
     const [searchKeyword, setSearchKeyword] = useState("");
+    const [hoveredImageIndex, setHoveredImageIndex] = useState(null);
     const fileInputRef = useRef(null);
     const contentAreaRef = useRef(null);
     const prevExternalDynamicsRef = useRef(null);
@@ -635,22 +636,81 @@ const Preview = forwardRef(
                     data-image-count={Math.min(dynamic.images.length, 9)}
                     style={{ gap: `${imageGap}px` }}
                   >
-                    {dynamic.images.slice(0, 9).map((image, imgIndex) => (
-                      <div
-                        key={imgIndex}
-                        className={styles.imageWrapper}
-                        onClick={() => {
-                          setPreviewImages(dynamic.images);
-                          setPreviewIndex(imgIndex);
-                        }}
-                      >
-                        <img
-                          src={image.url}
-                          alt={image.name}
-                          className={styles.dynamicImage}
-                        />
-                      </div>
-                    ))}
+                    {dynamic.images.slice(0, 9).map((image, imgIndex) => {
+                      const imageKey = `${dynamic.timestamp}-${imgIndex}`;
+                      const isHovered = hoveredImageIndex === imageKey;
+                      
+                      const handleDownload = async (event) => {
+                        event.stopPropagation();
+                        try {
+                          // 如果图片对象有 file 字段，直接使用原文件下载（保证原画质）
+                          if (image.file && image.file instanceof File) {
+                            const url = window.URL.createObjectURL(image.file);
+                            const link = document.createElement("a");
+                            link.href = url;
+                            link.download = image.name || image.file.name || `image-${imgIndex + 1}.jpg`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            window.URL.revokeObjectURL(url);
+                            return;
+                          }
+                          
+                          // 如果是 data URL，直接下载（data URL 包含完整的原图数据）
+                          if (image.url && image.url.startsWith("data:")) {
+                            const link = document.createElement("a");
+                            link.href = image.url;
+                            link.download = image.name || `image-${imgIndex + 1}.jpg`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            return;
+                          }
+                          
+                          // 其他情况，fetch 下载
+                          const response = await fetch(image.url);
+                          const blob = await response.blob();
+                          const url = window.URL.createObjectURL(blob);
+                          const link = document.createElement("a");
+                          link.href = url;
+                          link.download = image.name || `image-${imgIndex + 1}.jpg`;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                          window.URL.revokeObjectURL(url);
+                        } catch (error) {
+                          console.error("下载图片失败:", error);
+                        }
+                      };
+                      
+                      return (
+                        <div
+                          key={imgIndex}
+                          className={styles.imageWrapper}
+                          onMouseEnter={() => setHoveredImageIndex(imageKey)}
+                          onMouseLeave={() => setHoveredImageIndex(null)}
+                          onClick={() => {
+                            setPreviewImages(dynamic.images);
+                            setPreviewIndex(imgIndex);
+                          }}
+                        >
+                          <img
+                            src={image.url}
+                            alt={image.name}
+                            className={styles.dynamicImage}
+                          />
+                          {isHovered && (
+                            <div
+                              className={styles.imageDownloadButton}
+                              onClick={handleDownload}
+                              title="下载图片"
+                            >
+                              <HiDownload />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
                 {dynamic.videos && dynamic.videos.length > 0 && (
