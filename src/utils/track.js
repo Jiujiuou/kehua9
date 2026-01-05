@@ -61,12 +61,6 @@ function generateUserId() {
  */
 async function getUserCity() {
   try {
-    // 检查 localStorage 中是否已有城市信息
-    const storedCity = localStorage.getItem(CITY_KEY);
-    if (storedCity) {
-      return storedCity;
-    }
-
     // 尝试通过 IP 定位获取城市（使用免费的 IP 定位服务）
     try {
       // 使用 AbortController 实现超时
@@ -82,11 +76,12 @@ async function getUserCity() {
 
       if (response.ok) {
         const data = await response.json();
-        if (data.city) {
-          // 将城市名转换为小写，去掉空格（如 "Hangzhou" -> "hangzhou"）
-          const city = data.city.toLowerCase().replace(/\s+/g, "");
-          localStorage.setItem(CITY_KEY, city);
-          return city;
+        console.log('data', data)
+        // 组合 country_name-region-city
+        const location = (data.country_name || "") + "-" + (data.region || "") + "-" + (data.city || "");
+        if (location) {
+          localStorage.setItem(CITY_KEY, location);
+          return location;
         }
       }
     } catch (error) {
@@ -180,16 +175,6 @@ async function sendAnalytics(events) {
  * @returns {Promise<void>}
  */
 export async function track(eventName, params = {}) {
-  // 检查是否是开发环境（localhost），开发环境不发送埋点
-  try {
-    const hostname = window.location.hostname;
-    if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "0.0.0.0") {
-      console.log("开发环境，跳过埋点:", eventName);
-      return; // 不发送埋点
-    }
-  } catch {
-    // 如果无法获取 hostname，继续执行
-  }
 
   // 检查 URL 参数，如果有 analyticsData=true 则不上报埋点
   try {

@@ -92,11 +92,34 @@ function AnalyticsPanel() {
     const uniqueCities = new Set(data.map((item) => item.city).filter(Boolean))
       .size;
 
+    // 统计导入用户数（去重）
+    const allImportUsers = new Set();
+    data.forEach((item) => {
+      if (item.eventName === "导入数据" && item.userId) {
+        allImportUsers.add(item.userId);
+      }
+    });
+    const importUserCount = allImportUsers.size;
+
+    // 计算用户导入率：导入用户数 / 独立用户数
+    const userImportRate =
+      uniqueUsers > 0
+        ? ((importUserCount / uniqueUsers) * 100).toFixed(1)
+        : "0.0";
+
     // 按事件类型统计
     const eventStats = {};
     data.forEach((item) => {
       eventStats[item.eventName] = (eventStats[item.eventName] || 0) + 1;
     });
+
+    // 计算导入率：导入数据的次数 / 页面访问的次数
+    const pageViewCount = eventStats["页面访问"] || 0;
+    const importDataCount = eventStats["导入数据"] || 0;
+    const importRate =
+      pageViewCount > 0
+        ? ((importDataCount / pageViewCount) * 100).toFixed(1)
+        : "0.0";
 
     // 按日期统计
     const dailyStats = {};
@@ -167,8 +190,11 @@ function AnalyticsPanel() {
     return {
       totalEvents,
       uniqueUsers,
+      importUserCount,
+      userImportRate,
       uniqueCities,
       todayEvents,
+      importRate,
       eventStats,
       dailyStats,
       cityStats,
@@ -249,10 +275,6 @@ function AnalyticsPanel() {
               <div className={styles.metricValue}>{stats.totalEvents}</div>
             </div>
             <div className={styles.metricCard}>
-              <div className={styles.metricLabel}>独立用户</div>
-              <div className={styles.metricValue}>{stats.uniqueUsers}</div>
-            </div>
-            <div className={styles.metricCard}>
               <div className={styles.metricLabel}>今日事件</div>
               <div className={styles.metricValue}>{stats.todayEvents}</div>
             </div>
@@ -260,18 +282,30 @@ function AnalyticsPanel() {
               <div className={styles.metricLabel}>活跃城市</div>
               <div className={styles.metricValue}>{stats.uniqueCities}</div>
             </div>
+            <div className={styles.metricCard}>
+              <div className={styles.metricLabel}>独立用户</div>
+              <div className={styles.metricValue}>{stats.uniqueUsers}</div>
+            </div>
+            <div className={styles.metricCard}>
+              <div className={styles.metricLabel}>导入用户</div>
+              <div className={styles.metricValue}>{stats.importUserCount}</div>
+            </div>
+            <div className={styles.metricCard}>
+              <div className={styles.metricLabel}>用户导入率</div>
+              <div className={styles.metricValue}>{stats.userImportRate}%</div>
+            </div>
           </div>
 
           {/* 事件类型统计 */}
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>事件类型分布</h2>
-            <div className={styles.eventStats}>
+            <div className={styles.metrics}>
               {Object.entries(stats.eventStats)
                 .sort((a, b) => b[1] - a[1])
                 .map(([eventName, count]) => (
                   <div
                     key={eventName}
-                    className={styles.eventStatItem}
+                    className={styles.metricCard}
                     onClick={() => {
                       setFilterEventName(
                         filterEventName === eventName ? "" : eventName
@@ -281,16 +315,28 @@ function AnalyticsPanel() {
                       backgroundColor:
                         filterEventName === eventName
                           ? "var(--accent-bg)"
-                          : "transparent",
+                          : "var(--bg-card)",
+                      cursor: "pointer",
+                      transition: "background-color 0.2s",
                     }}
                   >
-                    <span className={styles.eventName}>{eventName}</span>
-                    <span className={styles.eventCount}>{count}</span>
-                    <span className={styles.eventPercent}>
+                    <div className={styles.metricLabel}>{eventName}</div>
+                    <div className={styles.metricValue}>{count}</div>
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        color: "var(--text-tertiary)",
+                        marginTop: "4px",
+                      }}
+                    >
                       ({((count / stats.totalEvents) * 100).toFixed(1)}%)
-                    </span>
+                    </div>
                   </div>
                 ))}
+              <div className={styles.metricCard}>
+                <div className={styles.metricLabel}>导入率</div>
+                <div className={styles.metricValue}>{stats.importRate}%</div>
+              </div>
             </div>
           </div>
 
@@ -383,23 +429,6 @@ function AnalyticsPanel() {
             </div>
           </div>
 
-          {/* 用户日志统计 */}
-          {Object.keys(stats.userStats).length > 0 && (
-            <div className={styles.section}>
-              <h2 className={styles.sectionTitle}>用户日志数量</h2>
-              <div className={styles.userStats}>
-                {Object.entries(stats.userStats)
-                  .sort((a, b) => b[1] - a[1])
-                  .map(([userId, count]) => (
-                    <div key={userId} className={styles.userItem}>
-                      <span className={styles.userId}>{userId}</span>
-                      <span className={styles.userCount}>{count}</span>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          )}
-
           {/* 城市分布 */}
           {Object.keys(stats.cityStats).length > 0 && (
             <div className={styles.section}>
@@ -411,6 +440,23 @@ function AnalyticsPanel() {
                     <div key={city} className={styles.cityItem}>
                       <span className={styles.cityName}>{city}</span>
                       <span className={styles.cityCount}>{count}</span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* 用户日志统计 */}
+          {Object.keys(stats.userStats).length > 0 && (
+            <div className={styles.section}>
+              <h2 className={styles.sectionTitle}>用户日志数量</h2>
+              <div className={styles.userStats}>
+                {Object.entries(stats.userStats)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([userId, count]) => (
+                    <div key={userId} className={styles.userItem}>
+                      <span className={styles.userId}>{userId}</span>
+                      <span className={styles.userCount}>{count}</span>
                     </div>
                   ))}
               </div>
