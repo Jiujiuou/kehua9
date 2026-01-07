@@ -442,6 +442,9 @@ const Preview = forwardRef(
             </div>
             <div className={styles.uploadText}>点击上传数据文件夹</div>
             <div className={styles.uploadHint}>请选择「我的动态」文件夹</div>
+            <div className={styles.uploadPrivacy}>
+              所有数据处理均在本地浏览器完成，网站无法查看或存储你的任何数据
+            </div>
           </div>
         </div>
       );
@@ -639,7 +642,7 @@ const Preview = forwardRef(
                     {dynamic.images.slice(0, 9).map((image, imgIndex) => {
                       const imageKey = `${dynamic.timestamp}-${imgIndex}`;
                       const isHovered = hoveredImageIndex === imageKey;
-                      
+
                       const handleDownload = async (event) => {
                         event.stopPropagation();
                         try {
@@ -648,32 +651,37 @@ const Preview = forwardRef(
                             const url = window.URL.createObjectURL(image.file);
                             const link = document.createElement("a");
                             link.href = url;
-                            link.download = image.name || image.file.name || `image-${imgIndex + 1}.jpg`;
+                            link.download =
+                              image.name ||
+                              image.file.name ||
+                              `image-${imgIndex + 1}.jpg`;
                             document.body.appendChild(link);
                             link.click();
                             document.body.removeChild(link);
                             window.URL.revokeObjectURL(url);
                             return;
                           }
-                          
+
                           // 如果是 data URL，直接下载（data URL 包含完整的原图数据）
                           if (image.url && image.url.startsWith("data:")) {
                             const link = document.createElement("a");
                             link.href = image.url;
-                            link.download = image.name || `image-${imgIndex + 1}.jpg`;
+                            link.download =
+                              image.name || `image-${imgIndex + 1}.jpg`;
                             document.body.appendChild(link);
                             link.click();
                             document.body.removeChild(link);
                             return;
                           }
-                          
+
                           // 其他情况，fetch 下载
                           const response = await fetch(image.url);
                           const blob = await response.blob();
                           const url = window.URL.createObjectURL(blob);
                           const link = document.createElement("a");
                           link.href = url;
-                          link.download = image.name || `image-${imgIndex + 1}.jpg`;
+                          link.download =
+                            image.name || `image-${imgIndex + 1}.jpg`;
                           document.body.appendChild(link);
                           link.click();
                           document.body.removeChild(link);
@@ -682,7 +690,7 @@ const Preview = forwardRef(
                           console.error("下载图片失败:", error);
                         }
                       };
-                      
+
                       return (
                         <div
                           key={imgIndex}
