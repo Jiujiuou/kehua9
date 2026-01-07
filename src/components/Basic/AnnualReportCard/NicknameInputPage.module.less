@@ -1,0 +1,150 @@
+.cardText {
+  font-size: 20px;
+  line-height: 1.8;
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  position: relative;
+  animation: breathe 3s ease-in-out infinite;
+  animation-delay: 2s; // 等待打字机效果完成后再开始呼吸动画
+  color: var(--text-primary); // 后备颜色
+  margin-bottom: 60px;
+  min-height: 120px; // 保持高度，避免布局跳动
+
+  // 亮色模式：使用渐变文字和发光效果
+  background: linear-gradient(
+    135deg,
+    rgba(26, 26, 26, 1) 0%,
+    rgba(51, 51, 51, 0.95) 50%,
+    rgba(26, 26, 26, 1) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  // 朦胧发光效果 - 多层阴影（亮色模式）
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4))
+    drop-shadow(0 0 16px rgba(255, 255, 255, 0.3))
+    drop-shadow(0 0 24px rgba(255, 255, 255, 0.2));
+
+  // 暗色模式下的发光效果
+  [data-theme="dark"] & {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(240, 240, 255, 0.95) 50%,
+      rgba(255, 255, 255, 1) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6))
+      drop-shadow(0 0 20px rgba(255, 255, 255, 0.4))
+      drop-shadow(0 0 30px rgba(255, 255, 255, 0.3))
+      drop-shadow(0 0 40px rgba(255, 255, 255, 0.2));
+  }
+}
+
+.cursor {
+  display: inline-block;
+  animation: blink 1s infinite;
+  margin-left: 2px;
+}
+
+.inputRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  animation: slideUpFadeIn 0.5s ease-out;
+}
+
+.input {
+  flex: 0 1 auto;
+  width: 180px;
+  max-width: 60%;
+  height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+
+  &:focus {
+    border-color: var(--accent-color);
+  }
+
+  &::placeholder {
+    color: var(--text-placeholder);
+  }
+}
+
+.startButton {
+  padding: 10px 24px;
+  border-radius: 6px;
+  border: none;
+  background-color: var(--accent-color);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    background-color: var(--accent-hover);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// 光标闪烁动画
+@keyframes blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
+// 从底部浮现动画
+@keyframes slideUpFadeIn {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+// 呼吸动画
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.95;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 1;
+  }
+}

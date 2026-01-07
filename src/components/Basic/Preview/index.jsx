@@ -7,7 +7,7 @@ import {
   useEffect,
   useCallback,
 } from "react";
-import { FaPlus, FaSearch, FaTimes } from "react-icons/fa";
+import { FaPlus, FaSearch, FaTimes, FaChartBar } from "react-icons/fa";
 import { MdDeleteOutline } from "react-icons/md";
 import { HiOutlineEye, HiDownload } from "react-icons/hi";
 import { parseDynamicData } from "@/utils/parseData";
@@ -15,6 +15,7 @@ import PropTypes from "prop-types";
 import ImagePreview from "@/components/Basic/ImagePreview";
 import VideoPreview from "@/components/Basic/VideoPreview";
 import CardPreview from "@/components/Basic/CardPreview";
+import AnnualReportCard from "@/components/Basic/AnnualReportCard";
 import { useToastHelpers } from "@/components/Basic/Toast";
 import { useConfirmHelper } from "@/components/Basic/Confirm";
 import { deleteDynamicFromFile } from "@/utils/writeData";
@@ -56,6 +57,9 @@ const Preview = forwardRef(
     const [searchInput, setSearchInput] = useState("");
     const [searchKeyword, setSearchKeyword] = useState("");
     const [hoveredImageIndex, setHoveredImageIndex] = useState(null);
+    const [showReportSelector, setShowReportSelector] = useState(false);
+    const [userNickname, setUserNickname] = useState("");
+    const [reportPageIndex, setReportPageIndex] = useState(0);
     const fileInputRef = useRef(null);
     const contentAreaRef = useRef(null);
     const prevExternalDynamicsRef = useRef(null);
@@ -497,6 +501,14 @@ const Preview = forwardRef(
             >
               <FaSearch />
             </button>
+            {/* <button
+              className={styles.reportButton}
+              onClick={() => setShowReportSelector(true)}
+              title="年度报告"
+            >
+              <FaChartBar />
+              <span className={styles.reportButtonText}>年度报告</span>
+            </button> */}
             {searchKeyword && (
               <button
                 className={styles.closeButton}
@@ -793,6 +805,27 @@ const Preview = forwardRef(
             setCardPreviewIndex(newIndex);
             // 切换动态时，滚动列表到对应位置
             scrollToDynamicIndex(newIndex);
+          }}
+        />
+        <AnnualReportCard
+          visible={showReportSelector}
+          currentIndex={reportPageIndex}
+          totalPages={2}
+          onClose={() => {
+            setShowReportSelector(false);
+            setUserNickname("");
+            setReportPageIndex(0);
+          }}
+          onPageChange={(newIndex) => {
+            setReportPageIndex(newIndex);
+          }}
+          userNickname={userNickname}
+          onNicknameChange={(nickname) => {
+            setUserNickname(nickname);
+          }}
+          onStartMemory={(nickname) => {
+            console.log("开启回忆被点击", nickname);
+            // TODO: 实现开启回忆的逻辑
           }}
         />
       </>
