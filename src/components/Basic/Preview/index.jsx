@@ -810,7 +810,7 @@ const Preview = forwardRef(
         <AnnualReportCard
           visible={showReportSelector}
           currentIndex={reportPageIndex}
-          totalPages={2}
+          totalPages={3}
           onClose={() => {
             setShowReportSelector(false);
             setUserNickname("");
@@ -827,6 +827,7 @@ const Preview = forwardRef(
             console.log("开启回忆被点击", nickname);
             // TODO: 实现开启回忆的逻辑
           }}
+          dynamics={sortedDynamics}
         />
       </>
     );

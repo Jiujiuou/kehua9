@@ -4,7 +4,8 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import backgroundImage from "@/assets/images/background.jpg";
 import backgroundDarkImage from "@/assets/images/background_dark.jpg";
 import NicknameInputPage from "./NicknameInputPage";
-import WelcomePage from "./WelcomePage";
+import Chapter1 from "./Chapter1";
+import Chapter2 from "./Chapter2";
 import styles from "./index.module.less";
 
 const AnnualReportCard = ({
@@ -16,6 +17,7 @@ const AnnualReportCard = ({
   userNickname = "",
   onNicknameChange,
   onStartMemory,
+  dynamics = [],
 }) => {
   const [activeIndex, setActiveIndex] = useState(currentIndex);
   const [prevIndex, setPrevIndex] = useState(currentIndex);
@@ -194,7 +196,9 @@ const AnnualReportCard = ({
           />
         );
       } else if (index === 1) {
-        content = <WelcomePage userNickname={userNickname} />;
+        content = <Chapter1 userNickname={userNickname} dynamics={dynamics} />;
+      } else if (index === 2) {
+        content = <Chapter2 userNickname={userNickname} dynamics={dynamics} />;
       }
 
       if (!content) return null;
@@ -280,6 +284,7 @@ AnnualReportCard.propTypes = {
   userNickname: PropTypes.string,
   onNicknameChange: PropTypes.func,
   onStartMemory: PropTypes.func,
+  dynamics: PropTypes.array,
 };
 
 export default AnnualReportCard;
