@@ -80,6 +80,8 @@ SortableImageItem.propTypes = {
   onRemove: PropTypes.func.isRequired,
 };
 
+const DRAFT_STORAGE_KEY = "addDynamicDraft";
+
 function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
   const [newDynamicText, setNewDynamicText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -87,6 +89,53 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const fileInputRef = useRef(null);
   const toast = useToastHelpers();
+
+  // 从 localStorage 加载草稿
+  useEffect(() => {
+    if (visible) {
+      try {
+        const draft = localStorage.getItem(DRAFT_STORAGE_KEY);
+        if (draft) {
+          const parsedDraft = JSON.parse(draft);
+          setNewDynamicText(parsedDraft.text || "");
+          // 注意：图片和视频的预览 URL 不能直接保存到 localStorage
+          // 因为它们是基于 File 对象的，关闭后无法恢复
+          // 所以只保存文本内容
+        }
+      } catch (error) {
+        console.error("加载草稿失败:", error);
+      }
+    }
+  }, [visible]);
+
+  // 保存草稿到 localStorage
+  const saveDraft = useCallback(() => {
+    try {
+      const draft = {
+        text: newDynamicText,
+        timestamp: Date.now(),
+      };
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+    } catch (error) {
+      console.error("保存草稿失败:", error);
+    }
+  }, [newDynamicText]);
+
+  // 清空草稿
+  const clearDraft = useCallback(() => {
+    try {
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+    } catch (error) {
+      console.error("清空草稿失败:", error);
+    }
+  }, []);
+
+  // 监听文本变化，自动保存草稿
+  useEffect(() => {
+    if (visible && newDynamicText) {
+      saveDraft();
+    }
+  }, [newDynamicText, visible, saveDraft]);
 
   const handleAddDynamic = async () => {
     if (!directoryHandle) {
@@ -160,6 +209,7 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
         URL.revokeObjectURL(selectedVideo.preview);
       }
       setSelectedVideo(null);
+      clearDraft(); // 发布成功后清空草稿
       onClose();
       toast.success("动态发布成功");
 
@@ -173,19 +223,20 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
     }
   };
 
+  // 关闭弹窗：保留文本内容，只清理图片和视频
   const handleClose = useCallback(() => {
-    setNewDynamicText("");
-    // Revoke all object URLs before closing
+    // 只清理图片和视频的预览 URL，保留文本内容
     selectedImages.forEach((img) => URL.revokeObjectURL(img.preview));
     setSelectedImages([]);
     if (selectedVideo) {
       URL.revokeObjectURL(selectedVideo.preview);
     }
     setSelectedVideo(null);
+    // 文本内容已经通过 useEffect 自动保存到 localStorage
     onClose();
   }, [selectedImages, selectedVideo, onClose]);
 
-  // 监听 ESC 键关闭弹窗
+  // 监听 ESC 键关闭弹窗（保留内容）
   useEffect(() => {
     if (!visible) return;
 
