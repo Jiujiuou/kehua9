@@ -15,7 +15,7 @@ const WordCloudComponent = ({ dynamics = [] }) => {
   const wordFrequencyRef = useRef(null); // 存储词频数据，用于响应式重新渲染
   const hoveredWordRef = useRef(null); // 当前 hover 的词
   const [hoveredWord, setHoveredWord] = useState(null); // 用于显示 hover 状态
-  const [wordCloudReady, setWordCloudReady] = useState(false); // 标记词云是否已渲染完成
+  const [relatedTexts, setRelatedTexts] = useState([]); // 与 hover 词相关的文本片段列表（最多3条）
 
   useEffect(() => {
     if (!dynamics || dynamics.length === 0) {
@@ -49,7 +49,6 @@ const WordCloudComponent = ({ dynamics = [] }) => {
 
       if (success && data && data.length > 0) {
         wordFrequencyRef.current = data;
-        setWordCloudReady(false); // 重置状态，准备重新渲染
         renderWordCloud(data);
         setLoading(false);
         setError(null);
@@ -57,7 +56,6 @@ const WordCloudComponent = ({ dynamics = [] }) => {
         console.error("[WordCloud] Worker 处理失败:", workerError);
         setError(workerError || "处理文本时出错");
         setLoading(false);
-        setWordCloudReady(false);
         wordFrequencyRef.current = null;
       }
     };
@@ -81,7 +79,6 @@ const WordCloudComponent = ({ dynamics = [] }) => {
     const resizeObserver = new ResizeObserver(() => {
       // 当容器大小变化时，使用已存储的词频数据重新渲染
       if (canvasRef.current && wordFrequencyRef.current) {
-        setWordCloudReady(false); // 重置状态，准备重新渲染
         renderWordCloud(wordFrequencyRef.current);
       }
     });
@@ -92,6 +89,103 @@ const WordCloudComponent = ({ dynamics = [] }) => {
       resizeObserver.disconnect();
     };
   }, [loading]);
+
+  // 高亮关键词的函数（复用搜索的高亮逻辑）
+  const highlightKeyword = (text, keyword) => {
+    if (!keyword || !text) return text;
+
+    const regex = new RegExp(
+      `(${keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`,
+      "gi"
+    );
+    const parts = text.split(regex);
+
+    return parts.map((part, index) => {
+      if (part.toLowerCase() === keyword.toLowerCase()) {
+        return (
+          <mark key={index} className={styles.highlight}>
+            {part}
+          </mark>
+        );
+      }
+      return part;
+    });
+  };
+
+  // 提取某个词的相关文本片段（最多3条）
+  const extractRelatedTexts = (word) => {
+    const related = [];
+    if (dynamics && Array.isArray(dynamics) && word) {
+      for (const dynamic of dynamics) {
+        if (dynamic && dynamic.text && dynamic.text.includes(word)) {
+          // 提取包含关键词的片段
+          const text = dynamic.text;
+
+          // 尝试按句子分割，找到包含关键词的句子
+          const sentences = text.split(/[。！？\n]/);
+          const sentenceWithKeyword = sentences.find((sentence) =>
+            sentence.includes(word)
+          );
+
+          if (sentenceWithKeyword) {
+            // 如果找到包含关键词的句子，使用该句子
+            let snippet = sentenceWithKeyword.trim();
+
+            // 如果句子太长（超过50个字符），提取关键词前后各25个字符
+            if (snippet.length > 50) {
+              const keywordIndex = snippet.indexOf(word);
+              if (keywordIndex !== -1) {
+                const contextLength = 25;
+                const start = Math.max(0, keywordIndex - contextLength);
+                const end = Math.min(
+                  snippet.length,
+                  keywordIndex + word.length + contextLength
+                );
+                snippet = snippet.substring(start, end);
+
+                if (start > 0) {
+                  snippet = "..." + snippet;
+                }
+                if (end < sentenceWithKeyword.trim().length) {
+                  snippet = snippet + "...";
+                }
+              }
+            }
+
+            related.push(snippet);
+            if (related.length >= 3) {
+              break;
+            }
+          } else {
+            // 如果没有找到完整句子，使用固定字符数提取
+            const keywordIndex = text.indexOf(word);
+            if (keywordIndex !== -1) {
+              const contextLength = 30;
+              const start = Math.max(0, keywordIndex - contextLength);
+              const end = Math.min(
+                text.length,
+                keywordIndex + word.length + contextLength
+              );
+              let snippet = text.substring(start, end);
+
+              if (start > 0) {
+                snippet = "..." + snippet;
+              }
+              if (end < text.length) {
+                snippet = snippet + "...";
+              }
+
+              related.push(snippet);
+              if (related.length >= 3) {
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+    return related;
+  };
 
   const renderWordCloud = (wordFrequency) => {
     if (!canvasRef.current || !wordFrequency || wordFrequency.length === 0) {
@@ -112,11 +206,22 @@ const WordCloudComponent = ({ dynamics = [] }) => {
     }
 
     const width = container.clientWidth || 800;
-    const height = container.clientHeight || 600;
+    // 保持合理的宽高比，避免文字被拉伸（使用 4:3 的比例）
+    const aspectRatio = 4 / 3;
+    const idealHeight = Math.round(width / aspectRatio);
+    // 使用容器高度和理想高度中的较小值，但不要太小
+    const height = Math.max(
+      Math.min(container.clientHeight || 600, idealHeight),
+      Math.round(width * 0.6)
+    );
 
-    // 设置 Canvas 尺寸
+    // 设置 Canvas 尺寸（像素尺寸）
     canvas.width = width;
     canvas.height = height;
+
+    // 确保 CSS 尺寸与像素尺寸匹配，避免拉伸
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
 
     // 计算最大词频和最小词频
     const frequencies = wordFrequency.map(([, freq]) => freq);
@@ -172,26 +277,31 @@ const WordCloudComponent = ({ dynamics = [] }) => {
       backgroundColor: "transparent",
       minSize: minFontSize,
       drawOutOfBound: false,
+      // 设置词云起始位置，让词云更居中，减少上下空白
+      // 使用 height * 0.45 让词云稍微偏上，减少底部空白
+      origin: [width / 2, height * 0.45],
+      // 启用自适应填充，让词云更好地填充可用空间
+      shrinkToFit: true,
       // hover 回调：当鼠标进入或离开词的区域时触发
       hover: function (item, dimension, event) {
         if (item) {
           // item 是 [word, weight, ...] 格式的数组
           const word = item[0];
-          // 只有当词发生变化时才打印日志
+          // 只有当词发生变化时才处理
           if (hoveredWordRef.current !== word) {
             hoveredWordRef.current = word;
             setHoveredWord(word);
             canvas.style.cursor = "pointer";
             console.log("Hover word:", word);
+
+            // 提取该词的相关文本片段
+            const related = extractRelatedTexts(word);
+            setRelatedTexts(related);
           }
         } else {
           // item 为 null 表示鼠标移出了词的区域
-          // 只有当之前有 hover 的词时才打印日志
-          if (hoveredWordRef.current !== null) {
-            hoveredWordRef.current = null;
-            setHoveredWord(null);
-            canvas.style.cursor = "default";
-          }
+          // 保持最后 hover 的词，不清空
+          canvas.style.cursor = "default";
         }
       },
       // click 回调：当点击词时触发
@@ -206,13 +316,19 @@ const WordCloudComponent = ({ dynamics = [] }) => {
     try {
       // WordCloud 函数会使用 options 中的 hover 和 click 回调
       WordCloud(canvas, options);
-      // 标记词云已渲染完成
-      setWordCloudReady(true);
       console.log("[WordCloud] 词云渲染完成");
+
+      // 渲染完成后，默认展示词频最高的词
+      if (wordFrequency && wordFrequency.length > 0) {
+        const topWord = wordFrequency[0][0]; // 词频最高的词
+        hoveredWordRef.current = topWord;
+        setHoveredWord(topWord);
+        const related = extractRelatedTexts(topWord);
+        setRelatedTexts(related);
+      }
     } catch (err) {
       console.error("[WordCloud] 词云渲染错误:", err);
       setError("词云渲染失败");
-      setWordCloudReady(false);
     }
   };
 
@@ -244,6 +360,15 @@ const WordCloudComponent = ({ dynamics = [] }) => {
           style={{ display: loading ? "none" : "block" }}
         />
       </div>
+      {relatedTexts.length > 0 && (
+        <div className={styles.relatedDynamicsContainer}>
+          {relatedTexts.map((text, index) => (
+            <div key={index} className={styles.relatedDynamicItem}>
+              {hoveredWord ? highlightKeyword(text, hoveredWord) : text}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

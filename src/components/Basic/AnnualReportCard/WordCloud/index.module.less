@@ -5,7 +5,7 @@
   justify-content: flex-start;
   width: 100%;
   height: 100%;
-  gap: 32px;
+  gap: 16px;
 }
 
 .titleSection {
@@ -109,17 +109,17 @@
 .wordCloudContainer {
   position: relative;
   width: 100%;
-  height: 100%;
+  // flex: 1;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  min-height: 400px;
+  min-height: 300px;
+  max-height: 500px;
 }
 
 .wordCloudCanvas {
-  width: 100%;
-  height: 100%;
   display: block;
+  max-width: 100%;
 }
 
 .loadingContainer {
@@ -151,4 +151,42 @@
   color: var(--text-error, #ff5252);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
+}
+
+.relatedDynamicsContainer {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+}
+
+.relatedDynamicItem {
+  width: 100%;
+  font-size: 12px;
+  line-height: 1.6;
+  color: rgba(128, 128, 128, 0.7);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  // 暗色模式下的颜色
+  [data-theme="dark"] & {
+    color: rgba(180, 180, 180, 0.6);
+  }
+}
+
+// 关键词高亮（复用搜索的高亮样式）
+.highlight {
+  background-color: var(--accent-color);
+  color: #fff;
+  padding: 0 2px;
+  border-radius: 2px;
+  font-weight: 500;
 }

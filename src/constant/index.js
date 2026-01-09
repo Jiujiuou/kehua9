@@ -148,5 +148,5 @@ export const ANNUAL_REPORT_END_DATE = "2025-12-31";
 // 1: 第一章
 // 2: 第二章
 // 示例：export const DEBUG_CHAPTER_INDEX = 2; // 直接跳转到第二章
-export const DEBUG_CHAPTER_INDEX = 2; // 设置为 null 表示不使用调试模式
+export const DEBUG_CHAPTER_INDEX = 3; // 设置为 null 表示不使用调试模式
 

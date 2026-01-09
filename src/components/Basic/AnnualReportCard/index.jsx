@@ -6,6 +6,7 @@ import backgroundDarkImage from "@/assets/images/background_dark.jpg";
 import NicknameInputPage from "./NicknameInputPage";
 import Chapter1 from "./Chapter1";
 import Chapter2 from "./Chapter2";
+import Chapter3 from "./Chapter3";
 import styles from "./index.module.less";
 
 const AnnualReportCard = ({
@@ -199,6 +200,8 @@ const AnnualReportCard = ({
         content = <Chapter1 userNickname={userNickname} dynamics={dynamics} />;
       } else if (index === 2) {
         content = <Chapter2 dynamics={dynamics} />;
+      } else if (index === 3) {
+        content = <Chapter3 dynamics={dynamics} />;
       }
 
       if (!content) return null;
