@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import backgroundImage from "@/assets/images/background.jpg";
 import backgroundDarkImage from "@/assets/images/background_dark.jpg";
+import CardPreview from "@/components/Basic/CardPreview";
 import NicknameInputPage from "./NicknameInputPage";
 import Chapter1 from "./Chapter1";
 import Chapter2 from "./Chapter2";
@@ -19,12 +20,24 @@ const AnnualReportCard = ({
   onNicknameChange,
   onStartMemory,
   dynamics = [],
+  // 样式配置，与 Preview 区域保持一致
+  textIndent = true,
+  paragraphSpacing = false,
+  fontSize = 15,
+  fontWeight = 400,
+  fontFamily = "system",
+  lineHeight = 1.6,
+  contentGap = 12,
+  borderRadius = 8,
+  imageGap = 4,
 }) => {
   const [activeIndex, setActiveIndex] = useState(currentIndex);
   const [prevIndex, setPrevIndex] = useState(currentIndex);
   const [theme, setTheme] = useState("light");
   const [direction, setDirection] = useState("forward"); // 'forward' 或 'backward'
   const [isAnimating, setIsAnimating] = useState(false);
+  const [cardPreviewDynamic, setCardPreviewDynamic] = useState(null);
+  const [cardPreviewIndex, setCardPreviewIndex] = useState(0);
 
   // 检测主题变化
   useEffect(() => {
@@ -201,7 +214,24 @@ const AnnualReportCard = ({
       } else if (index === 2) {
         content = <Chapter2 dynamics={dynamics} />;
       } else if (index === 3) {
-        content = <Chapter3 dynamics={dynamics} />;
+        content = (
+          <Chapter3
+            dynamics={dynamics}
+            textIndent={textIndent}
+            paragraphSpacing={paragraphSpacing}
+            fontSize={fontSize}
+            fontWeight={fontWeight}
+            fontFamily={fontFamily}
+            lineHeight={lineHeight}
+            contentGap={contentGap}
+            borderRadius={borderRadius}
+            imageGap={imageGap}
+            onPreviewClick={(dynamic, index) => {
+              setCardPreviewDynamic(dynamic);
+              setCardPreviewIndex(index);
+            }}
+          />
+        );
       }
 
       if (!content) return null;
@@ -274,6 +304,26 @@ const AnnualReportCard = ({
           <div className={styles.cardContent}>{renderPageContent()}</div>
         </div>
       </div>
+      <CardPreview
+        dynamic={cardPreviewDynamic}
+        dynamics={dynamics}
+        currentIndex={cardPreviewIndex}
+        fontSize={fontSize}
+        fontWeight={fontWeight}
+        fontFamily={fontFamily}
+        lineHeight={lineHeight}
+        textIndent={textIndent}
+        paragraphSpacing={paragraphSpacing}
+        allowNavigation={false}
+        onClose={() => {
+          setCardPreviewDynamic(null);
+          setCardPreviewIndex(0);
+        }}
+        onDynamicChange={(newDynamic, newIndex) => {
+          setCardPreviewDynamic(newDynamic);
+          setCardPreviewIndex(newIndex);
+        }}
+      />
     </div>
   );
 };

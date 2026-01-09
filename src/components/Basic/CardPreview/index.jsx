@@ -1,6 +1,11 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import PropTypes from "prop-types";
-import { FaChevronLeft, FaChevronRight, FaRandom } from "react-icons/fa";
+import {
+  FaChevronLeft,
+  FaChevronRight,
+  FaRandom,
+  FaTimes,
+} from "react-icons/fa";
 import { HiDownload } from "react-icons/hi";
 import { toPng } from "html-to-image";
 import download from "downloadjs";
@@ -20,6 +25,7 @@ const CardPreview = ({
   lineHeight = 1.6,
   textIndent = true,
   paragraphSpacing = false,
+  allowNavigation = true, // 是否允许左右切换和随机切换
 }) => {
   const [activeIndex, setActiveIndex] = useState(currentIndex);
   const [isHovered, setIsHovered] = useState(false);
@@ -87,97 +93,111 @@ const CardPreview = ({
     return `${year}/${month}/${day}`;
   }, []);
 
-  const handleDownload = useCallback(async (event) => {
-    event.stopPropagation();
-    if (!cardContainerRef.current) return;
+  const handleDownload = useCallback(
+    async (event) => {
+      event.stopPropagation();
+      if (!cardContainerRef.current) return;
 
-    const currentDynamicData =
-      dynamics && dynamics.length > 0 ? dynamics[activeIndex] : dynamic;
-    if (!currentDynamicData || !currentDynamicData.timestamp) return;
+      const currentDynamicData =
+        dynamics && dynamics.length > 0 ? dynamics[activeIndex] : dynamic;
+      if (!currentDynamicData || !currentDynamicData.timestamp) return;
 
-    const formattedDate = formatDate(currentDynamicData.timestamp);
+      const formattedDate = formatDate(currentDynamicData.timestamp);
 
-    // 临时隐藏下载按钮
-    let downloadButton = null;
-    let originalDisplay = "";
-    if (downloadButtonRef.current) {
-      downloadButton = downloadButtonRef.current;
-      originalDisplay = downloadButton.style.display;
-      downloadButton.style.display = "none";
-    }
+      // 临时隐藏下载按钮
+      let downloadButton = null;
+      let originalDisplay = "";
+      if (downloadButtonRef.current) {
+        downloadButton = downloadButtonRef.current;
+        originalDisplay = downloadButton.style.display;
+        downloadButton.style.display = "none";
+      }
 
-    // 临时移除高度限制和滚动，确保完整内容被导出
-    const element = cardContainerRef.current;
-    const originalMaxHeight = element.style.maxHeight;
-    const originalOverflow = element.style.overflow;
-    
-    // 获取 cardContent 元素（可能有滚动）
-    const cardContentElement = element.querySelector(`.${styles.cardContent}`);
-    const originalContentOverflow = cardContentElement ? cardContentElement.style.overflow : "";
+      // 临时移除高度限制和滚动，确保完整内容被导出
+      const element = cardContainerRef.current;
+      const originalMaxHeight = element.style.maxHeight;
+      const originalOverflow = element.style.overflow;
 
-    element.style.maxHeight = "none";
-    element.style.overflow = "visible";
-    if (cardContentElement) {
-      cardContentElement.style.overflow = "visible";
-    }
+      // 获取 cardContent 元素（可能有滚动）
+      const cardContentElement = element.querySelector(
+        `.${styles.cardContent}`
+      );
+      const originalContentOverflow = cardContentElement
+        ? cardContentElement.style.overflow
+        : "";
 
-    // 等待 DOM 更新
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    try {
-      // 获取展开后的完整高度
-      const fullHeight = element.scrollHeight;
-      const width = element.offsetWidth;
-      
-      // 使用缩放因子提高清晰度
-      const scaleFactor = 2;
-
-      // 使用 html-to-image 的 toPng 方法导出高清图片
-      const dataUrl = await toPng(element, {
-        width: width,
-        height: fullHeight,
-        pixelRatio: scaleFactor,
-        backgroundColor: "#fef9f0",
-        cacheBust: true,
-        style: {
-          margin: "0",
-          padding: "0",
-          maxHeight: "none",
-          overflow: "visible",
-        },
-      });
-
-      // 恢复原始样式
-      element.style.maxHeight = originalMaxHeight;
-      element.style.overflow = originalOverflow;
+      element.style.maxHeight = "none";
+      element.style.overflow = "visible";
       if (cardContentElement) {
-        cardContentElement.style.overflow = originalContentOverflow;
+        cardContentElement.style.overflow = "visible";
       }
 
-      // 恢复下载按钮显示
-      if (downloadButton) {
-        downloadButton.style.display = originalDisplay;
-      }
+      // 等待 DOM 更新
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // 使用 downloadjs 下载图片
-      download(dataUrl, `可话动态_${formattedDate.replace(/\//g, "-")}.png`);
-    } catch (error) {
-      console.error("下载图片失败:", error);
-      
-      // 确保在出错时也恢复样式
-      element.style.maxHeight = originalMaxHeight;
-      element.style.overflow = originalOverflow;
-      if (cardContentElement) {
-        cardContentElement.style.overflow = originalContentOverflow;
-      }
-      
-      if (downloadButton) {
-        downloadButton.style.display = originalDisplay;
-      }
-    }
-  }, [cardContainerRef, dynamics, activeIndex, dynamic, formatDate, styles.cardContent]);
+      try {
+        // 获取展开后的完整高度
+        const fullHeight = element.scrollHeight;
+        const width = element.offsetWidth;
 
-  // 点击 ESC 键关闭，支持左右箭头键切换
+        // 使用缩放因子提高清晰度
+        const scaleFactor = 2;
+
+        // 使用 html-to-image 的 toPng 方法导出高清图片
+        const dataUrl = await toPng(element, {
+          width: width,
+          height: fullHeight,
+          pixelRatio: scaleFactor,
+          backgroundColor: "#fef9f0",
+          cacheBust: true,
+          style: {
+            margin: "0",
+            padding: "0",
+            maxHeight: "none",
+            overflow: "visible",
+          },
+        });
+
+        // 恢复原始样式
+        element.style.maxHeight = originalMaxHeight;
+        element.style.overflow = originalOverflow;
+        if (cardContentElement) {
+          cardContentElement.style.overflow = originalContentOverflow;
+        }
+
+        // 恢复下载按钮显示
+        if (downloadButton) {
+          downloadButton.style.display = originalDisplay;
+        }
+
+        // 使用 downloadjs 下载图片
+        download(dataUrl, `可话动态_${formattedDate.replace(/\//g, "-")}.png`);
+      } catch (error) {
+        console.error("下载图片失败:", error);
+
+        // 确保在出错时也恢复样式
+        element.style.maxHeight = originalMaxHeight;
+        element.style.overflow = originalOverflow;
+        if (cardContentElement) {
+          cardContentElement.style.overflow = originalContentOverflow;
+        }
+
+        if (downloadButton) {
+          downloadButton.style.display = originalDisplay;
+        }
+      }
+    },
+    [
+      cardContainerRef,
+      dynamics,
+      activeIndex,
+      dynamic,
+      formatDate,
+      styles.cardContent,
+    ]
+  );
+
+  // 点击 ESC 键关闭，支持左右箭头键切换（仅在允许导航时）
   useEffect(() => {
     if (!dynamic) return;
 
@@ -187,12 +207,15 @@ const CardPreview = ({
         event.preventDefault();
         event.stopPropagation();
         onClose();
-      } else if (event.key === "ArrowLeft" && hasPrevious) {
-        event.preventDefault();
-        handlePrevious();
-      } else if (event.key === "ArrowRight" && hasNext) {
-        event.preventDefault();
-        handleNext();
+      } else if (allowNavigation) {
+        // 只有在允许导航时才支持左右箭头键切换
+        if (event.key === "ArrowLeft" && hasPrevious) {
+          event.preventDefault();
+          handlePrevious();
+        } else if (event.key === "ArrowRight" && hasNext) {
+          event.preventDefault();
+          handleNext();
+        }
       }
     };
 
@@ -205,7 +228,15 @@ const CardPreview = ({
       document.removeEventListener("keydown", handleKeyDown, true);
       document.body.style.overflow = "";
     };
-  }, [dynamic, onClose, hasPrevious, hasNext, handlePrevious, handleNext]);
+  }, [
+    dynamic,
+    onClose,
+    hasPrevious,
+    hasNext,
+    handlePrevious,
+    handleNext,
+    allowNavigation,
+  ]);
 
   // 如果没有传入 dynamic，则不显示预览
   if (!dynamic) {
@@ -241,14 +272,27 @@ const CardPreview = ({
 
   return (
     <div className={styles.previewOverlay} onClick={handleBackdropClick}>
-      <div
-        className={styles.randomButton}
-        onClick={handleRandomClick}
-        title="随机查看一条动态"
-      >
-        <FaRandom />
-      </div>
-      {hasPrevious && (
+      {allowNavigation ? (
+        <div
+          className={styles.randomButton}
+          onClick={handleRandomClick}
+          title="随机查看一条动态"
+        >
+          <FaRandom />
+        </div>
+      ) : (
+        <div
+          className={styles.closeButton}
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+          title="关闭"
+        >
+          <FaTimes />
+        </div>
+      )}
+      {allowNavigation && hasPrevious && (
         <div
           className={`${styles.navArrow} ${styles.navArrowLeft}`}
           onClick={(e) => handleArrowClick(e, "prev")}
@@ -256,7 +300,7 @@ const CardPreview = ({
           <FaChevronLeft />
         </div>
       )}
-      {hasNext && (
+      {allowNavigation && hasNext && (
         <div
           className={`${styles.navArrow} ${styles.navArrowRight}`}
           onClick={(e) => handleArrowClick(e, "next")}
@@ -305,7 +349,8 @@ const CardPreview = ({
                         );
                       }
                       // 判断是否是最后一段
-                      const isLastParagraph = paragraphIndex === array.length - 1;
+                      const isLastParagraph =
+                        paragraphIndex === array.length - 1;
                       return (
                         <div
                           key={paragraphIndex}
@@ -412,6 +457,7 @@ CardPreview.propTypes = {
   lineHeight: PropTypes.oneOf([1.4, 1.5, 1.6, 1.8, 2.0]),
   textIndent: PropTypes.bool,
   paragraphSpacing: PropTypes.bool,
+  allowNavigation: PropTypes.bool,
 };
 
 export default CardPreview;

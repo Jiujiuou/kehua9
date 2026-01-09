@@ -8,18 +8,16 @@ import {
   useCallback,
 } from "react";
 import { FaPlus, FaSearch, FaTimes, FaChartBar } from "react-icons/fa";
-import { MdDeleteOutline } from "react-icons/md";
-import { HiOutlineEye, HiDownload } from "react-icons/hi";
 import { parseDynamicData } from "@/utils/parseData";
 import PropTypes from "prop-types";
 import ImagePreview from "@/components/Basic/ImagePreview";
 import VideoPreview from "@/components/Basic/VideoPreview";
 import CardPreview from "@/components/Basic/CardPreview";
 import AnnualReportCard from "@/components/Basic/AnnualReportCard";
+import DynamicCard from "@/components/Basic/DynamicCard";
 import { useToastHelpers } from "@/components/Basic/Toast";
 import { useConfirmHelper } from "@/components/Basic/Confirm";
 import { deleteDynamicFromFile } from "@/utils/writeData";
-import { getFontFamily } from "@/utils/fonts";
 import { track } from "@/utils/track";
 import { DEBUG_CHAPTER_INDEX } from "@/constant";
 import styles from "./index.module.less";
@@ -57,7 +55,6 @@ const Preview = forwardRef(
     const [cardPreviewIndex, setCardPreviewIndex] = useState(0);
     const [searchInput, setSearchInput] = useState("");
     const [searchKeyword, setSearchKeyword] = useState("");
-    const [hoveredImageIndex, setHoveredImageIndex] = useState(null);
     const [showReportSelector, setShowReportSelector] = useState(false);
     // 开发调试模式：如果设置了 DEBUG_CHAPTER_INDEX，则直接跳转到指定章节
     const getInitialReportPageIndex = () => {
@@ -564,245 +561,75 @@ const Preview = forwardRef(
             ref={contentAreaRef}
             style={{ padding: `${previewPadding}px` }}
           >
-            {sortedDynamics.map((dynamic, index) => (
-              <div
-                key={dynamic.timestamp}
-                className={styles.dynamicItem}
-                data-date={dynamic.date}
-                data-dynamic-index={index}
-                style={{
-                  padding: `${contentGap}px`,
-                  borderRadius: `${borderRadius}px`,
-                }}
-              >
-                <div className={styles.dynamicHeader}>
-                  <span className={styles.dynamicDate}>
-                    {dynamic.date} {dynamic.time}
-                  </span>
-                  <div className={styles.headerIcons}>
-                    <HiOutlineEye
-                      className={styles.previewIcon}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setCardPreviewDynamic(dynamic);
-                        setCardPreviewIndex(index);
-                        // 埋点：查看预览卡片
-                        track("预览动态卡片");
-                      }}
-                      title="卡片预览"
-                    />
-                    {(() => {
-                      // 检查是否是2026年的动态
-                      const year = new Date(dynamic.timestamp).getFullYear();
-                      if (year === 2026 && directoryHandle) {
-                        return (
-                          <MdDeleteOutline
-                            className={styles.deleteIcon}
-                            onClick={async (e) => {
-                              e.stopPropagation();
-                              const result = await confirm(
-                                "确定要删除这条动态吗？"
-                              );
-                              if (result) {
-                                try {
-                                  const year = new Date(dynamic.timestamp)
-                                    .getFullYear()
-                                    .toString();
-                                  await deleteDynamicFromFile(
-                                    directoryHandle,
-                                    year,
-                                    dynamic.timestamp
-                                  );
-                                  // 从列表中移除
-                                  const updatedDynamics = dynamics.filter(
-                                    (d) => d.timestamp !== dynamic.timestamp
-                                  );
-                                  isInternalUpdateRef.current = true;
-                                  prevExternalDynamicsRef.current =
-                                    updatedDynamics;
-                                  setDynamics(updatedDynamics);
-                                  if (onDynamicsChange) {
-                                    onDynamicsChange(updatedDynamics);
-                                  }
-                                  toast.success("删除成功");
-                                } catch (error) {
-                                  console.error("删除失败:", error);
-                                  toast.error("删除失败：" + error.message);
-                                }
-                              }
-                            }}
-                          />
+            {sortedDynamics.map((dynamic, index) => {
+              // 检查是否是2026年的动态，决定是否显示删除按钮
+              const year = new Date(dynamic.timestamp).getFullYear();
+              const showDeleteButton = !!(year === 2026 && directoryHandle);
+
+              return (
+                <DynamicCard
+                  key={dynamic.timestamp}
+                  dynamic={dynamic}
+                  index={index}
+                  contentGap={contentGap}
+                  borderRadius={borderRadius}
+                  imageGap={imageGap}
+                  fontSize={fontSize}
+                  fontWeight={fontWeight}
+                  fontFamily={fontFamily}
+                  lineHeight={lineHeight}
+                  textIndent={textIndent}
+                  paragraphSpacing={paragraphSpacing}
+                  searchKeyword={searchKeyword}
+                  highlightKeyword={highlightKeyword}
+                  showDeleteButton={showDeleteButton}
+                  showPreviewButton={true}
+                  onPreviewClick={(dynamic, index) => {
+                    setCardPreviewDynamic(dynamic);
+                    setCardPreviewIndex(index);
+                    // 埋点：查看预览卡片
+                    track("预览动态卡片");
+                  }}
+                  onDeleteClick={async (dynamic) => {
+                    const result = await confirm("确定要删除这条动态吗？");
+                    if (result) {
+                      try {
+                        const year = new Date(dynamic.timestamp)
+                          .getFullYear()
+                          .toString();
+                        await deleteDynamicFromFile(
+                          directoryHandle,
+                          year,
+                          dynamic.timestamp
                         );
+                        // 从列表中移除
+                        const updatedDynamics = dynamics.filter(
+                          (d) => d.timestamp !== dynamic.timestamp
+                        );
+                        isInternalUpdateRef.current = true;
+                        prevExternalDynamicsRef.current = updatedDynamics;
+                        setDynamics(updatedDynamics);
+                        if (onDynamicsChange) {
+                          onDynamicsChange(updatedDynamics);
+                        }
+                        toast.success("删除成功");
+                      } catch (error) {
+                        console.error("删除失败:", error);
+                        toast.error("删除失败：" + error.message);
                       }
-                      return null;
-                    })()}
-                  </div>
-                </div>
-                {dynamic.text && (
-                  <div className={styles.dynamicText}>
-                    {dynamic.text
-                      .split("\n")
-                      .map((paragraph, paragraphIndex, array) => {
-                        // 如果是空段落，只渲染一个空行
-                        if (!paragraph.trim()) {
-                          return (
-                            <div
-                              key={paragraphIndex}
-                              className={styles.dynamicParagraph}
-                            ></div>
-                          );
-                        }
-                        // 判断是否是最后一段
-                        const isLastParagraph =
-                          paragraphIndex === array.length - 1;
-                        return (
-                          <div
-                            key={paragraphIndex}
-                            className={styles.dynamicParagraph}
-                            style={{
-                              textIndent: textIndent ? "2em" : "0",
-                              fontSize: `${fontSize}px`,
-                              fontWeight: fontWeight,
-                              fontFamily: getFontFamily(fontFamily),
-                              lineHeight: lineHeight,
-                              marginBottom:
-                                paragraphSpacing && !isLastParagraph
-                                  ? `${lineHeight}em`
-                                  : `${lineHeight * 0.5}em`,
-                            }}
-                          >
-                            {searchKeyword.trim()
-                              ? highlightKeyword(
-                                  paragraph,
-                                  searchKeyword.trim()
-                                )
-                              : paragraph}
-                          </div>
-                        );
-                      })}
-                  </div>
-                )}
-                {dynamic.images.length > 0 && (
-                  <div
-                    className={styles.dynamicImages}
-                    data-image-count={Math.min(dynamic.images.length, 9)}
-                    style={{ gap: `${imageGap}px` }}
-                  >
-                    {dynamic.images.slice(0, 9).map((image, imgIndex) => {
-                      const imageKey = `${dynamic.timestamp}-${imgIndex}`;
-                      const isHovered = hoveredImageIndex === imageKey;
-
-                      const handleDownload = async (event) => {
-                        event.stopPropagation();
-                        try {
-                          // 如果图片对象有 file 字段，直接使用原文件下载（保证原画质）
-                          if (image.file && image.file instanceof File) {
-                            const url = window.URL.createObjectURL(image.file);
-                            const link = document.createElement("a");
-                            link.href = url;
-                            link.download =
-                              image.name ||
-                              image.file.name ||
-                              `image-${imgIndex + 1}.jpg`;
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                            window.URL.revokeObjectURL(url);
-                            return;
-                          }
-
-                          // 如果是 data URL，直接下载（data URL 包含完整的原图数据）
-                          if (image.url && image.url.startsWith("data:")) {
-                            const link = document.createElement("a");
-                            link.href = image.url;
-                            link.download =
-                              image.name || `image-${imgIndex + 1}.jpg`;
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                            return;
-                          }
-
-                          // 其他情况，fetch 下载
-                          const response = await fetch(image.url);
-                          const blob = await response.blob();
-                          const url = window.URL.createObjectURL(blob);
-                          const link = document.createElement("a");
-                          link.href = url;
-                          link.download =
-                            image.name || `image-${imgIndex + 1}.jpg`;
-                          document.body.appendChild(link);
-                          link.click();
-                          document.body.removeChild(link);
-                          window.URL.revokeObjectURL(url);
-                        } catch (error) {
-                          console.error("下载图片失败:", error);
-                        }
-                      };
-
-                      return (
-                        <div
-                          key={imgIndex}
-                          className={styles.imageWrapper}
-                          onMouseEnter={() => setHoveredImageIndex(imageKey)}
-                          onMouseLeave={() => setHoveredImageIndex(null)}
-                          onClick={() => {
-                            setPreviewImages(dynamic.images);
-                            setPreviewIndex(imgIndex);
-                          }}
-                        >
-                          <img
-                            src={image.url}
-                            alt={image.name}
-                            className={styles.dynamicImage}
-                          />
-                          {isHovered && (
-                            <div
-                              className={styles.imageDownloadButton}
-                              onClick={handleDownload}
-                              title="下载图片"
-                            >
-                              <HiDownload />
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-                {dynamic.videos && dynamic.videos.length > 0 && (
-                  <div
-                    className={styles.dynamicImages}
-                    data-image-count={Math.min(dynamic.videos.length, 9)}
-                    style={{ gap: `${imageGap}px` }}
-                  >
-                    {dynamic.videos.slice(0, 9).map((video, vidIndex) => (
-                      <div
-                        key={vidIndex}
-                        className={styles.imageWrapper}
-                        onClick={() => {
-                          setPreviewVideos(dynamic.videos);
-                          setPreviewVideoIndex(vidIndex);
-                        }}
-                      >
-                        <video
-                          src={video.url}
-                          className={styles.dynamicImage}
-                          muted
-                          playsInline
-                          preload="metadata"
-                          onLoadedMetadata={(e) => {
-                            // 加载第一帧作为缩略图
-                            e.target.currentTime = 0.1;
-                          }}
-                        />
-                        <div className={styles.videoPlayIcon}>▶</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+                    }
+                  }}
+                  onImageClick={(images, imgIndex) => {
+                    setPreviewImages(images);
+                    setPreviewIndex(imgIndex);
+                  }}
+                  onVideoClick={(videos, vidIndex) => {
+                    setPreviewVideos(videos);
+                    setPreviewVideoIndex(vidIndex);
+                  }}
+                />
+              );
+            })}
           </div>
         </div>
         <ImagePreview
@@ -865,6 +692,16 @@ const Preview = forwardRef(
             // TODO: 实现开启回忆的逻辑
           }}
           dynamics={sortedDynamics}
+          // 传递样式配置，确保与 Preview 区域保持一致
+          textIndent={textIndent}
+          paragraphSpacing={paragraphSpacing}
+          fontSize={fontSize}
+          fontWeight={fontWeight}
+          fontFamily={fontFamily}
+          lineHeight={lineHeight}
+          contentGap={contentGap}
+          borderRadius={borderRadius}
+          imageGap={imageGap}
         />
       </>
     );

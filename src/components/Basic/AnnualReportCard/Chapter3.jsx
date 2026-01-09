@@ -1,13 +1,25 @@
 import { useState, useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
-import { HiDownload } from "react-icons/hi";
 import ImagePreview from "@/components/Basic/ImagePreview";
 import VideoPreview from "@/components/Basic/VideoPreview";
+import DynamicCard from "@/components/Basic/DynamicCard";
 import styles from "./Chapter3.module.less";
 
-const Chapter3 = ({ dynamics = [] }) => {
+const Chapter3 = ({
+  dynamics = [],
+  // 样式配置，与 Preview 区域保持一致
+  textIndent = true,
+  paragraphSpacing = false,
+  fontSize = 15,
+  fontWeight = 400,
+  fontFamily = "system",
+  lineHeight = 1.6,
+  contentGap = 12,
+  borderRadius = 8,
+  imageGap = 4,
+  onPreviewClick,
+}) => {
   const [showContent, setShowContent] = useState(false);
-  const [hoveredImageIndex, setHoveredImageIndex] = useState(null);
   const [previewImages, setPreviewImages] = useState([]);
   const [previewIndex, setPreviewIndex] = useState(0);
   const [previewVideos, setPreviewVideos] = useState([]);
@@ -56,7 +68,6 @@ const Chapter3 = ({ dynamics = [] }) => {
     return { longestPost: longest, shortestPost: shortest };
   }, [dynamics]);
 
-
   // 格式化日期时间显示（和 preview 区域保持一致）
   const formatDateTime = (timestamp) => {
     if (!timestamp) return "";
@@ -69,6 +80,30 @@ const Chapter3 = ({ dynamics = [] }) => {
     return `${year}-${month}-${day} ${hour}:${minute}`;
   };
 
+  // 为 DynamicCard 准备动态数据（需要 date 和 time 字段）
+  const prepareDynamicForCard = (dynamic) => {
+    if (!dynamic) return null;
+    return {
+      ...dynamic,
+      date: formatDateTime(dynamic.timestamp).split(" ")[0],
+      time: formatDateTime(dynamic.timestamp).split(" ")[1] || "",
+    };
+  };
+
+  // 找到动态在原始数组中的索引
+  const findDynamicIndex = (targetDynamic) => {
+    if (!targetDynamic) return 0;
+    return dynamics.findIndex((d) => d.timestamp === targetDynamic.timestamp);
+  };
+
+  // 处理预览点击
+  const handlePreviewClick = (dynamic) => {
+    if (onPreviewClick) {
+      const index = findDynamicIndex(dynamic);
+      onPreviewClick(dynamic, index);
+    }
+  };
+
   return (
     <div className={styles.chapter3Content}>
       <div
@@ -78,9 +113,7 @@ const Chapter3 = ({ dynamics = [] }) => {
       >
         <div className={styles.textWrapper}>
           <h2 className={styles.title}>表达光谱的两极</h2>
-          <p className={styles.subtitle}>
-            从最绵长的倾诉，到最刹那的灵感。
-          </p>
+          <p className={styles.subtitle}>从最绵长的倾诉，到最刹那的灵感。</p>
         </div>
 
         {longestPost && shortestPost && (
@@ -92,137 +125,32 @@ const Chapter3 = ({ dynamics = [] }) => {
                   最绵长的沉思 · {longestPost.text.trim().length}字
                 </h3>
               </div>
-              <div className={styles.dynamicItem} style={{ padding: "16px", borderRadius: "8px" }}>
-                <div className={styles.dynamicHeader}>
-                  <span className={styles.dynamicDate}>
-                    {formatDateTime(longestPost.timestamp)}
-                  </span>
-                </div>
-                <div className={`${styles.dynamicText} ${styles.truncatedText}`}>
-                  {longestPost.text
-                    .split("\n")
-                    .map((paragraph, index) => (
-                      <div key={index} className={styles.dynamicParagraph}>
-                        {paragraph || "\u00A0"}
-                      </div>
-                    ))}
-                </div>
-                {longestPost.images && longestPost.images.length > 0 && (
-                  <div
-                    className={styles.dynamicImages}
-                    data-image-count={Math.min(longestPost.images.length, 9)}
-                    style={{ gap: "8px" }}
-                  >
-                    {longestPost.images.slice(0, 9).map((image, imgIndex) => {
-                      const imageKey = `longest-${longestPost.timestamp}-${imgIndex}`;
-                      const isHovered = hoveredImageIndex === imageKey;
-
-                      const handleDownload = async (event) => {
-                        event.stopPropagation();
-                        try {
-                          if (image.file && image.file instanceof File) {
-                            const url = window.URL.createObjectURL(image.file);
-                            const link = document.createElement("a");
-                            link.href = url;
-                            link.download =
-                              image.name ||
-                              image.file.name ||
-                              `image-${imgIndex + 1}.jpg`;
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                            window.URL.revokeObjectURL(url);
-                            return;
-                          }
-
-                          if (image.url && image.url.startsWith("data:")) {
-                            const link = document.createElement("a");
-                            link.href = image.url;
-                            link.download =
-                              image.name || `image-${imgIndex + 1}.jpg`;
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                            return;
-                          }
-
-                          const response = await fetch(image.url);
-                          const blob = await response.blob();
-                          const url = window.URL.createObjectURL(blob);
-                          const link = document.createElement("a");
-                          link.href = url;
-                          link.download =
-                            image.name || `image-${imgIndex + 1}.jpg`;
-                          document.body.appendChild(link);
-                          link.click();
-                          document.body.removeChild(link);
-                          window.URL.revokeObjectURL(url);
-                        } catch (error) {
-                          console.error("下载图片失败:", error);
-                        }
-                      };
-
-                      return (
-                        <div
-                          key={imgIndex}
-                          className={styles.imageWrapper}
-                          onMouseEnter={() => setHoveredImageIndex(imageKey)}
-                          onMouseLeave={() => setHoveredImageIndex(null)}
-                          onClick={() => {
-                            setPreviewImages(longestPost.images);
-                            setPreviewIndex(imgIndex);
-                          }}
-                        >
-                          <img
-                            src={image.url}
-                            alt={image.name}
-                            className={styles.dynamicImage}
-                          />
-                          {isHovered && (
-                            <div
-                              className={styles.imageDownloadButton}
-                              onClick={handleDownload}
-                              title="下载图片"
-                            >
-                              <HiDownload />
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-                {longestPost.videos && longestPost.videos.length > 0 && (
-                  <div
-                    className={styles.dynamicImages}
-                    data-image-count={Math.min(longestPost.videos.length, 9)}
-                    style={{ gap: "8px" }}
-                  >
-                    {longestPost.videos.slice(0, 9).map((video, vidIndex) => (
-                      <div
-                        key={vidIndex}
-                        className={styles.imageWrapper}
-                        onClick={() => {
-                          setPreviewVideos(longestPost.videos);
-                          setPreviewVideoIndex(vidIndex);
-                        }}
-                      >
-                        <video
-                          src={video.url}
-                          className={styles.dynamicImage}
-                          muted
-                          playsInline
-                          preload="metadata"
-                          onLoadedMetadata={(e) => {
-                            e.target.currentTime = 0.1;
-                          }}
-                        />
-                        <div className={styles.videoPlayIcon}>▶</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <DynamicCard
+                dynamic={prepareDynamicForCard(longestPost)}
+                index={0}
+                contentGap={contentGap}
+                borderRadius={borderRadius}
+                imageGap={imageGap}
+                fontSize={fontSize}
+                fontWeight={fontWeight}
+                fontFamily={fontFamily}
+                lineHeight={lineHeight}
+                textIndent={textIndent}
+                paragraphSpacing={paragraphSpacing}
+                showPreviewButton={false}
+                showDeleteButton={false}
+                textClassName={styles.truncatedText}
+                allowContentClickToPreview={true}
+                onPreviewClick={handlePreviewClick}
+                onImageClick={(images, imgIndex) => {
+                  setPreviewImages(images);
+                  setPreviewIndex(imgIndex);
+                }}
+                onVideoClick={(videos, vidIndex) => {
+                  setPreviewVideos(videos);
+                  setPreviewVideoIndex(vidIndex);
+                }}
+              />
               <p className={styles.postInterpretation}>
                 有些心事，需要足够的篇幅来安放。
               </p>
@@ -235,137 +163,31 @@ const Chapter3 = ({ dynamics = [] }) => {
                   最刹那的火花 · {shortestPost.text.trim().length}字
                 </h3>
               </div>
-              <div className={styles.dynamicItem} style={{ padding: "16px", borderRadius: "8px" }}>
-                <div className={styles.dynamicHeader}>
-                  <span className={styles.dynamicDate}>
-                    {formatDateTime(shortestPost.timestamp)}
-                  </span>
-                </div>
-                <div className={styles.dynamicText}>
-                  {shortestPost.text
-                    .split("\n")
-                    .map((paragraph, index) => (
-                      <div key={index} className={styles.dynamicParagraph}>
-                        {paragraph || "\u00A0"}
-                      </div>
-                    ))}
-                </div>
-                {shortestPost.images && shortestPost.images.length > 0 && (
-                  <div
-                    className={styles.dynamicImages}
-                    data-image-count={Math.min(shortestPost.images.length, 9)}
-                    style={{ gap: "8px" }}
-                  >
-                    {shortestPost.images.slice(0, 9).map((image, imgIndex) => {
-                      const imageKey = `shortest-${shortestPost.timestamp}-${imgIndex}`;
-                      const isHovered = hoveredImageIndex === imageKey;
-
-                      const handleDownload = async (event) => {
-                        event.stopPropagation();
-                        try {
-                          if (image.file && image.file instanceof File) {
-                            const url = window.URL.createObjectURL(image.file);
-                            const link = document.createElement("a");
-                            link.href = url;
-                            link.download =
-                              image.name ||
-                              image.file.name ||
-                              `image-${imgIndex + 1}.jpg`;
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                            window.URL.revokeObjectURL(url);
-                            return;
-                          }
-
-                          if (image.url && image.url.startsWith("data:")) {
-                            const link = document.createElement("a");
-                            link.href = image.url;
-                            link.download =
-                              image.name || `image-${imgIndex + 1}.jpg`;
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                            return;
-                          }
-
-                          const response = await fetch(image.url);
-                          const blob = await response.blob();
-                          const url = window.URL.createObjectURL(blob);
-                          const link = document.createElement("a");
-                          link.href = url;
-                          link.download =
-                            image.name || `image-${imgIndex + 1}.jpg`;
-                          document.body.appendChild(link);
-                          link.click();
-                          document.body.removeChild(link);
-                          window.URL.revokeObjectURL(url);
-                        } catch (error) {
-                          console.error("下载图片失败:", error);
-                        }
-                      };
-
-                      return (
-                        <div
-                          key={imgIndex}
-                          className={styles.imageWrapper}
-                          onMouseEnter={() => setHoveredImageIndex(imageKey)}
-                          onMouseLeave={() => setHoveredImageIndex(null)}
-                          onClick={() => {
-                            setPreviewImages(shortestPost.images);
-                            setPreviewIndex(imgIndex);
-                          }}
-                        >
-                          <img
-                            src={image.url}
-                            alt={image.name}
-                            className={styles.dynamicImage}
-                          />
-                          {isHovered && (
-                            <div
-                              className={styles.imageDownloadButton}
-                              onClick={handleDownload}
-                              title="下载图片"
-                            >
-                              <HiDownload />
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-                {shortestPost.videos && shortestPost.videos.length > 0 && (
-                  <div
-                    className={styles.dynamicImages}
-                    data-image-count={Math.min(shortestPost.videos.length, 9)}
-                    style={{ gap: "8px" }}
-                  >
-                    {shortestPost.videos.slice(0, 9).map((video, vidIndex) => (
-                      <div
-                        key={vidIndex}
-                        className={styles.imageWrapper}
-                        onClick={() => {
-                          setPreviewVideos(shortestPost.videos);
-                          setPreviewVideoIndex(vidIndex);
-                        }}
-                      >
-                        <video
-                          src={video.url}
-                          className={styles.dynamicImage}
-                          muted
-                          playsInline
-                          preload="metadata"
-                          onLoadedMetadata={(e) => {
-                            e.target.currentTime = 0.1;
-                          }}
-                        />
-                        <div className={styles.videoPlayIcon}>▶</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <DynamicCard
+                dynamic={prepareDynamicForCard(shortestPost)}
+                index={1}
+                contentGap={contentGap}
+                borderRadius={borderRadius}
+                imageGap={imageGap}
+                fontSize={fontSize}
+                fontWeight={fontWeight}
+                fontFamily={fontFamily}
+                lineHeight={lineHeight}
+                textIndent={textIndent}
+                paragraphSpacing={paragraphSpacing}
+                showPreviewButton={false}
+                showDeleteButton={false}
+                allowContentClickToPreview={true}
+                onPreviewClick={handlePreviewClick}
+                onImageClick={(images, imgIndex) => {
+                  setPreviewImages(images);
+                  setPreviewIndex(imgIndex);
+                }}
+                onVideoClick={(videos, vidIndex) => {
+                  setPreviewVideos(videos);
+                  setPreviewVideoIndex(vidIndex);
+                }}
+              />
               <p className={styles.postInterpretation}>
                 瞬间的感受，也被你精准捕捉。
               </p>
@@ -395,7 +217,18 @@ const Chapter3 = ({ dynamics = [] }) => {
 
 Chapter3.propTypes = {
   dynamics: PropTypes.array,
+  // 样式配置
+  textIndent: PropTypes.bool,
+  paragraphSpacing: PropTypes.bool,
+  fontSize: PropTypes.number,
+  fontWeight: PropTypes.number,
+  fontFamily: PropTypes.string,
+  lineHeight: PropTypes.number,
+  contentGap: PropTypes.number,
+  borderRadius: PropTypes.number,
+  imageGap: PropTypes.number,
+  // 事件处理
+  onPreviewClick: PropTypes.func,
 };
 
 export default Chapter3;
-

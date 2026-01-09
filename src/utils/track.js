@@ -175,6 +175,16 @@ async function sendAnalytics(events) {
  * @returns {Promise<void>}
  */
 export async function track(eventName, params = {}) {
+  // 检查是否是开发环境（localhost），开发环境不发送埋点
+  try {
+    const hostname = window.location.hostname;
+    if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "0.0.0.0") {
+      // console.log("开发环境，跳过埋点:", eventName);
+      return; // 不发送埋点
+    }
+  } catch {
+    // 如果无法获取 hostname，继续执行
+  }
 
   // 检查 URL 参数，如果有 analyticsData=true 则不上报埋点
   try {

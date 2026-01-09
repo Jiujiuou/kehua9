@@ -1,0 +1,192 @@
+// 动态项
+.dynamicItem {
+  background-color: var(--bg-card);
+  // border-radius 和 padding 通过内联样式动态设置
+  box-shadow: none;
+  border: none;
+  margin-bottom: 12px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.dynamicHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.headerIcons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dynamicDate {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-time);
+  line-height: 1.5;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.previewIcon {
+  font-size: 18px;
+  color: var(--text-time);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    color: var(--accent-color);
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.deleteIcon {
+  font-size: 18px;
+  color: var(--text-time);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    color: var(--accent-color);
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.dynamicText {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-content);
+  word-break: break-word;
+  margin-bottom: 0;
+  margin-top: 4px;
+  text-align: left; // 主动声明对齐方式，避免继承父元素的居中样式
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.dynamicParagraph {
+  margin-bottom: 0.5em;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.dynamicImages {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); // 统一使用3列网格布局
+  // gap 通过内联样式动态设置
+  margin-top: 8px;
+  width: 100%;
+
+  // 所有图片都按1/3宽度排布，方便后续实现大图预览
+  // 每张图片占1列，宽度为父元素宽度的1/3（考虑间距）
+}
+
+.imageWrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%; // 保持正方形比例（多张图片时）
+  overflow: hidden;
+  border-radius: 4px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+}
+
+.imageDownloadButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  user-select: none;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  svg {
+    font-size: 16px;
+    color: #333;
+  }
+}
+
+.dynamicImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.videoPlayIcon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 48px;
+  height: 48px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+  pointer-events: none;
+  z-index: 1;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+
+  .imageWrapper:hover & {
+    background-color: rgba(0, 0, 0, 0.8);
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+// 关键词高亮
+.highlight {
+  background-color: var(--accent-color);
+  color: #fff;
+  padding: 0 2px;
+  border-radius: 2px;
+  font-weight: 500;
+}
+
