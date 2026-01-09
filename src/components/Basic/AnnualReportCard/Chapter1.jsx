@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import styles from "./Chapter1.module.less";
 import {
@@ -99,8 +99,73 @@ const truncateText = (text, maxLength = 50) => {
   return text.substring(0, maxLength) + "...";
 };
 
+// 将数字转换为中文
+const numberToChinese = (num) => {
+  const chineseNumbers = [
+    "",
+    "一",
+    "二",
+    "三",
+    "四",
+    "五",
+    "六",
+    "七",
+    "八",
+    "九",
+    "十",
+  ];
+
+  if (num <= 10) {
+    return chineseNumbers[num];
+  } else if (num < 20) {
+    return `十${chineseNumbers[num - 10]}`;
+  } else if (num < 100) {
+    const tens = Math.floor(num / 10);
+    const ones = num % 10;
+    if (ones === 0) {
+      return `${chineseNumbers[tens]}十`;
+    } else {
+      return `${chineseNumbers[tens]}十${chineseNumbers[ones]}`;
+    }
+  } else {
+    // 超过100年，直接返回数字（不太可能出现）
+    return num.toString();
+  }
+};
+
+// 将天数转换为年份描述
+const formatDaysToYears = (days) => {
+  if (days < 365) {
+    return "不到一年";
+  }
+
+  const years = days / 365;
+  const fullYears = Math.floor(years);
+  const remainder = years - fullYears;
+
+  if (remainder < 0.5) {
+    return `${numberToChinese(fullYears)}年多`;
+  } else {
+    return `近${numberToChinese(fullYears + 1)}年`;
+  }
+};
+
+// 格式化数量（乘以10后按整百取值）
+const formatCount = (count) => {
+  const multiplied = count * 10;
+  const rounded = Math.floor(multiplied / 100) * 100;
+  return `${rounded}+`;
+};
+// 为你亮起过 1000+ 次共鸣的微光。
+// 生成描述性文案
+const generateDescriptionText = (days, count) => {
+  const formattedTime = formatDaysToYears(days);
+  const formattedCount = formatCount(count);
+  return `在${formattedTime}的时间里，你亮起过${formattedCount}次共鸣的微光，\n是否有某一次，曾轻轻触动过你？`;
+};
+
 const Chapter1 = ({ userNickname = "", dynamics = [] }) => {
-  const [showWelcome, setShowWelcome] = useState(false);
+  const [showTitle, setShowTitle] = useState(false);
   const [showNickname, setShowNickname] = useState(false);
   const [showDays, setShowDays] = useState(false);
   const [showCount, setShowCount] = useState(false);
@@ -108,17 +173,10 @@ const Chapter1 = ({ userNickname = "", dynamics = [] }) => {
   const [showFirstDynamic, setShowFirstDynamic] = useState(false);
   const [showLastEmotionalText, setShowLastEmotionalText] = useState(false);
   const [showLastDynamic, setShowLastDynamic] = useState(false);
-  const [slideUp, setSlideUp] = useState(false);
-  const [displayTotalCount, setDisplayTotalCount] = useState(0);
   const [displayTotalDays, setDisplayTotalDays] = useState(0);
-  const welcomeTextRef = useRef(null);
-  const welcomeContentRef = useRef(null);
-  const firstEmotionalTextRef = useRef(null);
-  const firstDynamicRef = useRef(null);
-  const lastEmotionalTextRef = useRef(null);
-  const lastDynamicRef = useRef(null);
-  const statsContainerRef = useRef(null);
-  const slideDistanceRef = useRef(0);
+  const [displayTotalCount, setDisplayTotalCount] = useState(0);
+  const [filteredDynamics, setFilteredDynamics] = useState([]);
+  const [showDescription, setShowDescription] = useState(false);
 
   // 计数增长动画
   const animateNumber = (
@@ -158,37 +216,62 @@ const Chapter1 = ({ userNickname = "", dynamics = [] }) => {
 
   useEffect(() => {
     // 调试：打印接收到的 userNickname
-    console.log("WelcomePage received userNickname:", userNickname);
-    console.log("WelcomePage received dynamics:", dynamics);
+    console.log("Chapter1 received userNickname:", userNickname);
+    console.log("Chapter1 received dynamics:", dynamics);
+
+    // 先过滤出年度报告截止日期（2025-12-31）之前的所有动态
+    const cutoffDate = new Date(ANNUAL_REPORT_END_DATE);
+    cutoffDate.setHours(23, 59, 59, 999); // 设置为当天的最后一刻
+
+    const filtered = dynamics
+      .filter((dynamic) => {
+        if (!dynamic?.timestamp) return false;
+        const dynamicDate = new Date(dynamic.timestamp);
+        return dynamicDate <= cutoffDate;
+      })
+      // 按时间戳排序（从早到晚）
+      .sort((a, b) => {
+        const dateA = new Date(a.timestamp).getTime();
+        const dateB = new Date(b.timestamp).getTime();
+        return dateA - dateB;
+      });
+
+    setFilteredDynamics(filtered);
 
     // 计算统计数据
     let totalCount = 0;
     let totalDays = 0;
 
-    if (dynamics && dynamics.length > 0) {
-      // 总条数：直接统计数组长度
-      totalCount = dynamics.length;
+    if (filtered.length > 0) {
+      // 总条数：统计过滤后的数组长度
+      totalCount = filtered.length;
 
-      // 总天数：计算第一条动态与最后一条动态的日期差
-      // 最后日期是年度报告截止日期
-      const lastDate = new Date(ANNUAL_REPORT_END_DATE);
-
-      // 最初日期是第一条动态的日期
-      const firstDynamic = dynamics[0];
+      // 总天数：计算最早动态与最晚动态的日期差
+      // 最初日期是第一条动态的日期（已排序，所以是最早的）
+      const firstDynamic = filtered[0];
       const firstDate = firstDynamic?.timestamp
         ? new Date(firstDynamic.timestamp)
         : null;
 
-      if (firstDate) {
+      // 最后日期是最后一条动态的日期（已排序，所以是最晚的）
+      const lastDynamic = filtered[filtered.length - 1];
+      const lastDate = lastDynamic?.timestamp
+        ? new Date(lastDynamic.timestamp)
+        : null;
+
+      if (firstDate && lastDate) {
         // 公式：(最后日期 - 最初日期) / (1000 * 60 * 60 * 24) + 1，结果取整
         const diffTime = lastDate.getTime() - firstDate.getTime();
-        totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        totalDays = Math.max(
+          1,
+          Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1
+        );
       }
     }
 
     // 先显示"欢迎回来"
     const timer1 = setTimeout(() => {
-      setShowWelcome(true);
+      setShowTitle(true);
     }, 300);
 
     // 然后显示昵称
@@ -205,89 +288,28 @@ const Chapter1 = ({ userNickname = "", dynamics = [] }) => {
         setTimeout(() => {
           setShowCount(true);
           animateNumber(totalCount, setDisplayTotalCount, 1500, () => {
-            // 数量动画完成后，先显示第一条情感文案
+            // 数量动画完成后，显示描述性文案
             setTimeout(() => {
-              // 计算需要滑动的距离：欢迎标语高度 + gap
-              if (welcomeTextRef.current && welcomeContentRef.current) {
-                const welcomeTextHeight = welcomeTextRef.current.offsetHeight;
-                const gap = 48; // 与 CSS 中的 gap 保持一致
-                const initialSlideDistance = welcomeTextHeight + gap;
-                slideDistanceRef.current = initialSlideDistance;
-                welcomeContentRef.current.style.setProperty(
-                  "--slide-distance",
-                  `-${initialSlideDistance}px`
-                );
-                setSlideUp(true);
-              }
-              // 显示第一条情感文案
+              setShowDescription(true);
+            }, 500);
+            // 然后显示第一条情感文案
+            setTimeout(() => {
               setShowFirstEmotionalText(true);
               // 第一条情感文案显示后，显示第一条动态卡片
               setTimeout(() => {
                 setShowFirstDynamic(true);
-                // 第一条动态卡片显示后，继续向上推动并显示第二条情感文案
+                // 第一条动态卡片显示后，显示第二条情感文案
                 setTimeout(() => {
-                  if (
-                    firstEmotionalTextRef.current &&
-                    firstDynamicRef.current &&
-                    welcomeContentRef.current
-                  ) {
-                    const emotionalTextHeight =
-                      firstEmotionalTextRef.current.offsetHeight;
-                    const dynamicHeight = firstDynamicRef.current.offsetHeight;
-                    const gap = 24; // 动态容器之间的 gap
-                    const additionalSlide =
-                      emotionalTextHeight + dynamicHeight + gap;
-                    const newSlideDistance =
-                      slideDistanceRef.current + additionalSlide;
-                    slideDistanceRef.current = newSlideDistance;
-                    welcomeContentRef.current.style.setProperty(
-                      "--slide-distance",
-                      `-${newSlideDistance}px`
-                    );
-                  }
-                  // 显示第二条情感文案
                   setShowLastEmotionalText(true);
                   // 第二条情感文案显示后，显示最后一条动态卡片
                   setTimeout(() => {
                     setShowLastDynamic(true);
-                    // 最后一条动态卡片显示后，计算最终滑动距离
-                    setTimeout(() => {
-                      if (welcomeContentRef.current && lastDynamicRef.current) {
-                        // 使用 getBoundingClientRect 获取更准确的位置信息
-                        const contentRect =
-                          welcomeContentRef.current.getBoundingClientRect();
-                        const lastDynamicRect =
-                          lastDynamicRef.current.getBoundingClientRect();
-
-                        // 获取父容器的高度（可视区域高度）
-                        const containerHeight =
-                          welcomeContentRef.current.parentElement
-                            ?.offsetHeight || window.innerHeight;
-
-                        // 计算最后一条卡片底部相对于内容区域顶部的位置
-                        const lastDynamicBottom =
-                          lastDynamicRect.bottom - contentRect.top;
-
-                        // 计算滑动距离：让最后一条卡片底部刚好在容器底部
-                        // 需要考虑容器的 padding (32px)
-                        const padding = 64;
-                        const finalSlideDistance = Math.max(
-                          0,
-                          lastDynamicBottom - containerHeight + padding
-                        );
-
-                        welcomeContentRef.current.style.setProperty(
-                          "--slide-distance",
-                          `-${finalSlideDistance}px`
-                        );
-                      }
-                    }, 500);
                   }, 800);
                 }, 800);
               }, 800);
             }, 500);
           });
-        }, 200); // 稍微延迟一下，让过渡更自然
+        }, 200);
       });
     }, 1800);
 
@@ -299,24 +321,19 @@ const Chapter1 = ({ userNickname = "", dynamics = [] }) => {
   }, [userNickname, dynamics]);
 
   return (
-    <div
-      ref={welcomeContentRef}
-      className={`${styles.welcomeContent} ${
-        slideUp ? styles.slideUpContent : ""
-      }`}
-    >
-      <div ref={welcomeTextRef} className={styles.welcomeText}>
-        <span className={showWelcome ? styles.fadeIn : styles.hidden}>
+    <div className={styles.chapter1Content}>
+      <div className={styles.chapter1Title}>
+        <span className={showTitle ? styles.fadeIn : styles.hidden}>
           欢迎回来，
         </span>
-        {showWelcome && (
+        {showTitle && (
           <span className={showNickname ? styles.fadeIn : styles.hidden}>
             {userNickname || "朋友"}。
           </span>
         )}
       </div>
 
-      <div ref={statsContainerRef} className={styles.statsContainer}>
+      <div className={styles.statsContainer}>
         {showDays && (
           <div className={styles.statItem}>
             <span className={styles.statNumber}>{displayTotalDays}</span>
@@ -331,39 +348,40 @@ const Chapter1 = ({ userNickname = "", dynamics = [] }) => {
         )}
       </div>
 
-      {dynamics && dynamics.length > 0 && (
+      {showDescription && displayTotalDays > 0 && displayTotalCount > 0 && (
+        <div className={`${styles.descriptionText} ${styles.fadeIn}`}>
+          {generateDescriptionText(displayTotalDays, displayTotalCount)}
+        </div>
+      )}
+
+      {filteredDynamics && filteredDynamics.length > 0 && (
         <div className={styles.dynamicsContainer}>
           {showFirstEmotionalText && (
             <div
-              ref={firstEmotionalTextRef}
               className={`${styles.emotionalText} ${styles.emotionalTextAbove} ${styles.fadeIn}`}
             >
               一切，从这里开始。
             </div>
           )}
-          {showFirstDynamic && dynamics[0] && (
-            <div
-              ref={firstDynamicRef}
-              className={`${styles.dynamicItem} ${styles.fadeIn}`}
-            >
+          {showFirstDynamic && filteredDynamics[0] && (
+            <div className={`${styles.dynamicItem} ${styles.fadeIn}`}>
               <div className={styles.dynamicHeader}>
                 <span className={styles.dynamicDate}>
-                  {dynamics[0].date} {dynamics[0].time}
+                  {filteredDynamics[0].date} {filteredDynamics[0].time}
                 </span>
                 <span className={styles.currentTimeDescription}>
-                  {generateDateDescription(dynamics[0].timestamp)}
+                  {generateDateDescription(filteredDynamics[0].timestamp)}
                 </span>
               </div>
-              {dynamics[0].text && (
+              {filteredDynamics[0].text && (
                 <div className={styles.dynamicText}>
-                  {truncateText(dynamics[0].text, 50)}
+                  {truncateText(filteredDynamics[0].text, 50)}
                 </div>
               )}
             </div>
           )}
           {showLastEmotionalText && (
             <div
-              ref={lastEmotionalTextRef}
               className={`${styles.emotionalText} ${styles.emotionalTextAbove} ${styles.fadeIn}`}
             >
               旅程，在此刻暂歇。
@@ -371,37 +389,24 @@ const Chapter1 = ({ userNickname = "", dynamics = [] }) => {
           )}
           {showLastDynamic &&
             (() => {
-              // 找到年度报告截止日期之前最后一条动态
-              const cutoffDate = new Date(ANNUAL_REPORT_END_DATE);
-              const lastDynamicBeforeCutoff = dynamics
-                .filter((dynamic) => {
-                  if (!dynamic?.timestamp) return false;
-                  const dynamicDate = new Date(dynamic.timestamp);
-                  return dynamicDate < cutoffDate;
-                })
-                .pop(); // 获取最后一条
+              // 获取过滤后的最后一条动态
+              const lastDynamic = filteredDynamics[filteredDynamics.length - 1];
 
-              if (!lastDynamicBeforeCutoff) return null;
+              if (!lastDynamic) return null;
 
               return (
-                <div
-                  ref={lastDynamicRef}
-                  className={`${styles.dynamicItem} ${styles.fadeIn}`}
-                >
+                <div className={`${styles.dynamicItem} ${styles.fadeIn}`}>
                   <div className={styles.dynamicHeader}>
                     <span className={styles.dynamicDate}>
-                      {lastDynamicBeforeCutoff.date}{" "}
-                      {lastDynamicBeforeCutoff.time}
+                      {lastDynamic.date} {lastDynamic.time}
                     </span>
                     <span className={styles.currentTimeDescription}>
-                      {generateDateDescription(
-                        lastDynamicBeforeCutoff.timestamp
-                      )}
+                      {generateDateDescription(lastDynamic.timestamp)}
                     </span>
                   </div>
-                  {lastDynamicBeforeCutoff.text && (
+                  {lastDynamic.text && (
                     <div className={styles.dynamicText}>
-                      {truncateText(lastDynamicBeforeCutoff.text, 50)}
+                      {truncateText(lastDynamic.text, 50)}
                     </div>
                   )}
                 </div>

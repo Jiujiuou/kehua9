@@ -1,21 +1,15 @@
-.welcomeContent {
+.chapter1Content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   gap: 48px;
-  padding: 32px;
   box-sizing: border-box;
-  transition: transform 1s ease-out;
 }
 
-.slideUpContent {
-  transform: translateY(var(--slide-distance, 0));
-}
-
-.welcomeText {
+.chapter1Title {
   font-size: 24px;
   line-height: 1.6;
   color: var(--text-primary);
@@ -59,6 +53,20 @@
   font-weight: 500;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
+}
+
+.descriptionText {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  font-weight: 400;
+  max-width: 500px;
+  margin-top: -24px;
+  padding: 0 16px;
+  white-space: pre-line;
 }
 
 .hidden {
@@ -183,7 +191,7 @@
     font-size: 48px;
   }
 
-  .welcomeContent {
+  .chapter1Content {
     gap: 32px;
     padding: 24px;
   }

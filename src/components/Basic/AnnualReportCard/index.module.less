@@ -79,7 +79,15 @@
 .cardContent {
   flex: 1;
   position: relative;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  // 隐藏滚动条但保持滚动功能
+  scrollbar-width: none; // Firefox
+  -ms-overflow-style: none; // IE 和 Edge
+  
+  &::-webkit-scrollbar {
+    display: none; // Chrome, Safari, Opera
+  }
 }
 
 .pageContent {
@@ -92,11 +100,12 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  justify-content: center;
+  justify-content: flex-start;
   box-sizing: border-box;
   animation-duration: 0.3s;
   animation-timing-function: ease-in-out;
   animation-fill-mode: both;
+  min-height: 100%;
 }
 
 // 从右侧滑入（前进）
