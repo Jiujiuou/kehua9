@@ -1,0 +1,154 @@
+.wordCloudWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  height: 100%;
+  gap: 32px;
+}
+
+.titleSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  text-align: center;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  color: var(--text-primary); // 后备颜色
+
+  // 亮色模式：使用渐变文字和发光效果
+  background: linear-gradient(
+    135deg,
+    rgba(26, 26, 26, 1) 0%,
+    rgba(51, 51, 51, 0.95) 50%,
+    rgba(26, 26, 26, 1) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  // 朦胧发光效果 - 多层阴影（亮色模式）
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4))
+    drop-shadow(0 0 16px rgba(255, 255, 255, 0.3))
+    drop-shadow(0 0 24px rgba(255, 255, 255, 0.2));
+
+  // 暗色模式下的发光效果
+  [data-theme="dark"] & {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(240, 240, 255, 0.95) 50%,
+      rgba(255, 255, 255, 1) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6))
+      drop-shadow(0 0 20px rgba(255, 255, 255, 0.4))
+      drop-shadow(0 0 30px rgba(255, 255, 255, 0.3))
+      drop-shadow(0 0 40px rgba(255, 255, 255, 0.2));
+  }
+}
+
+.subtitle {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.6;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  color: var(--text-secondary); // 后备颜色
+
+  // 亮色模式：使用渐变文字和发光效果
+  background: linear-gradient(
+    135deg,
+    rgba(26, 26, 26, 0.9) 0%,
+    rgba(51, 51, 51, 0.85) 50%,
+    rgba(26, 26, 26, 0.9) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  // 朦胧发光效果 - 多层阴影（亮色模式）
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.3))
+    drop-shadow(0 0 12px rgba(255, 255, 255, 0.2))
+    drop-shadow(0 0 18px rgba(255, 255, 255, 0.15));
+
+  // 暗色模式下的发光效果
+  [data-theme="dark"] & {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(240, 240, 255, 0.9) 50%,
+      rgba(255, 255, 255, 0.95) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5))
+      drop-shadow(0 0 16px rgba(255, 255, 255, 0.3))
+      drop-shadow(0 0 24px rgba(255, 255, 255, 0.2))
+      drop-shadow(0 0 32px rgba(255, 255, 255, 0.15));
+  }
+}
+
+.wordCloudContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.wordCloudCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.loadingContainer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.loadingText {
+  font-size: 16px;
+  color: var(--text-secondary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.errorContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+}
+
+.errorText {
+  font-size: 16px;
+  color: var(--text-error, #ff5252);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}

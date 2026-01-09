@@ -198,7 +198,7 @@ const AnnualReportCard = ({
       } else if (index === 1) {
         content = <Chapter1 userNickname={userNickname} dynamics={dynamics} />;
       } else if (index === 2) {
-        content = <Chapter2 userNickname={userNickname} dynamics={dynamics} />;
+        content = <Chapter2 dynamics={dynamics} />;
       }
 
       if (!content) return null;

@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import styles from "./Chapter2.module.less";
+import WordCloud from "./WordCloud";
 
-const Chapter2 = ({ userNickname = "", dynamics = [] }) => {
+const Chapter2 = ({ dynamics = [] }) => {
   const [showContent, setShowContent] = useState(false);
 
   useEffect(() => {
@@ -19,21 +20,20 @@ const Chapter2 = ({ userNickname = "", dynamics = [] }) => {
   return (
     <div className={styles.chapter2Content}>
       <div
-        className={`${styles.content} ${showContent ? styles.fadeIn : styles.hidden}`}
+        className={`${styles.content} ${
+          showContent ? styles.fadeIn : styles.hidden
+        }`}
       >
-        <h2 className={styles.title}>第二章</h2>
-        <p className={styles.description}>
-          这里是第二章的内容，待完善...
-        </p>
+        <div className={styles.wordCloudWrapper}>
+          <WordCloud dynamics={dynamics} />
+        </div>
       </div>
     </div>
   );
 };
 
 Chapter2.propTypes = {
-  userNickname: PropTypes.string,
   dynamics: PropTypes.array,
 };
 
 export default Chapter2;
-

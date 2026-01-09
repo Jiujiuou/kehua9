@@ -140,3 +140,13 @@ export const WEEK_DAY_PREFIXES = {
 // 年度报告截止日期
 export const ANNUAL_REPORT_END_DATE = "2025-12-31";
 
+// ============================================
+// 开发调试配置
+// ============================================
+// 设置要调试的章节索引，设置为 null 或注释掉则使用正常流程
+// 0: 昵称输入页
+// 1: 第一章
+// 2: 第二章
+// 示例：export const DEBUG_CHAPTER_INDEX = 2; // 直接跳转到第二章
+export const DEBUG_CHAPTER_INDEX = 2; // 设置为 null 表示不使用调试模式
+

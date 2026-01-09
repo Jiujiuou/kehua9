@@ -21,6 +21,7 @@ import { useConfirmHelper } from "@/components/Basic/Confirm";
 import { deleteDynamicFromFile } from "@/utils/writeData";
 import { getFontFamily } from "@/utils/fonts";
 import { track } from "@/utils/track";
+import { DEBUG_CHAPTER_INDEX } from "@/constant";
 import styles from "./index.module.less";
 
 const Preview = forwardRef(
@@ -58,14 +59,47 @@ const Preview = forwardRef(
     const [searchKeyword, setSearchKeyword] = useState("");
     const [hoveredImageIndex, setHoveredImageIndex] = useState(null);
     const [showReportSelector, setShowReportSelector] = useState(false);
-    const [userNickname, setUserNickname] = useState("");
-    const [reportPageIndex, setReportPageIndex] = useState(0);
+    // 开发调试模式：如果设置了 DEBUG_CHAPTER_INDEX，则直接跳转到指定章节
+    const getInitialReportPageIndex = () => {
+      if (DEBUG_CHAPTER_INDEX !== null && DEBUG_CHAPTER_INDEX !== undefined) {
+        return DEBUG_CHAPTER_INDEX;
+      }
+      return 0;
+    };
+    const [userNickname, setUserNickname] = useState(() => {
+      // 如果调试模式不是第0页（昵称输入页），则设置一个测试昵称
+      if (
+        DEBUG_CHAPTER_INDEX !== null &&
+        DEBUG_CHAPTER_INDEX !== undefined &&
+        DEBUG_CHAPTER_INDEX > 0
+      ) {
+        return "测试用户";
+      }
+      return "";
+    });
+    const [reportPageIndex, setReportPageIndex] = useState(
+      getInitialReportPageIndex
+    );
     const fileInputRef = useRef(null);
     const contentAreaRef = useRef(null);
     const prevExternalDynamicsRef = useRef(null);
     const isInternalUpdateRef = useRef(false);
     const toast = useToastHelpers();
     const confirm = useConfirmHelper();
+
+    // 处理年度报告按钮点击
+    const handleReportButtonClick = () => {
+      // 开发调试模式：如果设置了 DEBUG_CHAPTER_INDEX，跳转到指定章节
+      if (DEBUG_CHAPTER_INDEX !== null && DEBUG_CHAPTER_INDEX !== undefined) {
+        setReportPageIndex(DEBUG_CHAPTER_INDEX);
+        // 如果调试的不是第0页（昵称输入页），设置测试昵称
+        if (DEBUG_CHAPTER_INDEX > 0) {
+          setUserNickname("测试用户");
+        }
+        console.log(`[调试模式] 已跳转到第 ${DEBUG_CHAPTER_INDEX + 1} 章`);
+      }
+      setShowReportSelector(true);
+    };
 
     // 当外部传入的 dynamics 变化时，同步更新内部 state
     useEffect(() => {
@@ -503,7 +537,7 @@ const Preview = forwardRef(
             </button>
             {/* <button
               className={styles.reportButton}
-              onClick={() => setShowReportSelector(true)}
+              onClick={handleReportButtonClick}
               title="年度报告"
             >
               <FaChartBar />
