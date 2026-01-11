@@ -1,0 +1,252 @@
+.container {
+  width: 100%;
+  margin-top: 32px;
+  padding: 24px 20px;
+  background-color: var(--bg-card);
+  border-radius: 12px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+
+  [data-theme="dark"] & {
+    background-color: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.canvasContainer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.canvas {
+  width: 100%;
+  max-width: 800px;
+  height: 400px;
+  display: block;
+  border-radius: 8px;
+}
+
+.loading,
+.empty {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 40px 20px;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+// 工具提示
+.tooltip {
+  position: fixed;
+  background: rgba(40, 40, 50, 0.95);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 1000;
+  transition: opacity 0.2s;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+
+  [data-theme="dark"] & {
+    background: rgba(30, 30, 40, 0.98);
+  }
+}
+
+.tooltipDate {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.tooltipEmotion {
+  color: #81C784;
+}
+
+.tooltipCount {
+  color: #B0BEC5;
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+// 详细信息面板
+.detailPanel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 500px;
+  background: rgba(35, 35, 45, 0.98);
+  border-radius: 12px;
+  padding: 20px;
+  z-index: 2000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+
+  [data-theme="dark"] & {
+    background: rgba(25, 25, 35, 0.98);
+  }
+
+  &.active {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  h3 {
+    margin: 0;
+    color: #fff;
+    font-size: 18px;
+  }
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.panelContent {
+  color: #fff;
+}
+
+.dateSection,
+.emotionSection,
+.postsSection {
+  margin-bottom: 20px;
+}
+
+.dateLabel,
+.emotionLabel,
+.postsLabel {
+  color: #B0BEC5;
+  font-size: 12px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dateValue {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.emotionName {
+  display: inline-block;
+  padding: 4px 8px;
+  background: rgba(129, 199, 132, 0.2);
+  border-radius: 4px;
+  color: #81C784;
+  margin-right: 8px;
+}
+
+.emotionDesc {
+  color: #CFD8DC;
+  font-size: 14px;
+}
+
+.emotionIntensity {
+  margin-top: 8px;
+  color: #FFB74D;
+  font-size: 14px;
+}
+
+.postItem {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.postText {
+  color: #E0E0E0;
+}
+
+.noPosts {
+  color: #78909C;
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+}
+
+// 移动端适配
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+    margin-top: 24px;
+  }
+
+  .title {
+    font-size: 16px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+  }
+
+  .canvas {
+    height: 300px;
+  }
+
+  .detailPanel {
+    width: 95%;
+    padding: 15px;
+  }
+}
+

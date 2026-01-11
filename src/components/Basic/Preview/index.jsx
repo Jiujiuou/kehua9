@@ -61,7 +61,7 @@ const Preview = forwardRef(
       if (DEBUG_CHAPTER_INDEX !== null && DEBUG_CHAPTER_INDEX !== undefined) {
         return DEBUG_CHAPTER_INDEX;
       }
-      return 3; // 默认打开 Chapter3
+      return 4; // 默认打开 Chapter4
     };
     const [userNickname, setUserNickname] = useState(() => {
       // 如果调试模式不是第0页（昵称输入页），则设置一个测试昵称
@@ -95,8 +95,8 @@ const Preview = forwardRef(
         }
         console.log(`[调试模式] 已跳转到第 ${DEBUG_CHAPTER_INDEX + 1} 章`);
       } else {
-        // 默认打开 Chapter3（索引为3）
-        setReportPageIndex(3);
+        // 默认打开 Chapter4（索引为4）
+        setReportPageIndex(4);
       }
       setShowReportSelector(true);
     };
@@ -674,11 +674,11 @@ const Preview = forwardRef(
         <AnnualReportCard
           visible={showReportSelector}
           currentIndex={reportPageIndex}
-          totalPages={4}
+          totalPages={5}
           onClose={() => {
             setShowReportSelector(false);
             setUserNickname("");
-            setReportPageIndex(3); // 关闭后重置为 Chapter3
+            setReportPageIndex(4); // 关闭后重置为 Chapter4
           }}
           onPageChange={(newIndex) => {
             setReportPageIndex(newIndex);

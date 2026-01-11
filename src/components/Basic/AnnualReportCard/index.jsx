@@ -8,6 +8,7 @@ import NicknameInputPage from "./NicknameInputPage";
 import Chapter1 from "./Chapter1";
 import Chapter2 from "./Chapter2";
 import Chapter3 from "./Chapter3";
+import Chapter4 from "./Chapter4";
 import styles from "./index.module.less";
 
 const AnnualReportCard = ({
@@ -232,6 +233,8 @@ const AnnualReportCard = ({
             }}
           />
         );
+      } else if (index === 4) {
+        content = <Chapter4 dynamics={dynamics} />;
       }
 
       if (!content) return null;

@@ -1,0 +1,723 @@
+.chapter4Content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  min-height: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  gap: 24px;
+  box-sizing: border-box;
+  padding: 20px;
+
+  // 隐藏滚动条但保留滚动功能
+  scrollbar-width: none; // Firefox
+  -ms-overflow-style: none; // IE 和 Edge
+
+  &::-webkit-scrollbar {
+    display: none; // Chrome, Safari, Opera
+  }
+}
+
+.chapter4Title {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  color: var(--text-primary); // 后备颜色
+  text-align: center;
+
+  // 亮色模式：使用渐变文字和发光效果
+  background: linear-gradient(
+    135deg,
+    rgba(26, 26, 26, 1) 0%,
+    rgba(51, 51, 51, 0.95) 50%,
+    rgba(26, 26, 26, 1) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  // 朦胧发光效果 - 多层阴影（亮色模式）
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4))
+    drop-shadow(0 0 16px rgba(255, 255, 255, 0.3))
+    drop-shadow(0 0 24px rgba(255, 255, 255, 0.2));
+
+  // 暗色模式下的发光效果
+  [data-theme="dark"] & {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(240, 240, 255, 0.95) 50%,
+      rgba(255, 255, 255, 1) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6))
+      drop-shadow(0 0 20px rgba(255, 255, 255, 0.4))
+      drop-shadow(0 0 30px rgba(255, 255, 255, 0.3))
+      drop-shadow(0 0 40px rgba(255, 255, 255, 0.2));
+  }
+}
+
+.chapter4Subtitle {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.6;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  color: var(--text-secondary); // 后备颜色
+  text-align: center;
+  max-width: 500px;
+  padding: 0 16px;
+
+  // 亮色模式：使用渐变文字和发光效果
+  background: linear-gradient(
+    135deg,
+    rgba(26, 26, 26, 0.9) 0%,
+    rgba(51, 51, 51, 0.85) 50%,
+    rgba(26, 26, 26, 0.9) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  // 朦胧发光效果 - 多层阴影（亮色模式）
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.3))
+    drop-shadow(0 0 12px rgba(255, 255, 255, 0.2))
+    drop-shadow(0 0 18px rgba(255, 255, 255, 0.15));
+
+  // 暗色模式下的发光效果
+  [data-theme="dark"] & {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(240, 240, 255, 0.9) 50%,
+      rgba(255, 255, 255, 0.95) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5))
+      drop-shadow(0 0 16px rgba(255, 255, 255, 0.3))
+      drop-shadow(0 0 24px rgba(255, 255, 255, 0.2))
+      drop-shadow(0 0 32px rgba(255, 255, 255, 0.15));
+  }
+}
+
+.hidden {
+  opacity: 0;
+}
+
+.fadeIn {
+  animation: fadeInText 0.6s ease-out forwards;
+}
+
+@keyframes fadeInText {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.analyzingText {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 24px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.spectrumContainer {
+  margin-top: 32px;
+  padding: 24px 20px;
+  background-color: var(--bg-card);
+  border-radius: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+
+  [data-theme="dark"] & {
+    background-color: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.spectrumTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.spectrumList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.spectrumItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.emotionLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 60px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.emotionColorDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.emotionName {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.progressBarContainer {
+  flex: 1;
+  height: 24px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+
+  [data-theme="dark"] & {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.progressBar {
+  height: 100%;
+  border-radius: 12px;
+  transition: width 1s ease-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.emotionPercentage {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 50px;
+  text-align: right;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.mostCommonEmotion {
+  margin-top: 28px;
+  text-align: center;
+  padding: 0 4px;
+}
+
+.mostCommonTitle {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.mostCommonDescription {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-style: italic;
+  line-height: 1.6;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+// 响应式设计：在小屏幕上调整布局
+@media (max-width: 480px) {
+  .chapter4Content {
+    gap: 20px;
+    padding: 24px;
+  }
+
+  .chapter4Title {
+    font-size: 24px;
+  }
+
+  .chapter4Subtitle {
+    font-size: 14px;
+  }
+
+  .spectrumContainer {
+    padding: 20px 16px;
+    margin-top: 24px;
+  }
+
+  .spectrumTitle {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+
+  .spectrumList {
+    gap: 12px;
+  }
+
+  .emotionName {
+    font-size: 14px;
+    min-width: 50px;
+  }
+
+  .emotionPercentage {
+    font-size: 13px;
+    min-width: 45px;
+  }
+
+  .mostCommonEmotion {
+    margin-top: 24px;
+  }
+
+  .mostCommonTitle {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .mostCommonDescription {
+    font-size: 13px;
+  }
+}
+
+// 时光色卡样式
+.timeColorSection {
+  margin-top: 40px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.timeColorTitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.timeColorSubtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.colorGridContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 800px;
+  padding: 20px;
+  justify-items: center;
+}
+
+.colorCardContainer {
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  will-change: transform, opacity;
+  animation: fadeInCard 0.6s ease-out forwards;
+
+  &:hover {
+    transform: translateY(-5px) scale(1.05);
+    z-index: 10;
+  }
+}
+
+@keyframes fadeInCard {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.colorCardCanvas {
+  display: block;
+  width: 120px;
+  height: 160px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+
+  .colorCardContainer:hover & {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.colorCardName {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  z-index: 2;
+  pointer-events: none;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 8px;
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  white-space: nowrap;
+  max-width: calc(100% - 16px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// 详情面板样式
+.colorDetailPanel {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+
+  &.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.panelOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+}
+
+.panelContent {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  width: 90%;
+  max-width: 500px;
+  background: rgba(35, 35, 45, 0.95);
+  border-radius: 16px;
+  padding: 30px;
+  opacity: 0;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(20px);
+
+  .colorDetailPanel.active & {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  h2 {
+    margin: 0;
+    color: #fff;
+    font-size: 24px;
+    font-weight: 300;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif;
+  }
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 28px;
+  cursor: pointer;
+  padding: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.colorDisplaySection {
+  margin-bottom: 30px;
+}
+
+.mainColor {
+  width: 100%;
+  height: 120px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.1) 25%,
+        transparent 25%
+      ),
+      linear-gradient(-45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.1) 75%),
+      linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.1) 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+}
+
+.colorVariants {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.colorVariant {
+  height: 40px;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.variantLabel {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.descriptionSection {
+  margin-bottom: 30px;
+
+  h3 {
+    color: #fff;
+    font-size: 18px;
+    margin-bottom: 15px;
+    font-weight: 400;
+    border-left: 3px solid rgba(255, 183, 77, 0.5);
+    padding-left: 10px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif;
+  }
+}
+
+.poeticDescription {
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.7;
+  margin-bottom: 20px;
+  font-size: 15px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.colorMetadata {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.metadataItem {
+  display: flex;
+  flex-direction: column;
+
+  .label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif;
+  }
+
+  .value {
+    font-size: 16px;
+    color: #fff;
+    font-weight: 500;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif;
+  }
+}
+
+.actionSection {
+  display: flex;
+  gap: 15px;
+}
+
+.shareBtn {
+  flex: 1;
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .colorGridContainer {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 15px;
+    padding: 15px;
+  }
+
+  .colorCardCanvas {
+    width: 100px;
+    height: 140px;
+  }
+
+  .colorVariants {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .colorMetadata {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .panelContent {
+    padding: 20px;
+    width: 95%;
+  }
+
+  .actionSection {
+    flex-direction: column;
+  }
+
+  .mainColor {
+    height: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .timeColorTitle {
+    font-size: 20px;
+  }
+
+  .timeColorSubtitle {
+    font-size: 12px;
+  }
+
+  .colorGridContainer {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 12px;
+  }
+
+  .colorCardCanvas {
+    width: 80px;
+    height: 120px;
+  }
+
+  .colorCardName {
+    font-size: 11px;
+    padding: 1px 6px;
+  }
+
+  .colorVariants {
+    grid-template-columns: 1fr;
+  }
+
+  .colorMetadata {
+    grid-template-columns: 1fr;
+  }
+
+  .panelHeader h2 {
+    font-size: 20px;
+  }
+}
