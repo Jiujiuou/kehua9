@@ -198,6 +198,7 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
       await writeDynamicToFile(directoryHandle, year, newDynamic);
 
       // 通知父组件成功
+      console.log(`[AddDynamicDialog] 添加动态成功，准备通知父组件，directoryHandle: ${directoryHandle ? '存在' : '不存在'}`);
       if (onSuccess) {
         onSuccess(newDynamic);
       }
@@ -212,6 +213,7 @@ function AddDynamicDialog({ visible, directoryHandle, onClose, onSuccess }) {
       clearDraft(); // 发布成功后清空草稿
       onClose();
       toast.success("动态发布成功");
+      console.log(`[AddDynamicDialog] 对话框已关闭，directoryHandle: ${directoryHandle ? '存在' : '不存在'}`);
 
       // 埋点：发布新动态
       track("发布新动态成功");

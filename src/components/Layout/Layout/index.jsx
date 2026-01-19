@@ -39,6 +39,11 @@ function App() {
   const [lineHeight, setLineHeight] = useState(savedSettings.lineHeight ?? 1.6);
   const [directoryHandle, setDirectoryHandle] = useState(null);
 
+  // 监听 directoryHandle 的变化
+  useEffect(() => {
+    console.log(`[Layout] directoryHandle 变化: ${directoryHandle ? '已设置' : '未设置'}`);
+  }, [directoryHandle]);
+
   // 页面加载时发送页面展现埋点
   useEffect(() => {
     track("页面访问");
@@ -164,6 +169,7 @@ function App() {
           contentTypeFilter={contentTypeFilter}
           directoryHandle={directoryHandle}
           dynamics={dynamics}
+          onDirectoryHandleChange={setDirectoryHandle}
           onSortOrderChange={handleSortOrderChange}
           onImageGapChange={setImageGap}
           onPreviewPaddingChange={setPreviewPadding}

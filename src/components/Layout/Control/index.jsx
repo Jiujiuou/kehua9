@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaPlus } from "react-icons/fa";
 import Slider from "@/components/Basic/Slider/Slider";
 import Switch from "@/components/Basic/Switch";
@@ -40,13 +40,21 @@ function Control({
 }) {
   const [showAddDialog, setShowAddDialog] = useState(false);
 
+  // 监听「添加动态」按钮可点击状态转变
+  useEffect(() => {
+    const isClickable = !!directoryHandle;
+    console.log(`「添加动态」按钮可点击状态转变: ${isClickable ? '可点击' : '不可点击'}`);
+  }, [directoryHandle]);
+
   const handleAddSuccess = (newDynamic) => {
+    console.log(`[Control] 添加动态成功回调，directoryHandle: ${directoryHandle ? '存在' : '不存在'}`);
     // 添加到当前动态列表
     if (onDynamicsChange) {
       const updatedDynamics = [...dynamics, newDynamic].sort((a, b) => {
         return new Date(a.timestamp) - new Date(b.timestamp);
       });
       onDynamicsChange(updatedDynamics);
+      console.log(`[Control] 动态列表已更新，按钮状态: ${directoryHandle ? '可点击' : '不可点击'}`);
     }
   };
   return (
@@ -62,6 +70,7 @@ function Control({
           <button
             className={styles.addButton}
             onClick={() => {
+              console.log(`[Control] 点击「添加动态」按钮，directoryHandle: ${directoryHandle ? '存在' : '不存在'}`);
               setShowAddDialog(true);
               // 埋点：点击「添加动态」
               track("点击添加动态");

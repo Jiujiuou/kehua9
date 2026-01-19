@@ -640,12 +640,5 @@ export const KEYWORD_INDEX = (() => {
     });
   });
 
-  // 调试信息
-  console.log('[KEYWORD_INDEX] 构建完成，共', Object.keys(index).length, '个关键词');
-  const sampleKeys = Object.keys(index).slice(0, 10);
-  console.log('[KEYWORD_INDEX] 示例关键词:', sampleKeys);
-  console.log('[KEYWORD_INDEX] "开心" 是否存在:', !!index['开心']);
-  console.log('[KEYWORD_INDEX] "开心" 详情:', index['开心']);
-
   return index;
 })();

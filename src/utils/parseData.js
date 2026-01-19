@@ -12,8 +12,6 @@ export async function parseDynamicData(files) {
   // 将 FileList 转换为数组
   const fileArray = Array.from(files);
 
-  console.log("开始解析，文件总数:", fileArray.length);
-
   // 按年份分组文件
   const yearGroups = {};
 
@@ -24,7 +22,6 @@ export async function parseDynamicData(files) {
   // 3. 彩虹绿/我的动态/2021年/2021年-动态内容.txt (选择包含"我的动态"的父文件夹)
   fileArray.forEach(file => {
     const pathParts = file.webkitRelativePath.split('/');
-    console.log("文件路径:", file.webkitRelativePath, "路径部分:", pathParts);
 
     let yearFolder = null;
 
@@ -51,12 +48,9 @@ export async function parseDynamicData(files) {
             images: [],
             videos: []
           };
-          console.log("找到年份文件夹:", year);
         }
       }
   });
-
-  console.log("找到的年份:", Object.keys(yearGroups));
 
   // 处理每个年份的文件
   for (const file of fileArray) {
@@ -98,7 +92,6 @@ export async function parseDynamicData(files) {
     const actualFileName = pathParts[yearIndex + 1];
 
     if (pathParts.length === yearIndex + 2 && actualFileName === expectedContentFileName) {
-      console.log("找到动态内容文件:", file.webkitRelativePath);
       const content = await readFileAsText(file);
       yearGroups[year].contentFile = {
         content,
@@ -118,7 +111,6 @@ export async function parseDynamicData(files) {
       );
 
       if (isImage) {
-        console.log("找到图片文件:", file.webkitRelativePath);
         const imagePath = pathParts.slice(imageFolderIndex + 1).join('/');
         const imageUrl = await readFileAsDataURL(file);
         yearGroups[year].images.push({
@@ -136,7 +128,6 @@ export async function parseDynamicData(files) {
       );
 
       if (isVideo) {
-        console.log("找到视频文件:", file.webkitRelativePath);
         const videoPath = pathParts.slice(imageFolderIndex + 1).join('/');
         const videoUrl = await readFileAsDataURL(file);
         yearGroups[year].videos.push({
@@ -154,30 +145,18 @@ export async function parseDynamicData(files) {
 
   for (const year in yearGroups) {
     const group = yearGroups[year];
-    console.log(`处理年份 ${year}:`, {
-      hasContentFile: !!group.contentFile,
-      imageCount: group.images.length,
-      videoCount: group.videos.length
-    });
 
     if (!group.contentFile) {
-      console.warn(`年份 ${year} 没有找到动态内容文件`);
       continue;
     }
 
     const dynamics = parseYearContent(group.contentFile.content, group.images, group.videos);
-    console.log(`年份 ${year} 解析出 ${dynamics.length} 条动态`);
     allDynamics.push(...dynamics);
   }
 
   // 按时间排序
   allDynamics.sort((a, b) => {
     return new Date(a.timestamp) - new Date(b.timestamp);
-  });
-
-  console.log("最终解析结果:", {
-    totalDynamics: allDynamics.length,
-    years: Object.keys(yearGroups)
   });
 
   return allDynamics;
