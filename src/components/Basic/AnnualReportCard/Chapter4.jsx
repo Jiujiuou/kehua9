@@ -4,13 +4,7 @@ import { analyzeEmotionsBatch } from "@/utils/emotionAnalysis";
 import {
   EMOTION_IDS,
   EMOTION_CATEGORIES,
-  ANNUAL_REPORT_END_DATE,
 } from "@/constant";
-import {
-  calculateYearlyEmotionData,
-  extractYearColor,
-} from "@/utils/timeColorGenerator";
-import TimeColorGrid from "./TimeColorGrid";
 import styles from "./Chapter4.module.less";
 
 const Chapter4 = ({ dynamics = [] }) => {
@@ -19,8 +13,6 @@ const Chapter4 = ({ dynamics = [] }) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [emotionStats, setEmotionStats] = useState(null);
   const [showSpectrum, setShowSpectrum] = useState(false);
-  const [yearlyColorData, setYearlyColorData] = useState([]);
-  const [showTimeColors, setShowTimeColors] = useState(false);
 
   useEffect(() => {
     console.log("[Chapter4] 组件初始化");
@@ -295,135 +287,6 @@ const Chapter4 = ({ dynamics = [] }) => {
         });
 
         console.log("\n[Chapter4] ========================================\n");
-
-        // 生成年度色彩数据
-        console.log("\n[Chapter4] ========== 开始生成年度色彩 ==========");
-        console.log("[Chapter4] 动态数据总数:", dynamics.length);
-        console.log("[Chapter4] 情绪分析结果总数:", results.length);
-
-        try {
-          // 获取截止日期
-          const cutoffDate = new Date(ANNUAL_REPORT_END_DATE);
-          cutoffDate.setHours(23, 59, 59, 999); // 设置为当天的最后一刻
-
-          console.log("[Chapter4] 年度报告截止日期:", ANNUAL_REPORT_END_DATE);
-
-          // 按年份分组动态数据
-          const dynamicsByYear = {};
-          dynamics.forEach((dynamic, index) => {
-            let year = null;
-            let dynamicDate = null;
-
-            // 优先使用 date 属性
-            if (dynamic.date) {
-              dynamicDate = new Date(dynamic.date + "T00:00:00");
-              year = parseInt(dynamic.date.split("-")[0]);
-            }
-            // 如果没有 date，尝试从 timestamp 提取
-            else if (dynamic.timestamp) {
-              dynamicDate = new Date(dynamic.timestamp);
-              if (!isNaN(dynamicDate.getTime())) {
-                year = dynamicDate.getFullYear();
-              }
-            }
-
-            // 检查年份有效性，并且日期必须在截止日期之前
-            if (
-              year &&
-              !isNaN(year) &&
-              year > 1900 &&
-              year < 2100 &&
-              dynamicDate &&
-              !isNaN(dynamicDate.getTime()) &&
-              dynamicDate <= cutoffDate
-            ) {
-              if (!dynamicsByYear[year]) {
-                dynamicsByYear[year] = {
-                  dynamics: [],
-                  emotionResults: [],
-                };
-              }
-              dynamicsByYear[year].dynamics.push(dynamic);
-              if (results[index]) {
-                dynamicsByYear[year].emotionResults.push(results[index]);
-              }
-            } else {
-              if (dynamicDate && dynamicDate > cutoffDate) {
-                console.log(
-                  `[Chapter4] 跳过超过截止日期的动态，日期: ${
-                    dynamic.date || dynamic.timestamp
-                  }, 截止日期: ${ANNUAL_REPORT_END_DATE}`
-                );
-              } else {
-                console.warn(
-                  `[Chapter4] 无法提取年份或日期无效，动态索引: ${index}`,
-                  dynamic
-                );
-              }
-            }
-          });
-
-          console.log(
-            "[Chapter4] 按年份分组完成，年份数:",
-            Object.keys(dynamicsByYear).length
-          );
-          console.log(
-            "[Chapter4] 年份列表:",
-            Object.keys(dynamicsByYear).sort()
-          );
-
-          // 打印每个年份的统计信息
-          Object.keys(dynamicsByYear).forEach((year) => {
-            const { dynamics: yearDynamics, emotionResults: yearResults } =
-              dynamicsByYear[year];
-            console.log(
-              `[Chapter4] ${year}年: ${yearDynamics.length}条动态, ${yearResults.length}条分析结果`
-            );
-          });
-
-          // 为每年生成色彩数据
-          const yearlyColors = [];
-          Object.keys(dynamicsByYear)
-            .sort()
-            .forEach((yearStr) => {
-              const year = parseInt(yearStr);
-              const { dynamics: yearDynamics, emotionResults: yearResults } =
-                dynamicsByYear[year];
-
-              if (yearDynamics.length > 0 && yearResults.length > 0) {
-                const yearEmotionData = calculateYearlyEmotionData(
-                  year,
-                  yearDynamics,
-                  yearResults
-                );
-
-                if (yearEmotionData) {
-                  const colorData = extractYearColor(yearEmotionData);
-                  yearlyColors.push(colorData);
-                  console.log(
-                    `[Chapter4] ${year}年色彩: ${colorData.baseColor.name} (${colorData.baseColor.hex})`
-                  );
-                }
-              }
-            });
-
-          console.log("[Chapter4] 生成的年度色彩数量:", yearlyColors.length);
-
-          if (yearlyColors.length > 0) {
-            setYearlyColorData(yearlyColors);
-
-            // 延迟显示时光色卡
-            setTimeout(() => {
-              setShowTimeColors(true);
-              console.log("[Chapter4] 时光色卡已显示");
-            }, 1000);
-          } else {
-            console.warn("[Chapter4] 没有生成任何年度色彩数据");
-          }
-        } catch (error) {
-          console.error("[Chapter4] 生成年度色彩时出错:", error);
-          console.error("[Chapter4] 错误详情:", error.stack);
-        }
       } catch (error) {
         console.error("[Chapter4] 分析过程中出错:", error);
       } finally {
@@ -518,42 +381,6 @@ const Chapter4 = ({ dynamics = [] }) => {
             </div>
           )}
 
-          {showTimeColors && (
-            <div
-              className={`${styles.timeColorSection} ${
-                showTimeColors ? styles.fadeIn : styles.hidden
-              }`}
-              style={{
-                animationDelay: `${(emotionStats.list.length + 1) * 100}ms`,
-              }}
-            >
-              <div className={styles.timeColorTitle}>时光色卡</div>
-              <div className={styles.timeColorSubtitle}>
-                每一年，都有独特的情绪底色
-              </div>
-              {console.log("[Chapter4] 渲染时光色卡，数据:", yearlyColorData)}
-              <TimeColorGrid yearlyColorData={yearlyColorData} />
-            </div>
-          )}
-
-          {!showTimeColors && !isAnalyzing && emotionStats && (
-            <div className={styles.timeColorSection}>
-              <div className={styles.timeColorTitle}>时光色卡</div>
-              <div className={styles.timeColorSubtitle}>
-                每一年，都有独特的情绪底色
-              </div>
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "40px 20px",
-                  color: "var(--text-secondary)",
-                  fontSize: "14px",
-                }}
-              >
-                正在生成年度色彩...
-              </div>
-            </div>
-          )}
         </>
       )}
     </div>
