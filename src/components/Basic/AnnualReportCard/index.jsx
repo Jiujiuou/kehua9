@@ -9,6 +9,7 @@ import Chapter1 from "./Chapter1";
 import Chapter2 from "./Chapter2";
 import Chapter3 from "./Chapter3";
 import Chapter4 from "./Chapter4";
+import Chapter5 from "./Chapter5";
 import styles from "./index.module.less";
 
 const AnnualReportCard = ({
@@ -235,6 +236,8 @@ const AnnualReportCard = ({
         );
       } else if (index === 4) {
         content = <Chapter4 dynamics={dynamics} />;
+      } else if (index === 5) {
+        content = <Chapter5 />;
       }
 
       if (!content) return null;
