@@ -484,6 +484,9 @@ const Preview = forwardRef(
             <div className={styles.uploadPrivacy}>
               所有数据处理均在本地浏览器完成，网站无法查看或存储你的任何数据
             </div>
+            <div className={styles.browserHint}>
+              推荐使用 Chrome、Edge 浏览器，其他浏览器可能有部分功能受限
+            </div>
           </div>
         </div>
       );
