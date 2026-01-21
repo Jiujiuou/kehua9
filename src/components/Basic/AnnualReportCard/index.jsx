@@ -12,6 +12,7 @@ import Chapter4 from "./Chapter4";
 import Chapter5 from "./Chapter5";
 import Chapter6 from "./Chapter6";
 import Chapter7 from "./Chapter7";
+import FinalChapter from "./FinalChapter";
 import styles from "./index.module.less";
 
 const AnnualReportCard = ({
@@ -24,6 +25,7 @@ const AnnualReportCard = ({
   onNicknameChange,
   onStartMemory,
   dynamics = [],
+  allDynamics = null,
   // 样式配置，与 Preview 区域保持一致
   textIndent = true,
   paragraphSpacing = false,
@@ -244,6 +246,8 @@ const AnnualReportCard = ({
         content = <Chapter6 dynamics={dynamics} />;
       } else if (index === 7) {
         content = <Chapter7 dynamics={dynamics} />;
+      } else if (index === 8) {
+        content = <FinalChapter dynamics={Array.isArray(allDynamics) ? allDynamics : dynamics} />;
       }
 
       if (!content) return null;
@@ -350,6 +354,7 @@ AnnualReportCard.propTypes = {
   onNicknameChange: PropTypes.func,
   onStartMemory: PropTypes.func,
   dynamics: PropTypes.array,
+  allDynamics: PropTypes.array,
 };
 
 export default AnnualReportCard;

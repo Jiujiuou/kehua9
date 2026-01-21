@@ -246,22 +246,19 @@ const Chapter1 = ({ userNickname = "", dynamics = [] }) => {
       // 总条数：统计过滤后的数组长度
       totalCount = filtered.length;
 
-      // 总天数：计算最早动态与最晚动态的日期差
+      // 总天数：计算最早动态到年度报告截止日期（2025-12-31）的日期差
       // 最初日期是第一条动态的日期（已排序，所以是最早的）
       const firstDynamic = filtered[0];
       const firstDate = firstDynamic?.timestamp
         ? new Date(firstDynamic.timestamp)
         : null;
 
-      // 最后日期是最后一条动态的日期（已排序，所以是最晚的）
-      const lastDynamic = filtered[filtered.length - 1];
-      const lastDate = lastDynamic?.timestamp
-        ? new Date(lastDynamic.timestamp)
-        : null;
+      // 结束日期固定为年度报告截止日（上面已设置为当天最后一刻）
+      const endDate = cutoffDate;
 
-      if (firstDate && lastDate) {
-        // 公式：(最后日期 - 最初日期) / (1000 * 60 * 60 * 24) + 1，结果取整
-        const diffTime = lastDate.getTime() - firstDate.getTime();
+      if (firstDate && endDate) {
+        // 公式：(截止日期 - 最初日期) / (1000 * 60 * 60 * 24) + 1，结果取整
+        const diffTime = endDate.getTime() - firstDate.getTime();
         totalDays = Math.max(
           1,
           Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1
