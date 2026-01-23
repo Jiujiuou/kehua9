@@ -13,10 +13,12 @@ import Chapter4_5 from "./Chapter4_5";
 import Chapter5 from "./Chapter5";
 import Chapter6 from "./Chapter6";
 import Chapter7 from "./Chapter7";
+import Chapter8 from "./Chapter8";
+import Chapter9 from "./Chapter9";
 import FinalChapter from "./FinalChapter";
 import styles from "./index.module.less";
 
-const TOTAL_PAGES = 10;
+const TOTAL_PAGES = 12;
 
 const AnnualReportCard = ({
   visible = false,
@@ -28,6 +30,8 @@ const AnnualReportCard = ({
   onStartMemory,
   dynamics = [],
   allDynamics = null,
+  directoryHandle = null,
+  onDynamicAdd = null,
   // 样式配置，与 Preview 区域保持一致
   textIndent = true,
   paragraphSpacing = false,
@@ -251,6 +255,16 @@ const AnnualReportCard = ({
       } else if (index === 8) {
         content = <Chapter7 dynamics={dynamics} />;
       } else if (index === 9) {
+        content = (
+          <Chapter8
+            dynamics={dynamics}
+            directoryHandle={directoryHandle}
+            onDynamicAdd={onDynamicAdd}
+          />
+        );
+      } else if (index === 10) {
+        content = <Chapter9 dynamics={dynamics} />;
+      } else if (index === 11) {
         content = <FinalChapter dynamics={Array.isArray(allDynamics) ? allDynamics : dynamics} />;
       }
 
@@ -358,6 +372,8 @@ AnnualReportCard.propTypes = {
   onStartMemory: PropTypes.func,
   dynamics: PropTypes.array,
   allDynamics: PropTypes.array,
+  directoryHandle: PropTypes.object,
+  onDynamicAdd: PropTypes.func,
 };
 
 export default AnnualReportCard;

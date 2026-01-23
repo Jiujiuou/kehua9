@@ -107,6 +107,30 @@ const Preview = forwardRef(
       setShowReportSelector(true);
     };
 
+    const handleAnnualReportDynamicAdd = useCallback(
+      (newDynamic) => {
+        if (!newDynamic?.timestamp) return;
+
+        // 避免重复插入
+        if (dynamics.some((d) => d?.timestamp === newDynamic.timestamp)) {
+          return;
+        }
+
+        const updatedDynamics = [...dynamics, newDynamic].sort(
+          (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+        );
+
+        isInternalUpdateRef.current = true;
+        prevExternalDynamicsRef.current = updatedDynamics;
+        setDynamics(updatedDynamics);
+
+        if (onDynamicsChange) {
+          onDynamicsChange(updatedDynamics);
+        }
+      },
+      [dynamics, onDynamicsChange]
+    );
+
     // 当外部传入的 dynamics 变化时，同步更新内部 state
     useEffect(() => {
       // 只有当 externalDynamics 真正变化时才更新
@@ -701,6 +725,8 @@ const Preview = forwardRef(
             // TODO: 实现开启回忆的逻辑
           }}
           dynamics={dynamics}
+          directoryHandle={directoryHandle}
+          onDynamicAdd={handleAnnualReportDynamicAdd}
           // 传递样式配置，确保与 Preview 区域保持一致
           textIndent={textIndent}
           paragraphSpacing={paragraphSpacing}
