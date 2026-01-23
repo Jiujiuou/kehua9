@@ -1,20 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
+import { getDateStringFromDynamic, pad2 } from "@/utils/annualReport";
 import styles from "./YearCalendar.module.less";
 
 const WEEKDAY_NAMES = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
-
-const pad2 = (n) => String(n).padStart(2, "0");
-
-const getDateStringFromDynamic = (dynamic) => {
-  if (dynamic?.date) return dynamic.date;
-  if (!dynamic?.timestamp) return null;
-
-  const d = new Date(dynamic.timestamp);
-  if (Number.isNaN(d.getTime())) return null;
-
-  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
-};
 
 const getYearFromDateString = (dateStr) => {
   if (!dateStr || typeof dateStr !== "string") return null;

@@ -16,9 +16,11 @@ import Chapter7 from "./Chapter7";
 import Chapter8 from "./Chapter8";
 import Chapter9 from "./Chapter9";
 import FinalChapter from "./FinalChapter";
+import {
+  ANNUAL_REPORT_PAGE_SWITCH_ANIMATION,
+  ANNUAL_REPORT_TOTAL_PAGES,
+} from "@/constant/annualReport";
 import styles from "./index.module.less";
-
-const TOTAL_PAGES = 12;
 
 const AnnualReportCard = ({
   visible = false,
@@ -80,7 +82,7 @@ const AnnualReportCard = ({
   }, [currentIndex]);
 
   const hasPrevious = activeIndex > 0;
-  const hasNext = activeIndex < TOTAL_PAGES - 1;
+  const hasNext = activeIndex < ANNUAL_REPORT_TOTAL_PAGES - 1;
   // 判断是否可以切换到下一页：如果在第一页且没有输入昵称，则不允许
   const canGoNext = hasNext && !(activeIndex === 0 && !userNickname.trim());
 
@@ -98,13 +100,13 @@ const AnnualReportCard = ({
         setTimeout(() => {
           setIsAnimating(false);
           setPrevIndex(newIndex);
-        }, 300); // 动画持续时间
-      }, 10);
+        }, ANNUAL_REPORT_PAGE_SWITCH_ANIMATION.durationMs); // 动画持续时间
+      }, ANNUAL_REPORT_PAGE_SWITCH_ANIMATION.delayMs);
     }
   }, [activeIndex, onPageChange, isAnimating]);
 
   const handleNext = useCallback(() => {
-    if (activeIndex < TOTAL_PAGES - 1 && !isAnimating) {
+    if (activeIndex < ANNUAL_REPORT_TOTAL_PAGES - 1 && !isAnimating) {
       setIsAnimating(true);
       setDirection("forward");
       setPrevIndex(activeIndex);
@@ -117,8 +119,8 @@ const AnnualReportCard = ({
         setTimeout(() => {
           setIsAnimating(false);
           setPrevIndex(newIndex);
-        }, 300); // 动画持续时间
-      }, 10);
+        }, ANNUAL_REPORT_PAGE_SWITCH_ANIMATION.durationMs); // 动画持续时间
+      }, ANNUAL_REPORT_PAGE_SWITCH_ANIMATION.delayMs);
     }
   }, [activeIndex, onPageChange, isAnimating]);
 
@@ -180,7 +182,7 @@ const AnnualReportCard = ({
     if (userNickname.trim() && !isAnimating) {
       // 切换到下一页
       const nextIndex = activeIndex + 1;
-      if (nextIndex < TOTAL_PAGES) {
+      if (nextIndex < ANNUAL_REPORT_TOTAL_PAGES) {
         setIsAnimating(true);
         setDirection("forward");
         setPrevIndex(activeIndex);
@@ -192,8 +194,8 @@ const AnnualReportCard = ({
           setTimeout(() => {
             setIsAnimating(false);
             setPrevIndex(nextIndex);
-          }, 300);
-        }, 10);
+          }, ANNUAL_REPORT_PAGE_SWITCH_ANIMATION.durationMs);
+        }, ANNUAL_REPORT_PAGE_SWITCH_ANIMATION.delayMs);
       }
       // 调用回调函数
       if (onStartMemory) {

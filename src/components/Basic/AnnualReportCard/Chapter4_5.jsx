@@ -1,23 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
-import { ANNUAL_REPORT_END_DATE } from "@/constant";
+import { filterDynamicsToAnnualReportRange, getDynamicType } from "@/utils/annualReport";
 import styles from "./Chapter4_5.module.less";
 
 // ========== 字数季节变化 & 相册里的温度（内置于 Chapter4_5，不依赖 mock 目录） ==========
-
-const filterDynamicsToAnnualReportRange = (dynamics = []) => {
-  if (!Array.isArray(dynamics) || dynamics.length === 0) return [];
-
-  const endDate = new Date(`${ANNUAL_REPORT_END_DATE}T23:59:59`);
-
-  return dynamics.filter((dynamic) => {
-    const ts = dynamic?.timestamp;
-    if (!ts) return false;
-    const date = new Date(ts);
-    if (Number.isNaN(date.getTime())) return false;
-    return date <= endDate;
-  });
-};
 
 const getMonthFromDynamic = (dynamic) => {
   if (!dynamic) return null;
@@ -122,19 +108,6 @@ const calculateSeasonAverages = (monthlyStats = []) => {
   return list;
 };
 
-const getDynamicType = (dynamic) => {
-  const hasText = !!(dynamic?.text && String(dynamic.text).trim().length > 0);
-  const hasImages = Array.isArray(dynamic?.images) && dynamic.images.length > 0;
-  const hasVideos = Array.isArray(dynamic?.videos) && dynamic.videos.length > 0;
-
-  if ((hasText && hasImages) || (hasText && hasVideos) || (hasImages && hasVideos)) {
-    return "mixed";
-  }
-  if (hasImages) return "image";
-  if (hasVideos) return "video";
-  if (hasText) return "text";
-  return "text";
-};
 
 const calculateAlbumTemperature = (dynamics = []) => {
   if (!Array.isArray(dynamics) || dynamics.length === 0) {
@@ -270,7 +243,7 @@ const Chapter4_5 = ({ dynamics = [] }) => {
   const [showCharts, setShowCharts] = useState(false);
   const [showText, setShowText] = useState(false);
 
-  const { monthlyStats, seasonAverages, albumStats, textList } = useMemo(() => {
+  const { monthlyStats, albumStats, textList } = useMemo(() => {
     const filtered = filterDynamicsToAnnualReportRange(dynamics);
 
     const monthlyStats = calculateMonthlyTextStats(filtered);
@@ -279,7 +252,7 @@ const Chapter4_5 = ({ dynamics = [] }) => {
 
     const textList = generateChapterText({ monthlyStats, seasonAverages, albumStats });
 
-    return { monthlyStats, seasonAverages, albumStats, textList };
+    return { monthlyStats, albumStats, textList };
   }, [dynamics]);
 
   const maxAvgChars = useMemo(() => {

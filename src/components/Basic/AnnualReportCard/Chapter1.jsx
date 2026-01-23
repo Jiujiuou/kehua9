@@ -9,6 +9,7 @@ import {
   WEEK_DAY_PREFIXES,
   ANNUAL_REPORT_END_DATE,
 } from "@/constant";
+import { filterDynamicsToAnnualReportRange } from "@/utils/annualReport";
 
 // 生成日期描述
 const generateDateDescription = (timestamp) => {
@@ -219,22 +220,11 @@ const Chapter1 = ({ userNickname = "", dynamics = [] }) => {
     console.log("Chapter1 received userNickname:", userNickname);
     console.log("Chapter1 received dynamics:", dynamics);
 
-    // 先过滤出年度报告截止日期（2025-12-31）之前的所有动态
+    // 先过滤出年度报告截止日期（2025-12-31）之前的所有动态，并按时间戳排序（从早到晚）
     const cutoffDate = new Date(ANNUAL_REPORT_END_DATE);
     cutoffDate.setHours(23, 59, 59, 999); // 设置为当天的最后一刻
 
-    const filtered = dynamics
-      .filter((dynamic) => {
-        if (!dynamic?.timestamp) return false;
-        const dynamicDate = new Date(dynamic.timestamp);
-        return dynamicDate <= cutoffDate;
-      })
-      // 按时间戳排序（从早到晚）
-      .sort((a, b) => {
-        const dateA = new Date(a.timestamp).getTime();
-        const dateB = new Date(b.timestamp).getTime();
-        return dateA - dateB;
-      });
+    const filtered = filterDynamicsToAnnualReportRange(dynamics, { sort: true });
 
     setFilteredDynamics(filtered);
 

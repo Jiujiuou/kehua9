@@ -1,40 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
-import { ANNUAL_REPORT_END_DATE } from "@/constant";
+import { ANNUAL_REPORT_END_DATE } from "@/constant/annualReport";
+import {
+  calculateInclusiveDays,
+  formatChineseDate,
+  getDateStringFromDynamic,
+} from "@/utils/annualReport";
 import styles from "./FinalChapter.module.less";
-
-const pad2 = (n) => String(n).padStart(2, "0");
-
-const formatChineseDate = (dateStr) => {
-  if (!dateStr || typeof dateStr !== "string") return "—";
-  const [y, m, d] = dateStr.split("-").map((x) => parseInt(x, 10));
-  if ([y, m, d].some((n) => Number.isNaN(n))) return "—";
-  return `${y}年${m}月${d}日`;
-};
-
-const getDateStringFromDynamic = (dynamic) => {
-  if (dynamic?.date) return dynamic.date;
-  if (!dynamic?.timestamp) return null;
-  const dt = new Date(dynamic.timestamp);
-  if (Number.isNaN(dt.getTime())) return null;
-  return `${dt.getFullYear()}-${pad2(dt.getMonth() + 1)}-${pad2(dt.getDate())}`;
-};
-
-const parseDateStringToUTC = (dateStr) => {
-  const [y, m, d] = String(dateStr).split("-").map((x) => parseInt(x, 10));
-  if ([y, m, d].some((n) => Number.isNaN(n))) return null;
-  return Date.UTC(y, m - 1, d);
-};
-
-const calculateInclusiveDays = (startDateStr, endDateStr) => {
-  const start = parseDateStringToUTC(startDateStr);
-  const end = parseDateStringToUTC(endDateStr);
-  if (start === null || end === null) return 0;
-  if (end < start) return 0;
-
-  const dayMs = 24 * 60 * 60 * 1000;
-  return Math.floor((end - start) / dayMs) + 1;
-};
 
 /**
  * FinalChapter：结尾页

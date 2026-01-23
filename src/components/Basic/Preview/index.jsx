@@ -19,7 +19,7 @@ import { useToastHelpers } from "@/components/Basic/Toast";
 import { useConfirmHelper } from "@/components/Basic/Confirm";
 import { deleteDynamicFromFile } from "@/utils/writeData";
 import { track } from "@/utils/track";
-import { DEBUG_CHAPTER_INDEX } from "@/constant";
+import { useAnnualReportStore } from "@/store/annualReport";
 import styles from "./index.module.less";
 
 const Preview = forwardRef(
@@ -57,27 +57,12 @@ const Preview = forwardRef(
     const [searchInput, setSearchInput] = useState("");
     const [searchKeyword, setSearchKeyword] = useState("");
     const [showReportSelector, setShowReportSelector] = useState(false);
-    // 开发调试模式：如果设置了 DEBUG_CHAPTER_INDEX，则直接跳转到指定章节
-    const getInitialReportPageIndex = () => {
-      if (DEBUG_CHAPTER_INDEX !== null && DEBUG_CHAPTER_INDEX !== undefined) {
-        return DEBUG_CHAPTER_INDEX;
-      }
-      return 4; // 默认打开 Chapter4
-    };
-    const [userNickname, setUserNickname] = useState(() => {
-      // 如果调试模式不是第0页（昵称输入页），则设置一个测试昵称
-      if (
-        DEBUG_CHAPTER_INDEX !== null &&
-        DEBUG_CHAPTER_INDEX !== undefined &&
-        DEBUG_CHAPTER_INDEX > 0
-      ) {
-        return "测试用户";
-      }
-      return "";
-    });
-    const [reportPageIndex, setReportPageIndex] = useState(
-      getInitialReportPageIndex
-    );
+
+    const userNickname = useAnnualReportStore((s) => s.userNickname);
+    const setUserNickname = useAnnualReportStore((s) => s.setUserNickname);
+    const reportPageIndex = useAnnualReportStore((s) => s.reportPageIndex);
+    const setReportPageIndex = useAnnualReportStore((s) => s.setReportPageIndex);
+    const resetAnnualReport = useAnnualReportStore((s) => s.resetAnnualReport);
     const fileInputRef = useRef(null);
     const contentAreaRef = useRef(null);
     const prevExternalDynamicsRef = useRef(null);
@@ -92,18 +77,8 @@ const Preview = forwardRef(
         onContentTypeFilterChange(null);
       }
 
-      // 开发调试模式：如果设置了 DEBUG_CHAPTER_INDEX，跳转到指定章节
-      if (DEBUG_CHAPTER_INDEX !== null && DEBUG_CHAPTER_INDEX !== undefined) {
-        setReportPageIndex(DEBUG_CHAPTER_INDEX);
-        // 如果调试的不是第0页（昵称输入页），设置测试昵称
-        if (DEBUG_CHAPTER_INDEX > 0) {
-          setUserNickname("测试用户");
-        }
-        console.log(`[调试模式] 已跳转到第 ${DEBUG_CHAPTER_INDEX + 1} 章`);
-      } else {
-        // 默认打开 Chapter4（索引为4）
-        setReportPageIndex(4);
-      }
+      // 每次打开都从头开始：清空昵称并回到第 0 页
+      resetAnnualReport();
       setShowReportSelector(true);
     };
 
@@ -710,8 +685,7 @@ const Preview = forwardRef(
           currentIndex={reportPageIndex}
           onClose={() => {
             setShowReportSelector(false);
-            setUserNickname("");
-            setReportPageIndex(4); // 关闭后重置为 Chapter4
+            resetAnnualReport();
           }}
           onPageChange={(newIndex) => {
             setReportPageIndex(newIndex);

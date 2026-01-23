@@ -1,18 +1,14 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import PropTypes from "prop-types";
+import { ANNUAL_REPORT_STORAGE_KEYS } from "@/constant/annualReport";
+import { appendToJSONList, loadJSON, removeItem, saveJSON } from "@/utils/annualReport";
 import { writeDynamicToFile } from "@/utils/writeData";
 import styles from "./Chapter8.module.less";
 
-const DRAFT_STORAGE_KEY = "annualReportChapter8Draft";
-const LOCAL_DYNAMICS_STORAGE_KEY = "annualReportChapter8LocalDynamics";
-
-const safeParseJson = (str, fallback) => {
-  try {
-    return JSON.parse(str);
-  } catch {
-    return fallback;
-  }
-};
+const {
+  chapter8Draft: DRAFT_STORAGE_KEY,
+  chapter8LocalDynamics: LOCAL_DYNAMICS_STORAGE_KEY,
+} = ANNUAL_REPORT_STORAGE_KEYS;
 
 const buildNewTextOnlyDynamic = (text) => {
   const now = new Date();
@@ -52,16 +48,9 @@ const Chapter8 = ({ dynamics = [], directoryHandle = null, onDynamicAdd = null }
   useEffect(() => {
     if (!showWriter) return;
 
-    try {
-      const draft = localStorage.getItem(DRAFT_STORAGE_KEY);
-      if (draft) {
-        const parsed = safeParseJson(draft, null);
-        if (parsed?.text && typeof parsed.text === "string") {
-          setWriterText(parsed.text);
-        }
-      }
-    } catch (e) {
-      console.error("[Chapter8] 读取草稿失败:", e);
+    const parsed = loadJSON(DRAFT_STORAGE_KEY, null);
+    if (parsed?.text && typeof parsed.text === "string") {
+      setWriterText(parsed.text);
     }
   }, [showWriter]);
 
@@ -69,14 +58,7 @@ const Chapter8 = ({ dynamics = [], directoryHandle = null, onDynamicAdd = null }
   useEffect(() => {
     if (!showWriter) return;
 
-    try {
-      localStorage.setItem(
-        DRAFT_STORAGE_KEY,
-        JSON.stringify({ text: writerText, timestamp: Date.now() })
-      );
-    } catch (e) {
-      console.error("[Chapter8] 保存草稿失败:", e);
-    }
+    saveJSON(DRAFT_STORAGE_KEY, { text: writerText, timestamp: Date.now() });
   }, [writerText, showWriter]);
 
   useEffect(() => {
@@ -104,27 +86,11 @@ const Chapter8 = ({ dynamics = [], directoryHandle = null, onDynamicAdd = null }
   }, []);
 
   const clearDraft = useCallback(() => {
-    try {
-      localStorage.removeItem(DRAFT_STORAGE_KEY);
-    } catch (e) {
-      console.error("[Chapter8] 清空草稿失败:", e);
-    }
+    removeItem(DRAFT_STORAGE_KEY);
   }, []);
 
   const saveToLocalStorage = useCallback((dynamic) => {
-    try {
-      const existing = safeParseJson(
-        localStorage.getItem(LOCAL_DYNAMICS_STORAGE_KEY) || "[]",
-        []
-      );
-
-      const list = Array.isArray(existing) ? existing : [];
-      list.push(dynamic);
-      localStorage.setItem(LOCAL_DYNAMICS_STORAGE_KEY, JSON.stringify(list));
-    } catch (e) {
-      console.error("[Chapter8] 写入本地存储失败:", e);
-      throw e;
-    }
+    appendToJSONList(LOCAL_DYNAMICS_STORAGE_KEY, dynamic);
   }, []);
 
   const handlePublish = useCallback(async () => {

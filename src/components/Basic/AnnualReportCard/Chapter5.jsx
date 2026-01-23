@@ -1,37 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
-import { ANNUAL_REPORT_END_DATE } from "@/constant";
+import { filterDynamicsToAnnualReportRange, getDynamicType } from "@/utils/annualReport";
 import styles from "./Chapter5.module.less";
 
 // ========== 统计文案生成逻辑（内置于 Chapter5，不依赖 mock 目录） ==========
-
-const filterDynamicsToAnnualReportRange = (dynamics = []) => {
-  if (!Array.isArray(dynamics) || dynamics.length === 0) return [];
-
-  // 截止到 2025-12-31 23:59:59
-  const endDate = new Date(`${ANNUAL_REPORT_END_DATE}T23:59:59`);
-
-  return dynamics.filter((dynamic) => {
-    const ts = dynamic?.timestamp;
-    if (!ts) return false;
-    const date = new Date(ts);
-    return date <= endDate;
-  });
-};
-
-const getDynamicType = (dynamic) => {
-  const hasText = !!(dynamic?.text && dynamic.text.trim().length > 0);
-  const hasImages = Array.isArray(dynamic?.images) && dynamic.images.length > 0;
-  const hasVideos = Array.isArray(dynamic?.videos) && dynamic.videos.length > 0;
-
-  if ((hasText && hasImages) || (hasText && hasVideos) || (hasImages && hasVideos)) {
-    return "mixed";
-  }
-  if (hasImages) return "image";
-  if (hasVideos) return "video";
-  if (hasText) return "text";
-  return "text";
-};
 
 const calculateDynamicStats = (dynamics) => {
   if (!Array.isArray(dynamics) || dynamics.length === 0) {

@@ -1,22 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
-import { ANNUAL_REPORT_END_DATE } from "@/constant";
+import { filterDynamicsToAnnualReportRange } from "@/utils/annualReport";
 import HourlyActivityRiver from "./HourlyActivityRiver";
 import styles from "./Chapter6.module.less";
 
 // ========== 时间分布计算与文案生成（内置于 Chapter6，不依赖 mock 目录） ==========
-
-const filterDynamicsToAnnualReportRange = (dynamics = []) => {
-  if (!Array.isArray(dynamics) || dynamics.length === 0) return [];
-  const endDate = new Date(`${ANNUAL_REPORT_END_DATE}T23:59:59`);
-
-  return dynamics.filter((dynamic) => {
-    const ts = dynamic?.timestamp;
-    if (!ts) return false;
-    const date = new Date(ts);
-    return date <= endDate;
-  });
-};
 
 const getHourFromDynamic = (dynamic) => {
   let hour = null;

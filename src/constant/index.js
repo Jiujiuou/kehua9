@@ -1,6 +1,3 @@
-export const DEBUG_CHAPTER_INDEX = 7; // 设置为 null 表示不使用调试模式
-
-
 // 节日数据（2019-2025年）
 export const HOLIDAYS = {
   2019: [
@@ -140,8 +137,8 @@ export const WEEK_DAY_PREFIXES = {
   6: "慵懒舒展的",
 };
 
-// 年度报告截止日期
-export const ANNUAL_REPORT_END_DATE = "2025-12-31";
+// 年度报告
+export * from "./annualReport";
 
 // ============================================
 // 视角分析词库 v2.0 (为"可话"日记场景优化)

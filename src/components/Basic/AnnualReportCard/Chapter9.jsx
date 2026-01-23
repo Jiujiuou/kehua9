@@ -1,31 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import PropTypes from "prop-types";
 import DynamicCard from "@/components/Basic/DynamicCard";
+import { ANNUAL_REPORT_STORAGE_KEYS } from "@/constant/annualReport";
+import { formatDateTimeParts, loadJSON, saveJSON } from "@/utils/annualReport";
 import styles from "./Chapter9.module.less";
 
-const SUBMISSION_STORAGE_KEY = "finalResonanceSubmissionMock";
-
-const safeParseJson = (str, fallback) => {
-  try {
-    return JSON.parse(str);
-  } catch {
-    return fallback;
-  }
-};
-
-const pad2 = (n) => String(n).padStart(2, "0");
-
-const formatDateTime = (d) => {
-  const y = d.getFullYear();
-  const m = pad2(d.getMonth() + 1);
-  const day = pad2(d.getDate());
-  const hh = pad2(d.getHours());
-  const mm = pad2(d.getMinutes());
-  return {
-    date: `${y}-${m}-${day}`,
-    time: `${hh}:${mm}`,
-  };
-};
+const { chapter9SubmissionMock: SUBMISSION_STORAGE_KEY } = ANNUAL_REPORT_STORAGE_KEYS;
 
 // 轻量可复现随机数（基于种子）
 const mulberry32 = (seed) => {
@@ -63,7 +42,7 @@ const buildMockResonanceDynamics = (seed = Date.now()) => {
     const dt = new Date(now - backDays * dayMs);
     dt.setHours(hour, minute, 0, 0);
 
-    const { date, time } = formatDateTime(dt);
+    const { date, time } = formatDateTimeParts(dt);
     const text = samples[Math.floor(rand() * samples.length)];
 
     return {
@@ -81,7 +60,7 @@ const buildMockResonanceDynamics = (seed = Date.now()) => {
   return list.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 };
 
-const Chapter9 = ({ dynamics = [] }) => {
+const Chapter9 = () => {
   const [showTitle, setShowTitle] = useState(false);
   const [showSubtitle, setShowSubtitle] = useState(false);
   const [showBody, setShowBody] = useState(false);
@@ -111,28 +90,17 @@ const Chapter9 = ({ dynamics = [] }) => {
 
   // 尝试恢复上次输入（仅 mock，本地保存；真实版本应提交到服务端）
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(SUBMISSION_STORAGE_KEY);
-      if (stored) {
-        const parsed = safeParseJson(stored, null);
-        if (parsed?.text && typeof parsed.text === "string") {
-          setText(parsed.text);
-        }
-      }
-    } catch (e) {
-      console.error("[Chapter9] 读取本地缓存失败:", e);
+    const parsed = loadJSON(SUBMISSION_STORAGE_KEY, null);
+    if (parsed?.text && typeof parsed.text === "string") {
+      setText(parsed.text);
     }
   }, []);
 
   const persistDraft = useCallback((nextText) => {
-    try {
-      localStorage.setItem(
-        SUBMISSION_STORAGE_KEY,
-        JSON.stringify({ text: String(nextText || ""), timestamp: Date.now() })
-      );
-    } catch (e) {
-      console.error("[Chapter9] 保存本地缓存失败:", e);
-    }
+    saveJSON(SUBMISSION_STORAGE_KEY, {
+      text: String(nextText || ""),
+      timestamp: Date.now(),
+    });
   }, []);
 
   const goEditor = useCallback(() => {
@@ -153,10 +121,11 @@ const Chapter9 = ({ dynamics = [] }) => {
       // TODO: 后续替换为真实接口：提交匿名动态，并拉取 10 条共鸣数据
       await new Promise((r) => setTimeout(r, 550));
 
-      localStorage.setItem(
-        SUBMISSION_STORAGE_KEY,
-        JSON.stringify({ text: content, timestamp: Date.now(), submitted: true })
-      );
+      saveJSON(SUBMISSION_STORAGE_KEY, {
+        text: content,
+        timestamp: Date.now(),
+        submitted: true,
+      });
 
       setResonanceSeed(Date.now());
       setStep("resonance");
@@ -316,8 +285,5 @@ const Chapter9 = ({ dynamics = [] }) => {
   );
 };
 
-Chapter9.propTypes = {
-  dynamics: PropTypes.array,
-};
 
 export default Chapter9;

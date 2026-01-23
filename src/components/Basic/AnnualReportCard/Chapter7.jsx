@@ -1,59 +1,23 @@
 import { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
-import { ANNUAL_REPORT_END_DATE } from "@/constant";
+import {
+  filterDynamicsToAnnualReportRange,
+  formatMonthDay,
+  getDateStringFromDynamic,
+  getTimeStringFromDynamic,
+  parseDateStringToUTC,
+} from "@/utils/annualReport";
 import YearCalendar from "./YearCalendar";
 import styles from "./Chapter7.module.less";
 
-const pad2 = (n) => String(n).padStart(2, "0");
-
-const toDateString = (d) =>
-  `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
-
-const getDateStringFromDynamic = (dynamic) => {
-  if (dynamic?.date) return dynamic.date;
-  if (!dynamic?.timestamp) return null;
-
-  const d = new Date(dynamic.timestamp);
-  if (Number.isNaN(d.getTime())) return null;
-
-  return toDateString(d);
-};
-
-const getTimeStringFromDynamic = (dynamic) => {
-  if (dynamic?.time) return String(dynamic.time);
-  if (!dynamic?.timestamp) return "";
-  const d = new Date(dynamic.timestamp);
-  if (Number.isNaN(d.getTime())) return "";
-  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
-};
-
-const filterDynamicsToAnnualReportRange = (dynamics = []) => {
-  if (!Array.isArray(dynamics) || dynamics.length === 0) return [];
-
-  const endDate = new Date(`${ANNUAL_REPORT_END_DATE}T23:59:59`);
-
-  return dynamics.filter((dynamic) => {
-    const ts = dynamic?.timestamp;
-    if (!ts) return false;
-    const date = new Date(ts);
-    return date <= endDate;
-  });
-};
-
-const parseDateStringToUTC = (dateStr) => {
-  const [y, m, d] = String(dateStr).split("-").map((x) => parseInt(x, 10));
-  if ([y, m, d].some((n) => Number.isNaN(n))) return null;
-  return Date.UTC(y, m - 1, d);
-};
-
-const formatMonthDay = (dateStr, { alwaysShowYear = false } = {}) => {
-  if (!dateStr) return "—";
-  const [y, m, d] = String(dateStr).split("-").map((x) => parseInt(x, 10));
-  if ([y, m, d].some((n) => Number.isNaN(n))) return "—";
-
-  if (alwaysShowYear) return `${y}年${m}月${d}日`;
-  return `${m}月${d}日`;
-};
+import {
+  HOLIDAYS,
+  HOLIDAY_NAMES,
+  SEASON_NAMES,
+  WEEK_DAY_NAMES,
+  WEEK_DAY_PREFIXES,
+  ANNUAL_REPORT_END_DATE,
+} from "@/constant";
 
 const truncateText = (text, maxLen = 80) => {
   if (!text || typeof text !== "string") return "";
