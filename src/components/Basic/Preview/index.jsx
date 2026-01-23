@@ -37,6 +37,7 @@ const Preview = forwardRef(
       fontFamily = "system",
       lineHeight = 1.6,
       contentTypeFilter = null,
+      onContentTypeFilterChange = null,
       dynamics: externalDynamics = null,
       onDynamicsChange = null,
       onScrollChange = null,
@@ -86,6 +87,11 @@ const Preview = forwardRef(
 
     // 处理年度报告按钮点击
     const handleReportButtonClick = () => {
+      // 打开年度报告时，强制把右侧「类型」切回「全部」，避免列表/报告被过滤
+      if (typeof onContentTypeFilterChange === "function") {
+        onContentTypeFilterChange(null);
+      }
+
       // 开发调试模式：如果设置了 DEBUG_CHAPTER_INDEX，跳转到指定章节
       if (DEBUG_CHAPTER_INDEX !== null && DEBUG_CHAPTER_INDEX !== undefined) {
         setReportPageIndex(DEBUG_CHAPTER_INDEX);
@@ -678,7 +684,6 @@ const Preview = forwardRef(
         <AnnualReportCard
           visible={showReportSelector}
           currentIndex={reportPageIndex}
-          totalPages={5}
           onClose={() => {
             setShowReportSelector(false);
             setUserNickname("");
@@ -695,7 +700,7 @@ const Preview = forwardRef(
             console.log("开启回忆被点击", nickname);
             // TODO: 实现开启回忆的逻辑
           }}
-          dynamics={sortedDynamics}
+          dynamics={dynamics}
           // 传递样式配置，确保与 Preview 区域保持一致
           textIndent={textIndent}
           paragraphSpacing={paragraphSpacing}
@@ -732,6 +737,7 @@ Preview.propTypes = {
     "withImages",
     "withVideos",
   ]),
+  onContentTypeFilterChange: PropTypes.func,
   dynamics: PropTypes.array,
   onDynamicsChange: PropTypes.func,
   onScrollChange: PropTypes.func,

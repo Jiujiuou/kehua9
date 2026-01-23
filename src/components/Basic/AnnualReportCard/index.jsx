@@ -9,16 +9,18 @@ import Chapter1 from "./Chapter1";
 import Chapter2 from "./Chapter2";
 import Chapter3 from "./Chapter3";
 import Chapter4 from "./Chapter4";
+import Chapter4_5 from "./Chapter4_5";
 import Chapter5 from "./Chapter5";
 import Chapter6 from "./Chapter6";
 import Chapter7 from "./Chapter7";
 import FinalChapter from "./FinalChapter";
 import styles from "./index.module.less";
 
+const TOTAL_PAGES = 10;
+
 const AnnualReportCard = ({
   visible = false,
   currentIndex = 0,
-  totalPages = 1,
   onClose,
   onPageChange,
   userNickname = "",
@@ -74,7 +76,7 @@ const AnnualReportCard = ({
   }, [currentIndex]);
 
   const hasPrevious = activeIndex > 0;
-  const hasNext = activeIndex < totalPages - 1;
+  const hasNext = activeIndex < TOTAL_PAGES - 1;
   // 判断是否可以切换到下一页：如果在第一页且没有输入昵称，则不允许
   const canGoNext = hasNext && !(activeIndex === 0 && !userNickname.trim());
 
@@ -98,7 +100,7 @@ const AnnualReportCard = ({
   }, [activeIndex, onPageChange, isAnimating]);
 
   const handleNext = useCallback(() => {
-    if (activeIndex < totalPages - 1 && !isAnimating) {
+    if (activeIndex < TOTAL_PAGES - 1 && !isAnimating) {
       setIsAnimating(true);
       setDirection("forward");
       setPrevIndex(activeIndex);
@@ -114,7 +116,7 @@ const AnnualReportCard = ({
         }, 300); // 动画持续时间
       }, 10);
     }
-  }, [activeIndex, totalPages, onPageChange, isAnimating]);
+  }, [activeIndex, onPageChange, isAnimating]);
 
   // 点击 ESC 键关闭，支持左右箭头键切换
   useEffect(() => {
@@ -174,7 +176,7 @@ const AnnualReportCard = ({
     if (userNickname.trim() && !isAnimating) {
       // 切换到下一页
       const nextIndex = activeIndex + 1;
-      if (nextIndex < totalPages) {
+      if (nextIndex < TOTAL_PAGES) {
         setIsAnimating(true);
         setDirection("forward");
         setPrevIndex(activeIndex);
@@ -241,12 +243,14 @@ const AnnualReportCard = ({
       } else if (index === 4) {
         content = <Chapter4 dynamics={dynamics} />;
       } else if (index === 5) {
-        content = <Chapter5 dynamics={dynamics} />;
+        content = <Chapter4_5 dynamics={dynamics} />;
       } else if (index === 6) {
-        content = <Chapter6 dynamics={dynamics} />;
+        content = <Chapter5 dynamics={dynamics} />;
       } else if (index === 7) {
-        content = <Chapter7 dynamics={dynamics} />;
+        content = <Chapter6 dynamics={dynamics} />;
       } else if (index === 8) {
+        content = <Chapter7 dynamics={dynamics} />;
+      } else if (index === 9) {
         content = <FinalChapter dynamics={Array.isArray(allDynamics) ? allDynamics : dynamics} />;
       }
 
@@ -347,7 +351,6 @@ const AnnualReportCard = ({
 AnnualReportCard.propTypes = {
   visible: PropTypes.bool,
   currentIndex: PropTypes.number,
-  totalPages: PropTypes.number,
   onClose: PropTypes.func.isRequired,
   onPageChange: PropTypes.func,
   userNickname: PropTypes.string,

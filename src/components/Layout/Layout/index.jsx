@@ -148,6 +148,7 @@ function App() {
           fontFamily={fontFamily}
           lineHeight={lineHeight}
           contentTypeFilter={contentTypeFilter}
+          onContentTypeFilterChange={setContentTypeFilter}
           dynamics={dynamics}
           onDynamicsChange={handleDynamicsChange}
           onScrollChange={handleScrollChange}

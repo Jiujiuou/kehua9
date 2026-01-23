@@ -1,4 +1,4 @@
-export const DEBUG_CHAPTER_INDEX = 6; // 设置为 null 表示不使用调试模式
+export const DEBUG_CHAPTER_INDEX = 7; // 设置为 null 表示不使用调试模式
 
 
 // 节日数据（2019-2025年）

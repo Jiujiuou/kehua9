@@ -18,6 +18,22 @@ const filterDynamicsToAnnualReportRange = (dynamics = []) => {
   });
 };
 
+const getHourFromDynamic = (dynamic) => {
+  let hour = null;
+
+  if (dynamic?.time) {
+    const parsed = parseInt(String(dynamic.time).split(":")[0], 10);
+    if (!Number.isNaN(parsed)) hour = parsed;
+  }
+
+  if (hour === null && dynamic?.timestamp) {
+    const date = new Date(dynamic.timestamp);
+    if (!Number.isNaN(date.getTime())) hour = date.getHours();
+  }
+
+  return typeof hour === "number" && hour >= 0 && hour < 24 ? hour : null;
+};
+
 const calculateHourlyStats = (dynamics) => {
   const hourStats = Array.from({ length: 24 }, (_, i) => ({ hour: i, count: 0 }));
 
@@ -26,20 +42,8 @@ const calculateHourlyStats = (dynamics) => {
   }
 
   dynamics.forEach((dynamic) => {
-    let hour = null;
-
-    if (dynamic?.time) {
-      const parsed = parseInt(String(dynamic.time).split(":")[0], 10);
-      if (!Number.isNaN(parsed)) hour = parsed;
-    }
-
-    if (hour === null && dynamic?.timestamp) {
-      hour = new Date(dynamic.timestamp).getHours();
-    }
-
-    if (typeof hour === "number" && hour >= 0 && hour < 24) {
-      hourStats[hour].count++;
-    }
+    const hour = getHourFromDynamic(dynamic);
+    if (hour !== null) hourStats[hour].count++;
   });
 
   return hourStats;
@@ -70,26 +74,62 @@ const calculateLateNightStats = (dynamics) => {
   let lateNightCount = 0;
 
   dynamics.forEach((dynamic) => {
-    let hour = null;
-
-    if (dynamic?.time) {
-      const parsed = parseInt(String(dynamic.time).split(":")[0], 10);
-      if (!Number.isNaN(parsed)) hour = parsed;
-    }
-
-    if (hour === null && dynamic?.timestamp) {
-      hour = new Date(dynamic.timestamp).getHours();
-    }
-
-    if (typeof hour === "number" && (hour >= 23 || hour < 5)) {
-      lateNightCount++;
-    }
+    const hour = getHourFromDynamic(dynamic);
+    if (hour === null) return;
+    if (hour >= 23 || hour < 5) lateNightCount++;
   });
 
   return {
     count: lateNightCount,
     percentage: Number(((lateNightCount / dynamics.length) * 100).toFixed(1)),
   };
+};
+
+const getPeriodByHour = (hour) => {
+  // 这些区间更贴近“作息画像”的直觉划分
+  if (hour >= 0 && hour < 6)
+    return { key: "dawn", name: "凌晨", range: "00:00-05:59" };
+  if (hour >= 6 && hour < 9)
+    return { key: "earlyMorning", name: "清晨", range: "06:00-08:59" };
+  if (hour >= 9 && hour < 12)
+    return { key: "morning", name: "上午", range: "09:00-11:59" };
+  if (hour >= 12 && hour < 14)
+    return { key: "noon", name: "午间", range: "12:00-13:59" };
+  if (hour >= 14 && hour < 18)
+    return { key: "afternoon", name: "午后", range: "14:00-17:59" };
+  if (hour >= 18 && hour < 20)
+    return { key: "dusk", name: "傍晚", range: "18:00-19:59" };
+  if (hour >= 20 && hour < 23)
+    return { key: "night", name: "夜晚", range: "20:00-22:59" };
+  return { key: "lateNight", name: "深夜", range: "23:00-23:59" };
+};
+
+const calculatePeriodStats = (dynamics) => {
+  if (!Array.isArray(dynamics) || dynamics.length === 0) return [];
+
+  const map = new Map();
+
+  dynamics.forEach((dynamic) => {
+    const hour = getHourFromDynamic(dynamic);
+    if (hour === null) return;
+
+    const period = getPeriodByHour(hour);
+    const prev = map.get(period.key);
+
+    map.set(period.key, {
+      ...period,
+      count: (prev?.count || 0) + 1,
+    });
+  });
+
+  const total = dynamics.length || 1;
+
+  return Array.from(map.values())
+    .map((p) => ({
+      ...p,
+      percentage: Number(((p.count / total) * 100).toFixed(1)),
+    }))
+    .sort((a, b) => b.count - a.count);
 };
 
 const getTimePeriodDescription = (hour) => {
@@ -103,7 +143,56 @@ const getTimePeriodDescription = (hour) => {
   return "夜深了";
 };
 
-const generateTimeDistributionText = (mostActiveHour, lateNightStats) => {
+const getPeriodWarmText = (period) => {
+  switch (period?.key) {
+    case "dawn":
+      return "凌晨的你，像把一天的心事轻轻放进文字里。";
+    case "earlyMorning":
+      return "清晨的你，把生活重新点亮，给自己一个温柔的开始。";
+    case "morning":
+      return "上午的你，在忙碌的节奏里也不忘留下些什么。";
+    case "noon":
+      return "午间的你，懂得停下来喘口气，把自己照顾好。";
+    case "afternoon":
+      return "午后的你，把琐碎也写得有光，像给生活加了一点糖。";
+    case "dusk":
+      return "傍晚的你，一边收尾，一边把今天好好告别。";
+    case "night":
+      return "夜晚的你，更愿意把思绪整理成句子，慢慢与自己对话。";
+    case "lateNight":
+      return "深夜的你，把安静留给自己，也把真实写下来。";
+    default:
+      return "你在时间里留下些什么，也在慢慢认识自己。";
+  }
+};
+
+const generateTimePersonaText = (periodStats = []) => {
+  if (!Array.isArray(periodStats) || periodStats.length === 0) return [];
+
+  const [dominant, ...rest] = periodStats;
+  const texts = [];
+
+  if (dominant?.count > 0) {
+    texts.push({
+      type: "normal",
+      text: `从整体来看，你更像“${dominant.name}的你”。在${dominant.range}这段时间，你的记录占比最高（${dominant.percentage}%）。${getPeriodWarmText(
+        dominant
+      )}`,
+    });
+  }
+
+  const others = rest.filter((p) => p?.count > 0).slice(0, 2);
+  others.forEach((p) => {
+    texts.push({
+      type: "normal",
+      text: `“${p.name}的你”（${p.range}）占比${p.percentage}%。${getPeriodWarmText(p)}`,
+    });
+  });
+
+  return texts;
+};
+
+const generateTimeDistributionText = (mostActiveHour, lateNightStats, dominantPeriod) => {
   const texts = [];
 
   const hour = mostActiveHour?.hour ?? 0;
@@ -132,10 +221,13 @@ const generateTimeDistributionText = (mostActiveHour, lateNightStats) => {
 
   texts.push({ type: "main", text: mainText });
 
-  if (lateNightStats?.count > 0 && !(hour >= 23 || hour < 6)) {
+  const dominantKey = dominantPeriod?.key;
+  const dominantIsLate = dominantKey === "dawn" || dominantKey === "lateNight";
+
+  if (lateNightStats?.count > 0 && !(hour >= 23 || hour < 6) && !dominantIsLate) {
     texts.push({
       type: "normal",
-      text: `深夜时光（23:00-05:00），你有${lateNightStats.count}次记录，那些安静的夜晚，你都在这里`,
+      text: `深夜时光（23:00-05:00），你有${lateNightStats.count}次记录，那些安静的夜晚，你也常常在这里`,
     });
   }
 
@@ -151,13 +243,21 @@ const Chapter6 = ({ dynamics = [] }) => {
   const { hourlyStats, mostActiveHour, timeDistributionText } = useMemo(() => {
     const filtered = filterDynamicsToAnnualReportRange(dynamics);
 
+    if (!Array.isArray(filtered) || filtered.length === 0) {
+      return { hourlyStats: [], mostActiveHour: null, timeDistributionText: [] };
+    }
+
     const hourlyStats = calculateHourlyStats(filtered);
     const mostActiveHour = getMostActiveHour(filtered);
     const lateNightStats = calculateLateNightStats(filtered);
-    const timeDistributionText = generateTimeDistributionText(
-      mostActiveHour,
-      lateNightStats
-    );
+
+    const periodStats = calculatePeriodStats(filtered);
+    const dominantPeriod = periodStats?.[0];
+
+    const timeDistributionText = [
+      ...generateTimeDistributionText(mostActiveHour, lateNightStats, dominantPeriod),
+      ...generateTimePersonaText(periodStats),
+    ];
 
     return { hourlyStats, mostActiveHour, timeDistributionText };
   }, [dynamics]);
