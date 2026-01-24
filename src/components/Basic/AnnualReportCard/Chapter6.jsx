@@ -268,8 +268,6 @@ const Chapter6 = ({ reportData, dynamics = [] }) => {
     : [];
 
   useEffect(() => {
-    console.log("[Chapter6] 组件初始化");
-
     const timer1 = setTimeout(() => {
       setShowTitle(true);
     }, 300);

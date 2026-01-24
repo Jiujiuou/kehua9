@@ -40,12 +40,6 @@ function Control({
 }) {
   const [showAddDialog, setShowAddDialog] = useState(false);
 
-  // 监听「添加动态」按钮可点击状态转变
-  useEffect(() => {
-    const isClickable = !!directoryHandle;
-    console.log(`「添加动态」按钮可点击状态转变: ${isClickable ? '可点击' : '不可点击'}`);
-  }, [directoryHandle]);
-
   const handleAddSuccess = (newDynamic) => {
     console.log(`[Control] 添加动态成功回调，directoryHandle: ${directoryHandle ? '存在' : '不存在'}`);
     // 添加到当前动态列表

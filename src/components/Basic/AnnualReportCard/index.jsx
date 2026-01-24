@@ -133,6 +133,19 @@ const AnnualReportCard = ({
     if (!visible) return;
 
     const handleKeyDown = (event) => {
+      // 检查焦点是否在可编辑元素中（input、textarea、contenteditable）
+      const activeElement = document.activeElement;
+      const isEditableElement =
+        activeElement &&
+        (activeElement.tagName === "INPUT" ||
+          activeElement.tagName === "TEXTAREA" ||
+          activeElement.isContentEditable);
+
+      // 如果焦点在可编辑元素中，且按的是方向键，则不处理（让光标移动）
+      if (isEditableElement && (event.key === "ArrowLeft" || event.key === "ArrowRight" || event.key === "ArrowUp" || event.key === "ArrowDown")) {
+        return; // 不阻止事件，让输入框正常处理方向键
+      }
+
       if (event.key === "Escape") {
         event.preventDefault();
         event.stopPropagation();
@@ -217,10 +230,6 @@ const AnnualReportCard = ({
   );
 
   const handleStartMemory = () => {
-    console.log(
-      "AnnualReportCard handleStartMemory, userNickname:",
-      userNickname
-    );
     if (userNickname.trim() && !isAnimating) {
       // 切换到下一页
       const nextIndex = activeIndex + 1;
@@ -305,7 +314,7 @@ const AnnualReportCard = ({
           />
         );
       } else if (index === 9) {
-        content = <Chapter9 dynamics={dynamics} />;
+        content = <Chapter9 userNickname={userNickname} />;
       } else if (index === 10) {
         content = <FinalChapter dynamics={Array.isArray(allDynamics) ? allDynamics : dynamics} />;
       }

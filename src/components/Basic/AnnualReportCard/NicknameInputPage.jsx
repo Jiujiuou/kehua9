@@ -35,10 +35,6 @@ const NicknameInputPage = ({
   }, []);
 
   const handleStartMemory = () => {
-    console.log(
-      "NicknameInputPage handleStartMemory, userNickname:",
-      userNickname
-    );
     if (userNickname.trim() && onStartMemory) {
       onStartMemory(userNickname.trim());
     }

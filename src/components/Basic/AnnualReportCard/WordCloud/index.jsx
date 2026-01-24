@@ -96,7 +96,7 @@ const WordCloudComponent = ({ dynamics = [] }) => {
 
     const regex = new RegExp(
       `(${keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`,
-      "gi"
+      "gi",
     );
     const parts = text.split(regex);
 
@@ -124,7 +124,7 @@ const WordCloudComponent = ({ dynamics = [] }) => {
           // 尝试按句子分割，找到包含关键词的句子
           const sentences = text.split(/[。！？\n]/);
           const sentenceWithKeyword = sentences.find((sentence) =>
-            sentence.includes(word)
+            sentence.includes(word),
           );
 
           if (sentenceWithKeyword) {
@@ -139,7 +139,7 @@ const WordCloudComponent = ({ dynamics = [] }) => {
                 const start = Math.max(0, keywordIndex - contextLength);
                 const end = Math.min(
                   snippet.length,
-                  keywordIndex + word.length + contextLength
+                  keywordIndex + word.length + contextLength,
                 );
                 snippet = snippet.substring(start, end);
 
@@ -164,7 +164,7 @@ const WordCloudComponent = ({ dynamics = [] }) => {
               const start = Math.max(0, keywordIndex - contextLength);
               const end = Math.min(
                 text.length,
-                keywordIndex + word.length + contextLength
+                keywordIndex + word.length + contextLength,
               );
               let snippet = text.substring(start, end);
 
@@ -212,7 +212,7 @@ const WordCloudComponent = ({ dynamics = [] }) => {
     // 使用容器高度和理想高度中的较小值，但不要太小
     const height = Math.max(
       Math.min(container.clientHeight || 600, idealHeight),
-      Math.round(width * 0.6)
+      Math.round(width * 0.6),
     );
 
     // 设置 Canvas 尺寸（像素尺寸）
@@ -235,10 +235,10 @@ const WordCloudComponent = ({ dynamics = [] }) => {
     // 确定需要横着显示的高频词数量（前10个或前20%的词，确保更多高频词横着显示）
     const topWordsCount = Math.min(
       10,
-      Math.max(5, Math.ceil(wordFrequency.length * 0.2))
+      Math.max(5, Math.ceil(wordFrequency.length * 0.2)),
     );
     const topWords = new Set(
-      wordFrequency.slice(0, topWordsCount).map(([word]) => word)
+      wordFrequency.slice(0, topWordsCount).map(([word]) => word),
     );
 
     // 配置词云选项
@@ -292,7 +292,6 @@ const WordCloudComponent = ({ dynamics = [] }) => {
             hoveredWordRef.current = word;
             setHoveredWord(word);
             canvas.style.cursor = "pointer";
-            console.log("Hover word:", word);
 
             // 提取该词的相关文本片段
             const related = extractRelatedTexts(word);
@@ -308,7 +307,6 @@ const WordCloudComponent = ({ dynamics = [] }) => {
       click: function (item, dimension, event) {
         if (item) {
           const word = item[0];
-          console.log("Click word:", word, item, dimension);
         }
       },
     };
@@ -316,7 +314,6 @@ const WordCloudComponent = ({ dynamics = [] }) => {
     try {
       // WordCloud 函数会使用 options 中的 hover 和 click 回调
       WordCloud(canvas, options);
-      console.log("[WordCloud] 词云渲染完成");
 
       // 渲染完成后，默认展示词频最高的词
       if (wordFrequency && wordFrequency.length > 0) {

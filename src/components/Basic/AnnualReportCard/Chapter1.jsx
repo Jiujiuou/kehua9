@@ -216,9 +216,6 @@ const Chapter1 = ({ userNickname = "", dynamics = [] }) => {
   };
 
   useEffect(() => {
-    // 调试：打印接收到的 userNickname
-    console.log("Chapter1 received userNickname:", userNickname);
-    console.log("Chapter1 received dynamics:", dynamics);
 
     // 先过滤出年度报告截止日期（2025-12-31）之前的所有动态，并按时间戳排序（从早到晚）
     const cutoffDate = new Date(ANNUAL_REPORT_END_DATE);

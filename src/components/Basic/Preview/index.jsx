@@ -368,14 +368,12 @@ const Preview = forwardRef(
       }
 
       setIsLoading(true);
-      console.log("导入数据");
       try {
         const parsedData = await parseDynamicData(files);
         isInternalUpdateRef.current = true; // 标记为内部更新
         prevExternalDynamicsRef.current = parsedData; // 更新外部引用，避免重复更新
         setDynamics(parsedData);
         toast.success("数据加载成功");
-        console.log("导入数据成功");
 
         // 埋点：导入数据成功
         track("导入数据", {
@@ -400,7 +398,6 @@ const Preview = forwardRef(
 
           // 通知父组件保存文件夹句柄
           if (onDirectoryHandleChange) {
-            console.log("[Preview] 设置 directoryHandle: 已设置");
             onDirectoryHandleChange(directoryHandle);
           }
 
@@ -448,14 +445,12 @@ const Preview = forwardRef(
     // 处理文件列表
     const handleFiles = async (files) => {
       setIsLoading(true);
-      console.log("导入数据");
       try {
         const parsedData = await parseDynamicData(files);
         isInternalUpdateRef.current = true; // 标记为内部更新
         prevExternalDynamicsRef.current = parsedData; // 更新外部引用，避免重复更新
         setDynamics(parsedData);
         toast.success("数据加载成功");
-        console.log("导入数据成功");
 
         // 埋点：导入数据成功
         track("导入数据", {
@@ -698,7 +693,6 @@ const Preview = forwardRef(
             setUserNickname(nickname);
           }}
           onStartMemory={(nickname) => {
-            console.log("开启回忆被点击", nickname);
             // TODO: 实现开启回忆的逻辑
           }}
           dynamics={dynamics}
