@@ -48,7 +48,7 @@ const FinalChapter = ({ dynamics = [] }) => {
 
   return (
     <div className={styles.finalContent}>
-      <div className={`${styles.title} ${showTitle ? styles.fadeIn : styles.hidden}`}>
+      <div className={`${styles.finalTitle} ${showTitle ? styles.fadeIn : styles.hidden}`}>
         旅程的终点
       </div>
 

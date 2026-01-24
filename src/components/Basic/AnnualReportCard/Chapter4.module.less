@@ -5,20 +5,9 @@
   justify-content: flex-start;
   width: 100%;
   min-height: 100%;
-  max-height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
   gap: 24px;
   box-sizing: border-box;
-  padding: 20px;
-
-  // 隐藏滚动条但保留滚动功能
-  scrollbar-width: none; // Firefox
-  -ms-overflow-style: none; // IE 和 Edge
-
-  &::-webkit-scrollbar {
-    display: none; // Chrome, Safari, Opera
-  }
+  // padding: 20px;
 }
 
 .chapter4Title {
@@ -26,12 +15,12 @@
   font-weight: 600;
   line-height: 1.4;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  color: var(--text-primary); // 后备颜色
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  color: var(--text-primary);
   text-align: center;
 
-  // 亮色模式：使用渐变文字和发光效果
   background: linear-gradient(
     135deg,
     rgba(26, 26, 26, 1) 0%,
@@ -42,12 +31,10 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
 
-  // 朦胧发光效果 - 多层阴影（亮色模式）
   filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4))
     drop-shadow(0 0 16px rgba(255, 255, 255, 0.3))
     drop-shadow(0 0 24px rgba(255, 255, 255, 0.2));
 
-  // 暗色模式下的发光效果
   [data-theme="dark"] & {
     background: linear-gradient(
       135deg,
@@ -71,14 +58,13 @@
   font-weight: 400;
   line-height: 1.6;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  color: var(--text-secondary); // 后备颜色
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
   text-align: center;
-  max-width: 500px;
+  max-width: 520px;
   padding: 0 16px;
 
-  // 亮色模式：使用渐变文字和发光效果
   background: linear-gradient(
     135deg,
     rgba(26, 26, 26, 0.9) 0%,
@@ -89,12 +75,10 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
 
-  // 朦胧发光效果 - 多层阴影（亮色模式）
   filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.3))
     drop-shadow(0 0 12px rgba(255, 255, 255, 0.2))
     drop-shadow(0 0 18px rgba(255, 255, 255, 0.15));
 
-  // 暗色模式下的发光效果
   [data-theme="dark"] & {
     background: linear-gradient(
       135deg,
@@ -111,6 +95,301 @@
       drop-shadow(0 0 24px rgba(255, 255, 255, 0.2))
       drop-shadow(0 0 32px rgba(255, 255, 255, 0.15));
   }
+}
+
+.charts {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 6px;
+}
+
+.monthChart {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 8px;
+  align-items: end;
+  padding: 10px 10px 6px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+
+  [data-theme="dark"] & {
+    background: rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+}
+
+.monthCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.barWrap {
+  width: 100%;
+  height: 92px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.bar {
+  width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.bar_spring {
+  background: linear-gradient(
+    180deg,
+    rgba(90, 200, 120, 0.9),
+    rgba(90, 200, 120, 0.25)
+  );
+}
+
+.bar_summer {
+  background: linear-gradient(
+    180deg,
+    rgba(234, 66, 95, 0.9),
+    rgba(234, 66, 95, 0.25)
+  );
+}
+
+.bar_autumn {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 149, 0, 0.9),
+    rgba(255, 149, 0, 0.25)
+  );
+}
+
+.bar_winter {
+  background: linear-gradient(
+    180deg,
+    rgba(64, 156, 255, 0.9),
+    rgba(64, 156, 255, 0.25)
+  );
+}
+
+.monthLabel {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 0 4px;
+}
+
+.legendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: 8px;
+}
+
+.dot_spring {
+  background: rgba(90, 200, 120, 0.9);
+}
+.dot_summer {
+  background: rgba(234, 66, 95, 0.9);
+}
+.dot_autumn {
+  background: rgba(255, 149, 0, 0.9);
+}
+.dot_winter {
+  background: rgba(64, 156, 255, 0.9);
+}
+
+.albumCard {
+  padding: 14px 14px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+
+  [data-theme="dark"] & {
+    background: rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+}
+
+.albumRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.albumLabel {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.albumValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.progressTrack {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  margin-top: 8px;
+
+  [data-theme="dark"] & {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(234, 66, 95, 0.95),
+    rgba(234, 66, 95, 0.35)
+  );
+}
+
+.progressFillMuted {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(26, 26, 26, 0.6),
+    rgba(26, 26, 26, 0.18)
+  );
+
+  [data-theme="dark"] & {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.6),
+      rgba(255, 255, 255, 0.18)
+    );
+  }
+}
+
+.mediaSplit {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.mediaSplitItem {
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+
+  [data-theme="dark"] & {
+    background: rgba(0, 0, 0, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+}
+
+.mediaSplitTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.mediaSplitName {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.mediaSplitPct {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.progressTrackSmall {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+
+  [data-theme="dark"] & {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.progressFillImage {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 149, 0, 0.95),
+    rgba(255, 149, 0, 0.35)
+  );
+}
+
+.progressFillVideo {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(64, 156, 255, 0.95),
+    rgba(64, 156, 255, 0.35)
+  );
+}
+
+.textSection {
+  margin-top: 12px;
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.textItem {
+  line-height: 1.8;
+  letter-spacing: 0.3px;
+  word-break: break-word;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+}
+
+.mainText {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.normalText {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-content);
 }
 
 .hidden {
@@ -132,130 +411,6 @@
   }
 }
 
-.analyzingText {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-top: 24px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-}
-
-.spectrumContainer {
-  margin-top: 32px;
-  padding: 24px 20px;
-  background-color: var(--bg-card);
-  border-radius: 12px;
-  width: 100%;
-  box-sizing: border-box;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-
-  [data-theme="dark"] & {
-    background-color: rgba(255, 255, 255, 0.05);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
-  }
-}
-
-.spectrumTitle {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 20px;
-  text-align: center;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-}
-
-.spectrumList {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.spectrumItem {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-}
-
-.emotionLabel {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 60px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-}
-
-.emotionColorDot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.emotionName {
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--text-primary);
-  white-space: nowrap;
-}
-
-.progressBarContainer {
-  flex: 1;
-  height: 24px;
-  background-color: rgba(0, 0, 0, 0.05);
-  border-radius: 12px;
-  overflow: hidden;
-  position: relative;
-
-  [data-theme="dark"] & {
-    background-color: rgba(255, 255, 255, 0.1);
-  }
-}
-
-.progressBar {
-  height: 100%;
-  border-radius: 12px;
-  transition: width 1s ease-out;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.emotionPercentage {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-  min-width: 50px;
-  text-align: right;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-}
-
-.mostCommonEmotion {
-  margin-top: 28px;
-  text-align: center;
-  padding: 0 4px;
-}
-
-.mostCommonTitle {
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 10px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-}
-
-.mostCommonDescription {
-  font-size: 14px;
-  color: var(--text-secondary);
-  font-style: italic;
-  line-height: 1.6;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-}
-
-// 响应式设计：在小屏幕上调整布局
 @media (max-width: 480px) {
   .chapter4Content {
     gap: 20px;
@@ -270,40 +425,23 @@
     font-size: 14px;
   }
 
-  .spectrumContainer {
-    padding: 20px 16px;
-    margin-top: 24px;
+  .monthChart {
+    gap: 6px;
   }
 
-  .spectrumTitle {
-    font-size: 16px;
-    margin-bottom: 16px;
+  .barWrap {
+    height: 78px;
   }
 
-  .spectrumList {
-    gap: 12px;
+  .textSection {
+    gap: 16px;
   }
 
-  .emotionName {
-    font-size: 14px;
-    min-width: 50px;
+  .mainText {
+    font-size: 15px;
   }
 
-  .emotionPercentage {
-    font-size: 13px;
-    min-width: 45px;
-  }
-
-  .mostCommonEmotion {
-    margin-top: 24px;
-  }
-
-  .mostCommonTitle {
-    font-size: 16px;
-    margin-bottom: 8px;
-  }
-
-  .mostCommonDescription {
+  .normalText {
     font-size: 13px;
   }
 }

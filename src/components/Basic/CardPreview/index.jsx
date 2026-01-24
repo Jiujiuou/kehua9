@@ -7,10 +7,9 @@ import {
   FaTimes,
 } from "react-icons/fa";
 import { HiDownload } from "react-icons/hi";
-import { toPng } from "html-to-image";
-import download from "downloadjs";
 import logoImage from "@/assets/images/logo_transparent.png";
 import { getFontFamily } from "@/utils/fonts";
+import { downloadElementAsImage } from "@/utils/downloadImage";
 import styles from "./index.module.less";
 
 const CardPreview = ({
@@ -80,7 +79,7 @@ const CardPreview = ({
         }
       }
     },
-    [dynamics, activeIndex, onDynamicChange]
+    [dynamics, activeIndex, onDynamicChange],
   );
 
   // 格式化日期：YYYY/MM/DD
@@ -103,98 +102,22 @@ const CardPreview = ({
       if (!currentDynamicData || !currentDynamicData.timestamp) return;
 
       const formattedDate = formatDate(currentDynamicData.timestamp);
-
-      // 临时隐藏下载按钮
-      let downloadButton = null;
-      let originalDisplay = "";
-      if (downloadButtonRef.current) {
-        downloadButton = downloadButtonRef.current;
-        originalDisplay = downloadButton.style.display;
-        downloadButton.style.display = "none";
-      }
-
-      // 临时移除高度限制和滚动，确保完整内容被导出
-      const element = cardContainerRef.current;
-      const originalMaxHeight = element.style.maxHeight;
-      const originalOverflow = element.style.overflow;
-
-      // 获取 cardContent 元素（可能有滚动）
-      const cardContentElement = element.querySelector(
-        `.${styles.cardContent}`
-      );
-      const originalContentOverflow = cardContentElement
-        ? cardContentElement.style.overflow
-        : "";
-
-      element.style.maxHeight = "none";
-      element.style.overflow = "visible";
-      if (cardContentElement) {
-        cardContentElement.style.overflow = "visible";
-      }
-
-      // 等待 DOM 更新
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      const filename = `可话动态_${formattedDate.replace(/\//g, "-")}`;
 
       try {
-        // 获取展开后的完整高度
-        const fullHeight = element.scrollHeight;
-        const width = element.offsetWidth;
-
-        // 使用缩放因子提高清晰度
-        const scaleFactor = 2;
-
-        // 使用 html-to-image 的 toPng 方法导出高清图片
-        const dataUrl = await toPng(element, {
-          width: width,
-          height: fullHeight,
-          pixelRatio: scaleFactor,
+        await downloadElementAsImage({
+          element: cardContainerRef.current,
+          filename: filename,
+          excludeElement: downloadButtonRef.current,
+          contentSelector: `.${styles.cardContent}`,
           backgroundColor: "#fef9f0",
-          cacheBust: true,
-          style: {
-            margin: "0",
-            padding: "0",
-            maxHeight: "none",
-            overflow: "visible",
-          },
+          scaleFactor: 2,
         });
-
-        // 恢复原始样式
-        element.style.maxHeight = originalMaxHeight;
-        element.style.overflow = originalOverflow;
-        if (cardContentElement) {
-          cardContentElement.style.overflow = originalContentOverflow;
-        }
-
-        // 恢复下载按钮显示
-        if (downloadButton) {
-          downloadButton.style.display = originalDisplay;
-        }
-
-        // 使用 downloadjs 下载图片
-        download(dataUrl, `可话动态_${formattedDate.replace(/\//g, "-")}.png`);
       } catch (error) {
         console.error("下载图片失败:", error);
-
-        // 确保在出错时也恢复样式
-        element.style.maxHeight = originalMaxHeight;
-        element.style.overflow = originalOverflow;
-        if (cardContentElement) {
-          cardContentElement.style.overflow = originalContentOverflow;
-        }
-
-        if (downloadButton) {
-          downloadButton.style.display = originalDisplay;
-        }
       }
     },
-    [
-      cardContainerRef,
-      dynamics,
-      activeIndex,
-      dynamic,
-      formatDate,
-      styles.cardContent,
-    ]
+    [dynamics, activeIndex, dynamic, formatDate],
   );
 
   // 点击 ESC 键关闭，支持左右箭头键切换（仅在允许导航时）
@@ -438,13 +361,13 @@ CardPreview.propTypes = {
       PropTypes.shape({
         url: PropTypes.string.isRequired,
         name: PropTypes.string,
-      })
+      }),
     ),
     videos: PropTypes.arrayOf(
       PropTypes.shape({
         url: PropTypes.string.isRequired,
         name: PropTypes.string,
-      })
+      }),
     ),
   }),
   dynamics: PropTypes.array,

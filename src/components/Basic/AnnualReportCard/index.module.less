@@ -76,6 +76,49 @@
   }
 }
 
+.downloadButton {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.2s ease;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+  &:hover {
+    transform: scale(1.1);
+    background-color: rgba(255, 255, 255, 1);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  svg {
+    font-size: 18px;
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  [data-theme="dark"] & {
+    background-color: rgba(0, 0, 0, 0.6);
+    
+    svg {
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.8);
+    }
+  }
+}
+
 .cardContent {
   flex: 1;
   position: relative;

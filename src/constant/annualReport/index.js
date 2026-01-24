@@ -2,7 +2,7 @@
 
 export const ANNUAL_REPORT_END_DATE = "2025-12-31";
 
-export const ANNUAL_REPORT_TOTAL_PAGES = 12;
+export const ANNUAL_REPORT_TOTAL_PAGES = 11;
 
 export const ANNUAL_REPORT_PAGE_SWITCH_ANIMATION = {
   delayMs: 10,

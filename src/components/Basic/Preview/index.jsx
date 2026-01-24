@@ -44,7 +44,7 @@ const Preview = forwardRef(
       onDirectoryHandleChange = null,
       directoryHandle = null,
     },
-    ref
+    ref,
   ) => {
     const [dynamics, setDynamics] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -61,7 +61,9 @@ const Preview = forwardRef(
     const userNickname = useAnnualReportStore((s) => s.userNickname);
     const setUserNickname = useAnnualReportStore((s) => s.setUserNickname);
     const reportPageIndex = useAnnualReportStore((s) => s.reportPageIndex);
-    const setReportPageIndex = useAnnualReportStore((s) => s.setReportPageIndex);
+    const setReportPageIndex = useAnnualReportStore(
+      (s) => s.setReportPageIndex,
+    );
     const resetAnnualReport = useAnnualReportStore((s) => s.resetAnnualReport);
     const fileInputRef = useRef(null);
     const contentAreaRef = useRef(null);
@@ -92,7 +94,7 @@ const Preview = forwardRef(
         }
 
         const updatedDynamics = [...dynamics, newDynamic].sort(
-          (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+          (a, b) => new Date(a.timestamp) - new Date(b.timestamp),
         );
 
         isInternalUpdateRef.current = true;
@@ -103,7 +105,7 @@ const Preview = forwardRef(
           onDynamicsChange(updatedDynamics);
         }
       },
-      [dynamics, onDynamicsChange]
+      [dynamics, onDynamicsChange],
     );
 
     // 当外部传入的 dynamics 变化时，同步更新内部 state
@@ -169,7 +171,7 @@ const Preview = forwardRef(
 
         // 获取所有日期元素
         const dateElements = Array.from(
-          contentElement.querySelectorAll("[data-date]")
+          contentElement.querySelectorAll("[data-date]"),
         );
 
         // 找到当前视口中最接近顶部的日期元素
@@ -218,7 +220,7 @@ const Preview = forwardRef(
 
       const regex = new RegExp(
         `(${keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`,
-        "gi"
+        "gi",
       );
       const parts = text.split(regex);
 
@@ -270,7 +272,7 @@ const Preview = forwardRef(
           if (
             dynamic.images &&
             dynamic.images.some(
-              (img) => img.name && img.name.toLowerCase().includes(keyword)
+              (img) => img.name && img.name.toLowerCase().includes(keyword),
             )
           ) {
             return true;
@@ -279,7 +281,7 @@ const Preview = forwardRef(
           if (
             dynamic.videos &&
             dynamic.videos.some(
-              (vid) => vid.name && vid.name.toLowerCase().includes(keyword)
+              (vid) => vid.name && vid.name.toLowerCase().includes(keyword),
             )
           ) {
             return true;
@@ -292,12 +294,12 @@ const Preview = forwardRef(
       if (sortOrder === "asc") {
         // 正序：从早到晚
         return filtered.sort(
-          (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+          (a, b) => new Date(a.timestamp) - new Date(b.timestamp),
         );
       } else {
         // 倒序：从晚到早
         return filtered.sort(
-          (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+          (a, b) => new Date(b.timestamp) - new Date(a.timestamp),
         );
       }
     }, [dynamics, sortOrder, contentTypeFilter, searchKeyword]);
@@ -316,7 +318,7 @@ const Preview = forwardRef(
 
         // 查找对应索引的动态项
         const targetElement = contentAreaRef.current.querySelector(
-          `[data-dynamic-index="${index}"]`
+          `[data-dynamic-index="${index}"]`,
         );
 
         if (targetElement) {
@@ -326,7 +328,7 @@ const Preview = forwardRef(
           });
         }
       },
-      [sortedDynamics]
+      [sortedDynamics],
     );
 
     // 暴露方法给父组件
@@ -337,7 +339,7 @@ const Preview = forwardRef(
 
         // 查找对应日期的第一个动态项
         const targetElement = contentAreaRef.current.querySelector(
-          `[data-date="${dateStr}"]`
+          `[data-date="${dateStr}"]`,
         );
 
         if (targetElement) {
@@ -435,7 +437,7 @@ const Preview = forwardRef(
         } else if (handle.kind === "directory") {
           const subFiles = await getFilesFromDirectoryHandle(
             handle,
-            currentPath
+            currentPath,
           );
           files.push(...subFiles);
         }
@@ -530,6 +532,18 @@ const Preview = forwardRef(
                 }
               }}
             />
+            {searchKeyword && (
+              <button
+                className={styles.closeButton}
+                onClick={() => {
+                  setSearchInput("");
+                  setSearchKeyword("");
+                }}
+                title="清除搜索"
+              >
+                <FaTimes />
+              </button>
+            )}
             <button
               className={styles.searchButton}
               onClick={() => {
@@ -544,6 +558,7 @@ const Preview = forwardRef(
             >
               <FaSearch />
             </button>
+
             {/* <button
               className={styles.reportButton}
               onClick={handleReportButtonClick}
@@ -552,18 +567,6 @@ const Preview = forwardRef(
               <FaChartBar />
               <span className={styles.reportButtonText}>年度报告</span>
             </button> */}
-            {searchKeyword && (
-              <button
-                className={styles.closeButton}
-                onClick={() => {
-                  setSearchInput("");
-                  setSearchKeyword("");
-                }}
-                title="清除搜索"
-              >
-                <FaTimes />
-              </button>
-            )}
           </div>
           <div
             className={styles.contentArea}
@@ -609,11 +612,11 @@ const Preview = forwardRef(
                         await deleteDynamicFromFile(
                           directoryHandle,
                           year,
-                          dynamic.timestamp
+                          dynamic.timestamp,
                         );
                         // 从列表中移除
                         const updatedDynamics = dynamics.filter(
-                          (d) => d.timestamp !== dynamic.timestamp
+                          (d) => d.timestamp !== dynamic.timestamp,
                         );
                         isInternalUpdateRef.current = true;
                         prevExternalDynamicsRef.current = updatedDynamics;
@@ -714,7 +717,7 @@ const Preview = forwardRef(
         />
       </>
     );
-  }
+  },
 );
 
 Preview.displayName = "Preview";

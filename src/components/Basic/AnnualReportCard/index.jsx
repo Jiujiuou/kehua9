@@ -1,15 +1,16 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import PropTypes from "prop-types";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { HiDownload } from "react-icons/hi";
 import backgroundImage from "@/assets/images/background.jpg";
 import backgroundDarkImage from "@/assets/images/background_dark.jpg";
 import CardPreview from "@/components/Basic/CardPreview";
+import { downloadElementAsImage } from "@/utils/downloadImage";
 import NicknameInputPage from "./NicknameInputPage";
 import Chapter1 from "./Chapter1";
 import Chapter2 from "./Chapter2";
 import Chapter3 from "./Chapter3";
 import Chapter4 from "./Chapter4";
-import Chapter4_5 from "./Chapter4_5";
 import Chapter5 from "./Chapter5";
 import Chapter6 from "./Chapter6";
 import Chapter7 from "./Chapter7";
@@ -52,6 +53,9 @@ const AnnualReportCard = ({
   const [isAnimating, setIsAnimating] = useState(false);
   const [cardPreviewDynamic, setCardPreviewDynamic] = useState(null);
   const [cardPreviewIndex, setCardPreviewIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const cardContainerRef = useRef(null);
+  const downloadButtonRef = useRef(null);
 
   // 检测主题变化
   useEffect(() => {
@@ -174,6 +178,44 @@ const AnnualReportCard = ({
     event.stopPropagation();
   };
 
+  const handleDownload = useCallback(
+    async (event) => {
+      event.stopPropagation();
+      if (!cardContainerRef.current) return;
+
+      // 生成文件名：根据当前页面索引生成
+      const pageNames = [
+        "封面",
+        "第一章",
+        "第二章",
+        "第三章",
+        "第四章",
+        "第五章",
+        "第六章",
+        "第七章",
+        "第八章",
+        "第九章",
+        "终章",
+      ];
+      const pageName = pageNames[activeIndex] || `第${activeIndex + 1}页`;
+      const filename = `年度报告_${pageName}`;
+
+      try {
+        await downloadElementAsImage({
+          element: cardContainerRef.current,
+          filename: filename,
+          excludeElement: downloadButtonRef.current,
+          contentSelector: `.${styles.cardContent}`,
+          backgroundColor: theme === "dark" ? "#1a1a1a" : "#fef9f0",
+          scaleFactor: 2,
+        });
+      } catch (error) {
+        console.error("下载年度报告页面失败:", error);
+      }
+    },
+    [activeIndex, theme, styles.cardContent]
+  );
+
   const handleStartMemory = () => {
     console.log(
       "AnnualReportCard handleStartMemory, userNickname:",
@@ -249,14 +291,12 @@ const AnnualReportCard = ({
       } else if (index === 4) {
         content = <Chapter4 dynamics={dynamics} />;
       } else if (index === 5) {
-        content = <Chapter4_5 dynamics={dynamics} />;
-      } else if (index === 6) {
         content = <Chapter5 dynamics={dynamics} />;
-      } else if (index === 7) {
+      } else if (index === 6) {
         content = <Chapter6 dynamics={dynamics} />;
-      } else if (index === 8) {
+      } else if (index === 7) {
         content = <Chapter7 dynamics={dynamics} />;
-      } else if (index === 9) {
+      } else if (index === 8) {
         content = (
           <Chapter8
             dynamics={dynamics}
@@ -264,9 +304,9 @@ const AnnualReportCard = ({
             onDynamicAdd={onDynamicAdd}
           />
         );
-      } else if (index === 10) {
+      } else if (index === 9) {
         content = <Chapter9 dynamics={dynamics} />;
-      } else if (index === 11) {
+      } else if (index === 10) {
         content = <FinalChapter dynamics={Array.isArray(allDynamics) ? allDynamics : dynamics} />;
       }
 
@@ -329,14 +369,27 @@ const AnnualReportCard = ({
       )}
       <div className={styles.cardWrapper}>
         <div
+          ref={cardContainerRef}
           className={styles.cardContainer}
           onClick={handleCardClick}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
           style={{
             backgroundImage: `url(${
               theme === "dark" ? backgroundDarkImage : backgroundImage
             })`,
           }}
         >
+          {isHovered && (
+            <div
+              ref={downloadButtonRef}
+              className={styles.downloadButton}
+              onClick={handleDownload}
+              title="下载图片"
+            >
+              <HiDownload />
+            </div>
+          )}
           <div className={styles.cardContent}>{renderPageContent()}</div>
         </div>
       </div>
