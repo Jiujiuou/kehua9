@@ -41,7 +41,7 @@ const NicknameInputPage = ({
   };
 
   return (
-    <>
+    <div className={styles.nicknameInputPage}>
       <div className={styles.cardText}>
         {displayedText.split("\n").map((line, index, array) => (
           <span key={index}>
@@ -81,7 +81,7 @@ const NicknameInputPage = ({
           </button>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

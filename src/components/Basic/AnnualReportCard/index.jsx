@@ -275,9 +275,26 @@ const AnnualReportCard = ({
           />
         );
       } else if (index === 1) {
-        content = <Chapter1 userNickname={userNickname} dynamics={dynamics} />;
+        content = (
+          <Chapter1
+            userNickname={userNickname}
+            dynamics={dynamics}
+            onPreviewClick={(dynamic, index) => {
+              setCardPreviewDynamic(dynamic);
+              setCardPreviewIndex(index);
+            }}
+          />
+        );
       } else if (index === 2) {
-        content = <Chapter2 dynamics={dynamics} />;
+        content = (
+          <Chapter2
+            dynamics={dynamics}
+            onPreviewClick={(dynamic, index) => {
+              setCardPreviewDynamic(dynamic);
+              setCardPreviewIndex(index);
+            }}
+          />
+        );
       } else if (index === 3) {
         content = (
           <Chapter3

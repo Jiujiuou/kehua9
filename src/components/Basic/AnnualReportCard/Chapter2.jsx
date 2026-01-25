@@ -430,10 +430,11 @@ const Chapter2 = ({
   };
 
   // 处理预览点击
-  const handlePreviewClick = (dynamic) => {
+  const handlePreviewClick = (dynamic, index) => {
     if (onPreviewClick) {
-      const index = findDynamicIndex(dynamic);
-      onPreviewClick(dynamic, index);
+      // 如果 index 未提供，则通过 findDynamicIndex 查找
+      const finalIndex = index !== undefined ? index : findDynamicIndex(dynamic);
+      onPreviewClick(dynamic, finalIndex);
     }
   };
 
