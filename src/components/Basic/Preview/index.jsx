@@ -20,6 +20,7 @@ import { useConfirmHelper } from "@/components/Basic/Confirm";
 import { deleteDynamicFromFile } from "@/utils/writeData";
 import { track } from "@/utils/track";
 import { useAnnualReportStore } from "@/store/annualReport";
+import { saveSetting } from "@/utils/storage";
 import styles from "./index.module.less";
 
 const Preview = forwardRef(
@@ -74,6 +75,13 @@ const Preview = forwardRef(
 
     // 处理年度报告按钮点击
     const handleReportButtonClick = () => {
+      // 打开年度报告时，自动切换到深色模式
+      const currentTheme = document.documentElement.getAttribute("data-theme");
+      if (currentTheme !== "dark") {
+        document.documentElement.setAttribute("data-theme", "dark");
+        saveSetting("theme", "dark");
+      }
+
       // 打开年度报告时，强制把右侧「类型」切回「全部」，避免列表/报告被过滤
       if (typeof onContentTypeFilterChange === "function") {
         onContentTypeFilterChange(null);
