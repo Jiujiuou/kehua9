@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import ImagePreview from "@/components/Basic/ImagePreview";
 import VideoPreview from "@/components/Basic/VideoPreview";
 import DynamicCard from "@/components/Basic/DynamicCard";
+import Padding from "@/components/Basic/Padding";
 import { PERSPECTIVE_LEXICON } from "@/constant";
 import styles from "./Chapter2.module.less";
 
@@ -106,6 +107,7 @@ function analyzeAllPerspectives(posts) {
       counts: { intro: 0, outro: 0, neutral: 0 },
       dominantType: "neutral",
       examples: { intro: [], outro: [], neutral: [] },
+      posts: { intro: [], outro: [], neutral: [] },
     };
   }
 
@@ -201,126 +203,13 @@ function analyzeAllPerspectives(posts) {
       outro: getExamples(outroPosts),
       neutral: getExamples(neutralPosts),
     },
+    // 返回完整的动态对象列表，用于展示
+    posts: {
+      intro: introPosts,
+      outro: outroPosts,
+      neutral: neutralPosts,
+    },
   };
-}
-
-/**
- * 添加个性化描述
- */
-function addCharacterDescription(I, O, R) {
-  const descriptors = [];
-
-  if (I > 40) descriptors.push("感受细腻");
-  if (O > 40) descriptors.push("观察敏锐");
-  if (R > 40) descriptors.push("记录详实");
-  if (Math.abs(I - O) < 10 && Math.abs(I - R) < 10)
-    descriptors.push("表达平衡");
-  if (I < 20 && O < 20) descriptors.push("聚焦当下");
-  if (R < 20 && I > 40) descriptors.push("偏重内心");
-
-  if (descriptors.length > 0) {
-    return `这让你成为一个${descriptors.join("、")}的记录者。`;
-  }
-  return "";
-}
-
-/**
- * 生成视角总结文案
- */
-function generatePerspectiveSummary(I, O, R) {
-  // 1. 检查单一主导视角
-  if (I > 65 && I - O > 30 && I - R > 30) {
-    const variants = [
-      `你是一个内在世界的细心观察者。在 ${I}% 的动态中，你都习惯看向自己的内心——那些"我觉得"、"我感到"、"回忆中"的时刻，是你与自己最真诚的对话。这种内省的习惯，让你在喧嚣中保留了倾听自己声音的空间。`,
-      `你的表达，像是内心的一面镜子。${I}% 的动态都在映照自己的感受与思考。当你说着"心里"、"思念"、"安静"时，我们听见了内在河流的流淌声。这种向内探索的勇气，很珍贵。`,
-      `嘿，我注意到你的动态里，有超过 ${I}% 都在表达自己的感受和想法。你似乎习惯把动态当作一面镜子，映照内心的涟漪。这样的记录方式，让每个瞬间都有了情感的重量。`,
-    ];
-    return variants[Math.floor(Math.random() * variants.length)];
-  }
-
-  if (O > 65 && O - I > 30 && O - R > 30) {
-    const variants = [
-      `你有一双捕捉世界细节的眼睛。${O}% 的动态都在描述你看到、听到、感受到的外部世界——窗外的雨、路边的花、天空的颜色。你通过观察与世界温柔连接，让平凡的事物都有了诗意的光芒。`,
-      `你的文字常常是一扇窗，${O}% 的窗外风景被记录下来。那些关于"看见"、"发现"、"窗外"的叙述，让我们透过你的眼睛重新认识世界。这种观察力，是一种难得的天赋。`,
-    ];
-    return variants[Math.floor(Math.random() * variants.length)];
-  }
-
-  if (R > 65 && R - I > 30 && R - O > 30) {
-    const variants = [
-      `你是一个生活的忠实记录者。${R}% 的动态都在为时间留下具体的锚点——"今天"、"完成"、"遇到"、"去了"。这些看似平凡的记录，像日记本上的折角，标记着生活原本的模样。`,
-      `你的动态像是时间的地图，${R}% 的标记都是具体的事件和日常。你用文字为每一天留下坐标，让回忆能够顺着"今天做了什么"的线索，找到回家的路。`,
-    ];
-    return variants[Math.floor(Math.random() * variants.length)];
-  }
-
-  // 2. 检查双视角组合
-  if (I + O > 80 && I > 20 && O > 20) {
-    if (I > O && I - R > 20) {
-      return `你在内心与外界之间架起了一座桥。${I}% 的内省与 ${O}% 的观察相互交织——当外在的风景触动内在的感受，你的文字便有了双重的深度。这种内化与外化的平衡，让你的表达既敏感又丰富。`;
-    }
-    if (O > I && O - R > 20) {
-      return `你的观察常常引发内心的回响。${O}% 的观察与 ${I}% 的内省如同和弦——看见一片云，想起一个人；听见一首歌，涌起一阵情绪。世界对你来说，既是风景也是镜子。`;
-    }
-    if (Math.abs(I - O) < 15) {
-      return `你自如地在内在感受与外部观察间游走。${I}% 看向自己，${O}% 望向世界，两者几乎平分秋色。这种平衡让你既能感受内心的微澜，也能看见世界的细节。`;
-    }
-  }
-
-  if (I + R > 80 && I > 20 && R > 20) {
-    if (I > R && I - O > 20) {
-      return `你既记录生活的轨迹，也不忘感受的温度。${I}% 的内省与 ${R}% 的记录相互映衬——事件因感受而深刻，感受因事件而具体。你的动态，是日记也是心情笔记。`;
-    }
-    if (R > I && R - O > 20) {
-      return `你的记录常常带有感受的注脚。${R}% 的事件记载与 ${I}% 的情感表达交织在一起——不仅记录了"做了什么"，也记下了"感受到了什么"。这让日常有了双重的意义。`;
-    }
-  }
-
-  if (O + R > 80 && O > 20 && R > 20) {
-    return `你像一个带着笔记本的旅人，${O}% 观察世界，${R}% 记录旅程。你的动态既有眼前的风景，也有脚下的路径，让每一次停留都有了文字的形状。`;
-  }
-
-  // 3. 检查平衡型
-  const maxVal = Math.max(I, O, R);
-  const minVal = Math.min(I, O, R);
-  if (maxVal - minVal < 15 && minVal > 20) {
-    const variants = [
-      `你的表达有一种美妙的平衡。内省（${I}%）、观察（${O}%）、记录（${R}%）几乎均匀分布在你的动态中。你像是三个视角的舞者，在感受、观看、记叙间自如旋转，让每一次表达都完整而立体。`,
-      `你的动态是三维的——向内探索深度，向外拓展广度，在时间轴上留下印记。这种平衡不是刻意为之，而是你与世界对话的自然方式。`,
-    ];
-    return variants[Math.floor(Math.random() * variants.length)];
-  }
-
-  if (maxVal - minVal < 25) {
-    const dominant = I > O && I > R ? "内省" : O > I && O > R ? "观察" : "记录";
-    return `你在三种视角间找到了舒适的节奏。虽然 ${dominant} 视角稍多一些，但整体上你的表达兼顾了内心、外界与时间。这种包容性，让你的动态丰富多彩。`;
-  }
-
-  // 4. 检查边缘模式
-  if (I < 15 && R > 50) {
-    return `你很少直接谈论自己的感受（仅 ${I}%），更习惯通过具体事件的记录（${R}%）来承载一切。这或许意味着，你把情感都编织进了日常的经纬中。`;
-  }
-
-  if (O < 15 && I > 50) {
-    return `你的目光更多看向自己的内在（${I}%），较少描述外部世界（仅 ${O}%）。但这让你的内心图景格外细腻清晰，每一个情绪的起伏都被温柔注视。`;
-  }
-
-  if (R < 15 && O > 40) {
-    return `你很少记录具体事件（仅 ${R}%），但对外界的观察（${O}%）细致入微。你的动态更像是一幅幅印象派的画，捕捉瞬间的感受与氛围。`;
-  }
-
-  // 5. 检查两极分化
-  if (maxVal > 55 && minVal < 20) {
-    const high = I === maxVal ? "内省" : O === maxVal ? "观察" : "记录";
-    const highPercent = I === maxVal ? I : O === maxVal ? O : R;
-    const low = I === minVal ? "内省" : O === minVal ? "观察" : "记录";
-    const lowPercent = I === minVal ? I : O === minVal ? O : R;
-    return `你的表达有明显的侧重——${high} 视角占据主导（${highPercent}%），而 ${low} 视角则相对安静（${lowPercent}%）。这种选择性的表达，恰恰形成了你独特的叙述风格。`;
-  }
-
-  // 6. 默认通用
-  const description = addCharacterDescription(I, O, R);
-  return `你的表达有自己独特的韵律。内省（${I}%）、观察（${O}%）、记录（${R}%）以这样的比例组合，构成了你与世界对话的方式。这不是偏好，而是你真实的表达习惯。${description}`;
 }
 
 const Chapter2 = ({
@@ -337,20 +226,66 @@ const Chapter2 = ({
   imageGap = 4,
   onPreviewClick,
 }) => {
-  const [showContent, setShowContent] = useState(false);
+  const [displayedSubtitle, setDisplayedSubtitle] = useState("");
+  const [showFirstSpark, setShowFirstSpark] = useState(false);
+  const [showSecondMeditation, setShowSecondMeditation] = useState(false);
+  const [showBottomContent, setShowBottomContent] = useState(false);
   const [previewImages, setPreviewImages] = useState([]);
   const [previewIndex, setPreviewIndex] = useState(0);
   const [previewVideos, setPreviewVideos] = useState([]);
   const [previewVideoIndex, setPreviewVideoIndex] = useState(0);
+  const [expandedIntro, setExpandedIntro] = useState(false);
+  const [expandedOutro, setExpandedOutro] = useState(false);
 
+  const SUBTITLE_TEXT = "从最刹那的灵感，到最绵长的倾诉。";
+
+  // 延迟辅助函数
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  // 打字机效果
   useEffect(() => {
-    // 延迟显示内容，添加淡入动画
-    const timer = setTimeout(() => {
-      setShowContent(true);
-    }, 300);
+    let currentIndex = 0;
+    const typingSpeed = 100; // 每个字符的延迟（毫秒）
+    let typingTimer = null;
+    let initialDelayTimer = null;
+
+    const typeText = () => {
+      if (currentIndex < SUBTITLE_TEXT.length) {
+        setDisplayedSubtitle(SUBTITLE_TEXT.slice(0, currentIndex + 1));
+        currentIndex++;
+        typingTimer = setTimeout(typeText, typingSpeed);
+      } else {
+        // 文字显示完成后，开始显示后面的内容
+        const runAnimationSequence = async () => {
+          // 先显示"最刹那的火花"和动态卡片
+          await delay(2000);
+          setShowFirstSpark(true);
+
+          // 间隔 2s 后显示"最绵长的沉思"和动态卡片
+          await delay(3000);
+          setShowSecondMeditation(true);
+
+          // 再间隔 2s 后显示底部内容
+          await delay(3000);
+          setShowBottomContent(true);
+        };
+
+        runAnimationSequence();
+      }
+    };
+
+    // 切换到当前卡片后 500ms 再开启打字机效果
+    initialDelayTimer = setTimeout(() => {
+      typeText();
+    }, 500);
 
     return () => {
-      clearTimeout(timer);
+      if (typingTimer) {
+        clearTimeout(typingTimer);
+      }
+      if (initialDelayTimer) {
+        clearTimeout(initialDelayTimer);
+      }
     };
   }, []);
 
@@ -362,7 +297,7 @@ const Chapter2 = ({
 
     // 过滤出有文本内容的动态
     const postsWithText = dynamics.filter(
-      (dynamic) => dynamic && dynamic.text && dynamic.text.trim().length > 0
+      (dynamic) => dynamic && dynamic.text && dynamic.text.trim().length > 0,
     );
 
     if (postsWithText.length === 0) {
@@ -391,14 +326,35 @@ const Chapter2 = ({
     return analyzeAllPerspectives(dynamics);
   }, [dynamics]);
 
-  // 生成视角总结文案
-  const perspectiveSummary = useMemo(() => {
+  // 生成核心洞察句
+  const coreInsight = useMemo(() => {
     if (!perspectiveAnalysis || dynamics.length === 0) return "";
-    return generatePerspectiveSummary(
-      perspectiveAnalysis.intro,
-      perspectiveAnalysis.outro,
-      perspectiveAnalysis.neutral
-    );
+    const { counts } = perspectiveAnalysis;
+
+    // 如果某一类动态极少，调整文案
+    if (counts.intro < 5 && counts.outro >= 5) {
+      return "你的记录，是一幅细腻的内心导航图。你善于为每个事件落下感受的注脚，这让你写下的，不仅是日记，更是情绪的谱系。";
+    }
+    if (counts.outro < 5 && counts.intro >= 5) {
+      return "你的记录，是一扇观察世界的窗。你习惯捕捉外部世界的生动细节，让平凡的日常充满了具体的画面与温度。";
+    }
+
+    // 默认情况：两种视角都有一定数量
+    return "我们注意到，你的记录常在两种目光间轻柔地切换：";
+  }, [perspectiveAnalysis, dynamics]);
+
+  // 生成总结升华句
+  const summarySentence = useMemo(() => {
+    if (!perspectiveAnalysis || dynamics.length === 0) return "";
+    const { dominantType } = perspectiveAnalysis;
+
+    if (dominantType === "intro") {
+      return "而更多时候，这些向内的目光，让平凡的日常，变成了你独特的、带有体温的日记。";
+    } else if (dominantType === "outro") {
+      return "而更多时候，这些向外的观察，让平凡的日常，变成了你独特的、充满画面感的记录。";
+    } else {
+      return "而更多时候，这两种目光交织在一起，让平凡的日常，变成了你独特的、带有体温的日记。";
+    }
   }, [perspectiveAnalysis, dynamics]);
 
   // 格式化日期时间显示（和 preview 区域保持一致）
@@ -433,217 +389,293 @@ const Chapter2 = ({
   const handlePreviewClick = (dynamic, index) => {
     if (onPreviewClick) {
       // 如果 index 未提供，则通过 findDynamicIndex 查找
-      const finalIndex = index !== undefined ? index : findDynamicIndex(dynamic);
+      const finalIndex =
+        index !== undefined ? index : findDynamicIndex(dynamic);
       onPreviewClick(dynamic, finalIndex);
     }
   };
 
   return (
     <div className={styles.chapter2Content}>
-      <div
-        className={`${styles.content} ${
-          showContent ? styles.fadeIn : styles.hidden
-        }`}
-      >
+      <div className={styles.content}>
         <div className={styles.textWrapper}>
           <h2 className={styles.title}>表达光谱的两极</h2>
-          <p className={styles.subtitle}>从最刹那的灵感，到最绵长的倾诉。</p>
+          <p className={styles.subtitle}>
+            {displayedSubtitle}
+            {displayedSubtitle.length < SUBTITLE_TEXT.length && (
+              <span className={styles.cursor}>|</span>
+            )}
+          </p>
         </div>
 
         {longestPost && shortestPost && (
           <div className={styles.postsContainer}>
             {/* 左侧：最刹那的火花 */}
-            <div className={styles.postCard}>
-              <div className={styles.postHeader}>
-                <h3 className={styles.postTitle}>
-                  最刹那的火花 · {shortestPost.text.trim().length}字
-                </h3>
-              </div>
-              <DynamicCard
-                dynamic={prepareDynamicForCard(shortestPost)}
-                index={0}
-                contentGap={contentGap}
-                borderRadius={borderRadius}
-                imageGap={imageGap}
-                fontSize={fontSize}
-                fontWeight={fontWeight}
-                fontFamily={fontFamily}
-                lineHeight={lineHeight}
-                textIndent={textIndent}
-                paragraphSpacing={paragraphSpacing}
-                showPreviewButton={false}
-                showDeleteButton={false}
-                allowContentClickToPreview={true}
-                onPreviewClick={handlePreviewClick}
-                onImageClick={(images, imgIndex) => {
-                  setPreviewImages(images);
-                  setPreviewIndex(imgIndex);
-                }}
-                onVideoClick={(videos, vidIndex) => {
-                  setPreviewVideos(videos);
-                  setPreviewVideoIndex(vidIndex);
-                }}
-              />
-              <p className={styles.postInterpretation}>
-                瞬间的感受，也被你精准捕捉。
-              </p>
-            </div>
-
-            {/* 右侧：最绵长的沉思 */}
-            <div className={styles.postCard}>
-              <div className={styles.postHeader}>
-                <h3 className={styles.postTitle}>
-                  最绵长的沉思 · {longestPost.text.trim().length}字
-                </h3>
-              </div>
-              <DynamicCard
-                dynamic={prepareDynamicForCard(longestPost)}
-                index={1}
-                contentGap={contentGap}
-                borderRadius={borderRadius}
-                imageGap={imageGap}
-                fontSize={fontSize}
-                fontWeight={fontWeight}
-                fontFamily={fontFamily}
-                lineHeight={lineHeight}
-                textIndent={textIndent}
-                paragraphSpacing={paragraphSpacing}
-                showPreviewButton={false}
-                showDeleteButton={false}
-                textClassName={styles.truncatedText}
-                allowContentClickToPreview={true}
-                onPreviewClick={handlePreviewClick}
-                onImageClick={(images, imgIndex) => {
-                  setPreviewImages(images);
-                  setPreviewIndex(imgIndex);
-                }}
-                onVideoClick={(videos, vidIndex) => {
-                  setPreviewVideos(videos);
-                  setPreviewVideoIndex(vidIndex);
-                }}
-              />
-              <p className={styles.postInterpretation}>
-                有些心事，需要足够的篇幅来安放。
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* 个人视角分析区域 */}
-        {perspectiveAnalysis && dynamics.length > 0 && (
-          <div className={styles.perspectiveSection}>
-            <div className={styles.perspectiveHeader}>
-              <h3 className={styles.perspectiveTitle}>
-                🌟 你的表达，有三种温度
-              </h3>
-              <p className={styles.perspectiveSubtitle}>
-                这些视角，是你与世界的对话方式
-              </p>
-            </div>
-
-            {/* 视角卡片展示 - 三个卡片并排 */}
-            <div className={styles.perspectiveCards}>
-              {/* 内省视角卡片 */}
-              <div className={styles.perspectiveCard}>
-                <div className={styles.cardIcon}>🔍</div>
-                <h4 className={styles.cardTitle}>向内看</h4>
-                <p className={styles.cardSubtitle}>倾听内心</p>
-                <div className={styles.cardPercentage}>
-                  {perspectiveAnalysis.intro}%
+            {showFirstSpark && (
+              <div className={`${styles.postCard} ${styles.fadeIn}`}>
+                <div className={styles.postHeader}>
+                  <h3 className={styles.postTitle}>
+                    最刹那的火花 · {shortestPost.text.trim().length}字
+                  </h3>
+                  <p className={styles.postInterpretation}>
+                    瞬间的感受，也被你精准捕捉。
+                  </p>
                 </div>
-              </div>
-
-              {/* 观察视角卡片 */}
-              <div className={styles.perspectiveCard}>
-                <div className={styles.cardIcon}>👁</div>
-                <h4 className={styles.cardTitle}>向外看</h4>
-                <p className={styles.cardSubtitle}>观察世界</p>
-                <div className={styles.cardPercentage}>
-                  {perspectiveAnalysis.outro}%
-                </div>
-              </div>
-
-              {/* 记录视角卡片 */}
-              <div className={styles.perspectiveCard}>
-                <div className={styles.cardIcon}>📝</div>
-                <h4 className={styles.cardTitle}>记录</h4>
-                <p className={styles.cardSubtitle}>书写日常</p>
-                <div className={styles.cardPercentage}>
-                  {perspectiveAnalysis.neutral}%
-                </div>
-              </div>
-            </div>
-
-            {/* 视角总结文案 */}
-            {perspectiveSummary && (
-              <div className={styles.perspectiveSummary}>
-                <p className={styles.summaryText}>{perspectiveSummary}</p>
+                <Padding height={12} />
+                <DynamicCard
+                  dynamic={prepareDynamicForCard(shortestPost)}
+                  index={0}
+                  contentGap={contentGap}
+                  borderRadius={borderRadius}
+                  imageGap={imageGap}
+                  fontSize={fontSize}
+                  fontWeight={fontWeight}
+                  fontFamily={fontFamily}
+                  lineHeight={lineHeight}
+                  textIndent={textIndent}
+                  paragraphSpacing={paragraphSpacing}
+                  showPreviewButton={false}
+                  showDeleteButton={false}
+                  allowContentClickToPreview={true}
+                  onPreviewClick={handlePreviewClick}
+                  onImageClick={(images, imgIndex) => {
+                    setPreviewImages(images);
+                    setPreviewIndex(imgIndex);
+                  }}
+                  onVideoClick={(videos, vidIndex) => {
+                    setPreviewVideos(videos);
+                    setPreviewVideoIndex(vidIndex);
+                  }}
+                />
               </div>
             )}
 
-            {/* 典型表达示例区域 */}
-            <div className={styles.examplesSection}>
-              {/* 内省视角示例 */}
-              {perspectiveAnalysis.examples.intro.length > 0 && (
-                <div className={styles.exampleGroup}>
-                  <div className={styles.exampleGroupHeader}>
-                    <span className={styles.exampleIcon}>🔍</span>
-                    <span className={styles.exampleGroupTitle}>
-                      当你这样说时，属于&ldquo;内省视角&rdquo;：
-                    </span>
-                  </div>
-                  <div className={styles.exampleItems}>
-                    {perspectiveAnalysis.examples.intro.map((example, idx) => (
-                      <div key={idx} className={styles.exampleItem}>
-                        &ldquo;{example}&rdquo;
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+            {showFirstSpark && <Padding height={32} />}
 
-              {/* 观察视角示例 */}
-              {perspectiveAnalysis.examples.outro.length > 0 && (
-                <div className={styles.exampleGroup}>
-                  <div className={styles.exampleGroupHeader}>
-                    <span className={styles.exampleIcon}>👁</span>
-                    <span className={styles.exampleGroupTitle}>
-                      当你这样说时，属于&ldquo;观察视角&rdquo;：
-                    </span>
-                  </div>
-                  <div className={styles.exampleItems}>
-                    {perspectiveAnalysis.examples.outro.map((example, idx) => (
-                      <div key={idx} className={styles.exampleItem}>
-                        &ldquo;{example}&rdquo;
-                      </div>
-                    ))}
-                  </div>
+            {/* 右侧：最绵长的沉思 */}
+            {showSecondMeditation && (
+              <div className={`${styles.postCard} ${styles.fadeIn}`}>
+                <div className={styles.postHeader}>
+                  <h3 className={styles.postTitle}>
+                    最绵长的沉思 · {longestPost.text.trim().length}字
+                  </h3>
+                  <p className={styles.postInterpretation}>
+                    有些心事，需要足够的篇幅来安放。
+                  </p>
                 </div>
-              )}
+                <Padding height={12} />
 
-              {/* 记录视角示例 */}
-              {perspectiveAnalysis.examples.neutral.length > 0 && (
-                <div className={styles.exampleGroup}>
-                  <div className={styles.exampleGroupHeader}>
-                    <span className={styles.exampleIcon}>📝</span>
-                    <span className={styles.exampleGroupTitle}>
-                      当你这样说时，属于&ldquo;记录视角&rdquo;：
-                    </span>
-                  </div>
-                  <div className={styles.exampleItems}>
-                    {perspectiveAnalysis.examples.neutral.map(
-                      (example, idx) => (
-                        <div key={idx} className={styles.exampleItem}>
-                          &ldquo;{example}&rdquo;
-                        </div>
-                      )
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
+                <DynamicCard
+                  dynamic={prepareDynamicForCard(longestPost)}
+                  index={1}
+                  contentGap={contentGap}
+                  borderRadius={borderRadius}
+                  imageGap={imageGap}
+                  fontSize={fontSize}
+                  fontWeight={fontWeight}
+                  fontFamily={fontFamily}
+                  lineHeight={lineHeight}
+                  textIndent={textIndent}
+                  paragraphSpacing={paragraphSpacing}
+                  showPreviewButton={false}
+                  showDeleteButton={false}
+                  textClassName={styles.truncatedText}
+                  allowContentClickToPreview={true}
+                  onPreviewClick={handlePreviewClick}
+                  onImageClick={(images, imgIndex) => {
+                    setPreviewImages(images);
+                    setPreviewIndex(imgIndex);
+                  }}
+                  onVideoClick={(videos, vidIndex) => {
+                    setPreviewVideos(videos);
+                    setPreviewVideoIndex(vidIndex);
+                  }}
+                />
+              </div>
+            )}
           </div>
         )}
+
+        {/* 你的文字重心分析区域 */}
+        {showBottomContent &&
+          perspectiveAnalysis &&
+          dynamics.length > 0 &&
+          perspectiveAnalysis.counts.intro >= 5 &&
+          perspectiveAnalysis.counts.outro >= 5 && (
+            <div className={`${styles.perspectiveSection} ${styles.fadeIn}`}>
+              {/* 模块主标题 */}
+              <div className={styles.perspectiveHeader}>
+                <h3 className={styles.perspectiveTitle}>
+                  你的文字，有两种重心
+                </h3>
+              </div>
+
+              {/* 核心洞察句 */}
+              {coreInsight && (
+                <div className={styles.coreInsight}>
+                  <p>{coreInsight}</p>
+                </div>
+              )}
+
+              <Padding height={32} />
+
+              {/* 向内与向外的并列阐述区 */}
+              <div className={styles.perspectiveContent}>
+                {/* 向内的描摹 */}
+                {perspectiveAnalysis.posts.intro.length > 0 && (
+                  <div className={styles.perspectiveBlock}>
+                    <div className={styles.perspectiveBlockHeader}>
+                      <h4 className={styles.perspectiveBlockTitle}>
+                        向内的描摹
+                      </h4>
+                      <p className={styles.perspectiveBlockDescription}>
+                        你习惯为事件落下感受的注脚，捕捉心绪的细微波动。
+                      </p>
+                      <p className={styles.perspectiveBlockSubDescription}>
+                        &ldquo;这让你在记录&lsquo;发生了什么&rsquo;时，也诚实地回答了&lsquo;感觉如何&rsquo;。&rdquo;
+                      </p>
+                    </div>
+                    <div className={styles.exampleCards}>
+                      {(expandedIntro
+                        ? perspectiveAnalysis.posts.intro
+                        : perspectiveAnalysis.posts.intro.slice(0, 2)
+                      ).map((dynamic, idx) => (
+                        <div
+                          key={dynamic.timestamp || idx}
+                          className={styles.exampleCard}
+                        >
+                          <DynamicCard
+                            dynamic={prepareDynamicForCard(dynamic)}
+                            index={findDynamicIndex(dynamic)}
+                            contentGap={contentGap}
+                            borderRadius={borderRadius}
+                            imageGap={imageGap}
+                            fontSize={fontSize}
+                            fontWeight={fontWeight}
+                            fontFamily={fontFamily}
+                            lineHeight={lineHeight}
+                            textIndent={textIndent}
+                            paragraphSpacing={paragraphSpacing}
+                            showPreviewButton={false}
+                            showDeleteButton={false}
+                            allowContentClickToPreview={true}
+                            onPreviewClick={handlePreviewClick}
+                            onImageClick={(images, imgIndex) => {
+                              setPreviewImages(images);
+                              setPreviewIndex(imgIndex);
+                            }}
+                            onVideoClick={(videos, vidIndex) => {
+                              setPreviewVideos(videos);
+                              setPreviewVideoIndex(vidIndex);
+                            }}
+                          />
+                        </div>
+                      ))}
+                      {perspectiveAnalysis.posts.intro.length > 2 && (
+                        <button
+                          className={styles.expandButton}
+                          onClick={() => setExpandedIntro(!expandedIntro)}
+                        >
+                          {expandedIntro
+                            ? "收起"
+                            : `展开更多（${perspectiveAnalysis.posts.intro.length - 2}条）`}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+                <Padding height={32} />
+
+                {/* 向外的观察 */}
+                {perspectiveAnalysis.posts.outro.length > 0 && (
+                  <div className={styles.perspectiveBlock}>
+                    <div className={styles.perspectiveBlockHeader}>
+                      <h4 className={styles.perspectiveBlockTitle}>
+                        向外的观察
+                      </h4>
+                      <p className={styles.perspectiveBlockDescription}>
+                        你也时常像敏锐的镜头，定格外部世界的生动细节。
+                      </p>
+                      <p className={styles.perspectiveBlockSubDescription}>
+                        &ldquo;这让你在描绘世界时，充满了具体的画面与温度。&rdquo;
+                      </p>
+                    </div>
+                    <div className={styles.exampleCards}>
+                      {(expandedOutro
+                        ? perspectiveAnalysis.posts.outro
+                        : perspectiveAnalysis.posts.outro.slice(0, 2)
+                      ).map((dynamic, idx) => (
+                        <div
+                          key={dynamic.timestamp || idx}
+                          className={styles.exampleCard}
+                        >
+                          <DynamicCard
+                            dynamic={prepareDynamicForCard(dynamic)}
+                            index={findDynamicIndex(dynamic)}
+                            contentGap={contentGap}
+                            borderRadius={borderRadius}
+                            imageGap={imageGap}
+                            fontSize={fontSize}
+                            fontWeight={fontWeight}
+                            fontFamily={fontFamily}
+                            lineHeight={lineHeight}
+                            textIndent={textIndent}
+                            paragraphSpacing={paragraphSpacing}
+                            showPreviewButton={false}
+                            showDeleteButton={false}
+                            allowContentClickToPreview={true}
+                            onPreviewClick={handlePreviewClick}
+                            onImageClick={(images, imgIndex) => {
+                              setPreviewImages(images);
+                              setPreviewIndex(imgIndex);
+                            }}
+                            onVideoClick={(videos, vidIndex) => {
+                              setPreviewVideos(videos);
+                              setPreviewVideoIndex(vidIndex);
+                            }}
+                          />
+                        </div>
+                      ))}
+                      {perspectiveAnalysis.posts.outro.length > 2 && (
+                        <button
+                          className={styles.expandButton}
+                          onClick={() => setExpandedOutro(!expandedOutro)}
+                        >
+                          {expandedOutro
+                            ? "收起"
+                            : `展开更多（${perspectiveAnalysis.posts.outro.length - 2}条）`}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 总结升华句 */}
+              {summarySentence && (
+                <div
+                  className={`${styles.summarySentence} ${
+                    summarySentence.includes("这两种目光交织在一起")
+                      ? styles.sparkleText
+                      : ""
+                  }`}
+                >
+                  <p>{summarySentence}</p>
+                  {summarySentence.includes("这两种目光交织在一起") && (
+                    <>
+                      <span className={styles.sparkleDot1}></span>
+                      <span className={styles.sparkleDot2}></span>
+                      <span className={styles.sparkleDot3}></span>
+                      <span className={styles.sparkleDot4}></span>
+                      <span className={styles.sparkleDot5}></span>
+                      <span className={styles.sparkleDot6}></span>
+                    </>
+                  )}
+                </div>
+              )}
+              <Padding height={32} />
+            </div>
+          )}
       </div>
       <ImagePreview
         images={previewImages}

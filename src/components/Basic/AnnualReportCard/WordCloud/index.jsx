@@ -16,11 +16,53 @@ const WordCloudComponent = ({ dynamics = [] }) => {
   const hoveredWordRef = useRef(null); // 当前 hover 的词
   const [hoveredWord, setHoveredWord] = useState(null); // 用于显示 hover 状态
   const [relatedTexts, setRelatedTexts] = useState([]); // 与 hover 词相关的文本片段列表（最多3条）
+  const [displayedSubtitle, setDisplayedSubtitle] = useState(""); // 打字机效果显示的副标题
+  const [showWordCloud, setShowWordCloud] = useState(false); // 控制词云显示
+
+  const SUBTITLE_TEXT = "词语的大小，代表它在你的世界里占据的分量。";
+
+  // 打字机效果
+  useEffect(() => {
+    let currentIndex = 0;
+    const typingSpeed = 100; // 每个字符的延迟（毫秒）
+    let typingTimer = null;
+    let initialDelayTimer = null;
+
+    const typeText = () => {
+      if (currentIndex < SUBTITLE_TEXT.length) {
+        setDisplayedSubtitle(SUBTITLE_TEXT.slice(0, currentIndex + 1));
+        currentIndex++;
+        typingTimer = setTimeout(typeText, typingSpeed);
+      } else {
+        // 文字显示完成后，显示词云内容
+        setShowWordCloud(true);
+      }
+    };
+
+    // 切换到当前卡片后 500ms 再开启打字机效果
+    initialDelayTimer = setTimeout(() => {
+      typeText();
+    }, 500);
+
+    return () => {
+      if (typingTimer) {
+        clearTimeout(typingTimer);
+      }
+      if (initialDelayTimer) {
+        clearTimeout(initialDelayTimer);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!dynamics || dynamics.length === 0) {
       setLoading(false);
       wordFrequencyRef.current = null;
+      return;
+    }
+
+    // 只有在打字机效果完成后才开始处理词云
+    if (!showWordCloud) {
       return;
     }
 
@@ -70,7 +112,7 @@ const WordCloudComponent = ({ dynamics = [] }) => {
         workerRef.current = null;
       }
     };
-  }, [dynamics]);
+  }, [dynamics, showWordCloud]);
 
   // 响应式处理：当窗口大小变化时，只重新渲染，不重新处理数据
   useEffect(() => {
@@ -88,7 +130,31 @@ const WordCloudComponent = ({ dynamics = [] }) => {
     return () => {
       resizeObserver.disconnect();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
+
+  // 监听主题变化：当主题切换时，重新渲染词云以更新颜色
+  useEffect(() => {
+    if (!showWordCloud || loading || !wordFrequencyRef.current) return;
+
+    const observer = new MutationObserver(() => {
+      // 主题变化时，重新渲染词云
+      if (canvasRef.current && wordFrequencyRef.current) {
+        renderWordCloud(wordFrequencyRef.current);
+      }
+    });
+
+    // 监听 data-theme 属性的变化
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showWordCloud, loading]);
 
   // 高亮关键词的函数（复用搜索的高亮逻辑）
   const highlightKeyword = (text, keyword) => {
@@ -259,7 +325,9 @@ const WordCloudComponent = ({ dynamics = [] }) => {
       color: function (word, _weight, _fontSize, _distance, _theta) {
         // 根据词频设置颜色
         const freq = wordFrequency.find(([w]) => w === word)?.[1] || 1;
-        return getColorByFrequency(freq, maxFrequency);
+        // 找到词在列表中的索引，用于生成不同的色相变化
+        const wordIndex = wordFrequency.findIndex(([w]) => w === word);
+        return getColorByFrequency(freq, maxFrequency, wordIndex);
       },
       // 自定义旋转函数：高频词横着显示（角度为0），其他词可以旋转
       rotate: function (word, _weight, _fontSize, _distance, _theta) {
@@ -340,12 +408,16 @@ const WordCloudComponent = ({ dynamics = [] }) => {
   return (
     <div className={styles.wordCloudWrapper}>
       <div className={styles.titleSection}>
-        <h2 className={styles.title}>你的个人词典</h2>
+        <h2 className={styles.title}>你的可话个人词典</h2>
         <p className={styles.subtitle}>
-          词语的大小，代表它在你的世界里占据的分量。
+          {displayedSubtitle}
+          {displayedSubtitle.length < SUBTITLE_TEXT.length && (
+            <span className={styles.cursor}>|</span>
+          )}
         </p>
       </div>
-      <div ref={containerRef} className={styles.wordCloudContainer}>
+      {showWordCloud && (
+        <div ref={containerRef} className={styles.wordCloudContainer}>
         {loading && (
           <div className={styles.loadingContainer}>
             <p className={styles.loadingText}>正在生成词云...</p>
@@ -356,8 +428,9 @@ const WordCloudComponent = ({ dynamics = [] }) => {
           className={styles.wordCloudCanvas}
           style={{ display: loading ? "none" : "block" }}
         />
-      </div>
-      {relatedTexts.length > 0 && (
+        </div>
+      )}
+      {showWordCloud && relatedTexts.length > 0 && (
         <div className={styles.relatedDynamicsContainer}>
           {relatedTexts.map((text, index) => (
             <div key={index} className={styles.relatedDynamicItem}>
