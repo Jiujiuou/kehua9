@@ -75,6 +75,9 @@ const Preview = forwardRef(
 
     // 处理年度报告按钮点击
     const handleReportButtonClick = () => {
+      // 埋点：点击年度报告
+      track("点击年度报告");
+
       // 打开年度报告时，自动切换到深色模式
       const currentTheme = document.documentElement.getAttribute("data-theme");
       if (currentTheme !== "dark") {

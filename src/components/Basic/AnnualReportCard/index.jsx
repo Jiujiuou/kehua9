@@ -406,16 +406,6 @@ const AnnualReportCard = ({
             })`,
           }}
         >
-          {isHovered && (
-            <div
-              ref={downloadButtonRef}
-              className={styles.downloadButton}
-              onClick={handleDownload}
-              title="下载图片"
-            >
-              <HiDownload />
-            </div>
-          )}
           <div className={styles.cardContent}>{renderPageContent()}</div>
         </div>
       </div>

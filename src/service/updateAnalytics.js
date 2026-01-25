@@ -48,6 +48,7 @@ function validateEventData(eventData) {
     "预览动态",
     "预览动态卡片",  // 新增
     "切换主题",  // 新增（如果前端使用了）
+    "点击年度报告",  // 新增
   ];
 
   if (eventData.eventName && !validEventNames.includes(eventData.eventName)) {
