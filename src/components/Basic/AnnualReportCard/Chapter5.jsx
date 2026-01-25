@@ -23,7 +23,10 @@ const getHourFromDynamic = (dynamic) => {
 };
 
 const calculateHourlyStats = (dynamics) => {
-  const hourStats = Array.from({ length: 24 }, (_, i) => ({ hour: i, count: 0 }));
+  const hourStats = Array.from({ length: 24 }, (_, i) => ({
+    hour: i,
+    count: 0,
+  }));
 
   if (!Array.isArray(dynamics) || dynamics.length === 0) {
     return hourStats;
@@ -41,7 +44,7 @@ const getMostActiveHour = (dynamics) => {
   const hourlyStats = calculateHourlyStats(dynamics);
   const maxStat = hourlyStats.reduce(
     (max, stat) => (stat.count > max.count ? stat : max),
-    hourlyStats[0]
+    hourlyStats[0],
   );
 
   return {
@@ -121,101 +124,106 @@ const calculatePeriodStats = (dynamics) => {
 };
 
 const getTimePeriodDescription = (hour) => {
-  if (hour >= 1 && hour < 6) return "深夜时分，当世界安静下来";
-  if (hour >= 6 && hour < 9) return "清晨醒来，新的一天开始";
-  if (hour >= 9 && hour < 12) return "上午时光，忙碌中抽空";
-  if (hour >= 12 && hour < 14) return "午间休息，片刻的宁静";
-  if (hour >= 14 && hour < 18) return "午后时光";
-  if (hour >= 18 && hour < 20) return "傍晚时分，一天的疲惫渐渐散去";
-  if (hour >= 20 && hour < 23) return "夜晚来临";
-  return "夜深了";
+  if (hour >= 1 && hour < 6) return "世界沉睡，你独自清醒";
+  if (hour >= 6 && hour < 9) return "晨光微亮，一天刚刚开始";
+  if (hour >= 9 && hour < 12) return "忙碌的上午，间隙中的片刻";
+  if (hour >= 12 && hour < 14) return "午后的安静时光";
+  if (hour >= 14 && hour < 18) return "下午的漫长与温柔";
+  if (hour >= 18 && hour < 20) return "傍晚，白天的尾声";
+  if (hour >= 20 && hour < 23) return "夜晚，思绪开始流淌";
+  return "一天将尽，与自己对话";
 };
 
 const getPeriodWarmText = (period) => {
   switch (period?.key) {
     case "dawn":
-      return "凌晨的你，像把一天的心事轻轻放进文字里。";
+      return "在无人打扰的凌晨，你把心事轻轻放下。";
     case "earlyMorning":
-      return "清晨的你，把生活重新点亮，给自己一个温柔的开始。";
+      return "清晨的你，给自己一个温柔的起点。";
     case "morning":
-      return "上午的你，在忙碌的节奏里也不忘留下些什么。";
+      return "上午的你，在忙碌中也不忘捕捉瞬间。";
     case "noon":
-      return "午间的你，懂得停下来喘口气，把自己照顾好。";
+      return "午间的你，懂得停下来的艺术。";
     case "afternoon":
-      return "午后的你，把琐碎也写得有光，像给生活加了一点糖。";
+      return "午后的你，给琐碎日常加上一点光。";
     case "dusk":
-      return "傍晚的你，一边收尾，一边把今天好好告别。";
+      return "傍晚的你，一边告别今天，一边开始整理。";
     case "night":
-      return "夜晚的你，更愿意把思绪整理成句子，慢慢与自己对话。";
+      return "夜晚的你，更适合与自己深度对话。";
     case "lateNight":
-      return "深夜的你，把安静留给自己，也把真实写下来。";
+      return "深夜的你，把真实留给了文字。";
     default:
-      return "你在时间里留下些什么，也在慢慢认识自己。";
+      return "时间流过，你在不同时刻留下不同模样的自己。";
   }
 };
 
 const generateTimePersonaText = (periodStats = []) => {
   if (!Array.isArray(periodStats) || periodStats.length === 0) return [];
 
-  const [dominant, ...rest] = periodStats;
+  const sortedPeriods = periodStats.filter((p) => p?.count > 0);
   const texts = [];
 
-  if (dominant?.count > 0) {
+  const first = sortedPeriods[0];
+  const second = sortedPeriods[1];
+
+  if (first) {
     texts.push({
       type: "normal",
-      text: `从整体来看，你更像"${dominant.name}的你"。在${dominant.range}这段时间，你的记录占比最高（${dominant.percentage}%）。${getPeriodWarmText(
-        dominant
-      )}`,
+      text: `你更接近"${first.name}的你"——在${first.range}记录最多。${getPeriodWarmText(first)}`,
     });
   }
 
-  const others = rest.filter((p) => p?.count > 0).slice(0, 2);
-  others.forEach((p) => {
+  // 如果有显著的第二高峰，才提
+  if (second && second.percentage > 15) {
     texts.push({
       type: "normal",
-      text: `"${p.name}的你"（${p.range}）占比${p.percentage}%。${getPeriodWarmText(p)}`,
+      text: `而${second.name}（${second.range}）也是你的另一个活跃窗口。`,
     });
-  });
+  }
+
+  // 如果数据分布特别均匀
+  const isEven = sortedPeriods.filter((p) => p.percentage > 10).length >= 4;
+  if (isEven) {
+    texts.push({
+      type: "normal",
+      text: "你的记录时间很分散，似乎每个时刻都有想说的话。",
+    });
+  }
 
   return texts;
 };
 
-const generateTimeDistributionText = (mostActiveHour, lateNightStats, dominantPeriod) => {
+const generateTimeDistributionText = (
+  mostActiveHour,
+  lateNightStats,
+  dominantPeriod,
+) => {
   const texts = [];
 
-  const hour = mostActiveHour?.hour ?? 0;
-  const nextHour = hour + 1;
-  const hourText = `${hour}:00-${nextHour}:00`;
-  const timePeriod = getTimePeriodDescription(hour);
+  if (!mostActiveHour) return texts;
 
-  let mainText = "";
-  if (hour >= 1 && hour < 6) {
-    mainText = `你最爱凌晨发布动态。${hourText}是你最活跃的时候，${timePeriod}，你在这里记录着那些白天来不及说的话`;
-  } else if (hour >= 6 && hour < 9) {
-    mainText = `你最爱清晨发布动态。${hourText}是你最活跃的时候，${timePeriod}，你习惯在这里开始新的一天`;
-  } else if (hour >= 9 && hour < 12) {
-    mainText = `你最爱上午发布动态。${hourText}是你最活跃的时候，${timePeriod}，你在这里记录着忙碌中的片刻`;
-  } else if (hour >= 12 && hour < 14) {
-    mainText = `你最爱午间发布动态。${hourText}是你最活跃的时候，${timePeriod}，你在这里享受着片刻的宁静`;
-  } else if (hour >= 14 && hour < 18) {
-    mainText = `你最爱下午发布动态。${hourText}是你最活跃的时候，手边的咖啡蓄满了忙碌，但此刻你学会在这里放个空`;
-  } else if (hour >= 18 && hour < 20) {
-    mainText = `你最爱傍晚发布动态。${hourText}是你最活跃的时候，${timePeriod}，你在这里记录着一天的结束`;
-  } else if (hour >= 20 && hour < 23) {
-    mainText = `你最爱晚上发布动态。${hourText}是你最活跃的时候，${timePeriod}，你在这里整理着一天的思绪`;
-  } else {
-    mainText = `你最爱深夜发布动态。${hourText}是你最活跃的时候，${timePeriod}，你还在记录着`;
-  }
+  const hour = mostActiveHour.hour;
+  const hourText = `${hour}:00-${hour + 1}:00`;
+  const periodDesc = getTimePeriodDescription(hour);
+  const period = getPeriodByHour(hour);
+  const periodName = period.name;
 
+  // 更简洁的主文案
+  const mainText = `一天中，你最爱在${periodName}记录生活——${hourText}是你的高峰时刻。${periodDesc}`;
   texts.push({ type: "main", text: mainText });
 
+  // 深夜数据补充
   const dominantKey = dominantPeriod?.key;
   const dominantIsLate = dominantKey === "dawn" || dominantKey === "lateNight";
 
-  if (lateNightStats?.count > 0 && !(hour >= 23 || hour < 6) && !dominantIsLate) {
+  if (
+    lateNightStats?.percentage > 10 &&
+    !(hour >= 23 || hour < 6) &&
+    !dominantIsLate
+  ) {
     texts.push({
       type: "normal",
-      text: `深夜时光（23:00-05:00），你有${lateNightStats.count}次记录，那些安静的夜晚，你也常常在这里`,
+      text: `此外，深夜（23:00-05:00）也有${lateNightStats.percentage}%的记录。那些安静的时刻，你也在书写。`,
     });
   }
 
@@ -227,12 +235,19 @@ const Chapter5 = ({ dynamics = [] }) => {
   const [showSubtitle, setShowSubtitle] = useState(false);
   const [showRiver, setShowRiver] = useState(false);
   const [showText, setShowText] = useState(false);
+  const [displayedSubtitle, setDisplayedSubtitle] = useState("");
+
+  const SUBTITLE_TEXT = "你的一天，在时间里慢慢成形";
 
   const { hourlyStats, mostActiveHour, timeDistributionText } = useMemo(() => {
     const filtered = filterDynamicsToAnnualReportRange(dynamics);
 
     if (!Array.isArray(filtered) || filtered.length === 0) {
-      return { hourlyStats: [], mostActiveHour: null, timeDistributionText: [] };
+      return {
+        hourlyStats: [],
+        mostActiveHour: null,
+        timeDistributionText: [],
+      };
     }
 
     const hourlyStats = calculateHourlyStats(filtered);
@@ -243,24 +258,54 @@ const Chapter5 = ({ dynamics = [] }) => {
     const dominantPeriod = periodStats?.[0];
 
     const timeDistributionText = [
-      ...generateTimeDistributionText(mostActiveHour, lateNightStats, dominantPeriod),
+      ...generateTimeDistributionText(
+        mostActiveHour,
+        lateNightStats,
+        dominantPeriod,
+      ),
       ...generateTimePersonaText(periodStats),
     ];
 
     return { hourlyStats, mostActiveHour, timeDistributionText };
   }, [dynamics]);
 
+  // 打字机效果
   useEffect(() => {
+    let currentIndex = 0;
+    const typingSpeed = 100; // 每个字符的延迟（毫秒）
+    let typingTimer = null;
+    let initialDelayTimer = null;
+
+    const typeText = () => {
+      if (currentIndex < SUBTITLE_TEXT.length) {
+        setDisplayedSubtitle(SUBTITLE_TEXT.slice(0, currentIndex + 1));
+        currentIndex++;
+        typingTimer = setTimeout(typeText, typingSpeed);
+      } else {
+        // 文字显示完成后，等待一段时间再显示图表
+        setTimeout(() => {
+          setShowRiver(true);
+          // 图表显示后，再等待一段时间显示文案
+          setTimeout(() => {
+            setShowText(true);
+          }, 1500);
+        }, 1000);
+      }
+    };
+
+    // 先显示标题
     const timer1 = setTimeout(() => setShowTitle(true), 300);
-    const timer2 = setTimeout(() => setShowSubtitle(true), 800);
-    const timer3 = setTimeout(() => setShowRiver(true), 1100);
-    const timer4 = setTimeout(() => setShowText(true), 1300);
+
+    // 标题显示后500ms再开启打字机效果
+    initialDelayTimer = setTimeout(() => {
+      setShowSubtitle(true);
+      typeText();
+    }, 800);
 
     return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
-      clearTimeout(timer4);
+      if (timer1) clearTimeout(timer1);
+      if (typingTimer) clearTimeout(typingTimer);
+      if (initialDelayTimer) clearTimeout(initialDelayTimer);
     };
   }, []);
 
@@ -271,7 +316,7 @@ const Chapter5 = ({ dynamics = [] }) => {
           showTitle ? styles.fadeIn : styles.hidden
         }`}
       >
-        时光流转
+        时间的形状
       </div>
 
       {showTitle && (
@@ -280,7 +325,10 @@ const Chapter5 = ({ dynamics = [] }) => {
             showSubtitle ? styles.fadeIn : styles.hidden
           }`}
         >
-          记录你一天中的活跃轨迹
+          {displayedSubtitle}
+          {displayedSubtitle.length < SUBTITLE_TEXT.length && (
+            <span className={styles.cursor}>|</span>
+          )}
         </div>
       )}
 
@@ -295,24 +343,27 @@ const Chapter5 = ({ dynamics = [] }) => {
         />
       </div>
 
-      {Array.isArray(timeDistributionText) && timeDistributionText.length > 0 && (
-        <div
-          className={`${styles.textSection} ${
-            showText ? styles.fadeIn : styles.hidden
-          }`}
-        >
-          {timeDistributionText.map((item, index) => (
-            <div
-              key={index}
-              className={`${styles.textItem} ${
-                item?.type === "main" ? styles.mainText : styles.normalText
-              }`}
-            >
-              {item?.text}
-            </div>
-          ))}
-        </div>
-      )}
+      {Array.isArray(timeDistributionText) &&
+        timeDistributionText.length > 0 && (
+          <div
+            className={`${styles.textSection} ${
+              showText ? styles.fadeIn : styles.hidden
+            }`}
+          >
+            {timeDistributionText.map((item, index) => (
+              <div
+                key={index}
+                className={`${styles.textItem} ${
+                  item?.type === "main" ? styles.mainText : styles.normalText
+                }`}
+              >
+                {item?.text}
+              </div>
+            ))}
+          </div>
+        )}
+      {/* 底部间距，确保内容不被裁剪 */}
+      <div style={{ height: "32px", width: "100%", flexShrink: 0 }} />
     </div>
   );
 };

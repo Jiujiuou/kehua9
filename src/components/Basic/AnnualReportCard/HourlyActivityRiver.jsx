@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useEffect, useState, useRef } from "react";
 import PropTypes from "prop-types";
 import styles from "./HourlyActivityRiver.module.less";
 
@@ -77,6 +77,7 @@ const HourlyActivityRiver = ({ hourlyStats, mostActiveHour }) => {
       timeMarkers,
       padding,
       chartHeight,
+      points, // 保存原始点数据用于波浪动画
     };
   }, [hourlyStats, mostActiveHour]);
 
@@ -92,7 +93,74 @@ const HourlyActivityRiver = ({ hourlyStats, mostActiveHour }) => {
     timeMarkers,
     padding,
     chartHeight,
+    points,
   } = renderData;
+
+  const [animatedPathD, setAnimatedPathD] = useState(pathD);
+  const animationFrameRef = useRef(null);
+  const startTimeRef = useRef(null);
+
+  // 生成波浪效果的路径
+  useEffect(() => {
+    if (!points || points.length === 0) return;
+
+    const animate = (currentTime) => {
+      if (!startTimeRef.current) {
+        startTimeRef.current = currentTime;
+      }
+
+      const elapsed = (currentTime - startTimeRef.current) / 1000; // 转换为秒
+      const waveAmplitude = 2; // 波浪幅度（像素）
+      const waveSpeed = 0.5; // 波浪速度
+      const waveLength = 200; // 波浪长度（像素）
+
+      // 创建带波浪效果的点
+      const animatedPoints = points.map((point, index) => {
+        const waveOffset =
+          Math.sin((point.x / waveLength + elapsed * waveSpeed) * Math.PI * 2) *
+          waveAmplitude;
+        return {
+          ...point,
+          y: point.y + waveOffset,
+        };
+      });
+
+      // 重新生成路径
+      let newPathD = `M ${animatedPoints[0].x} ${viewBoxHeight - padding.bottom}`;
+      newPathD += ` L ${animatedPoints[0].x} ${animatedPoints[0].y}`;
+
+      for (let i = 0; i < animatedPoints.length - 1; i++) {
+        const current = animatedPoints[i];
+        const next = animatedPoints[i + 1];
+        const prev = i > 0 ? animatedPoints[i - 1] : current;
+        const nextNext =
+          i < animatedPoints.length - 2 ? animatedPoints[i + 2] : next;
+
+        const smoothness = 0.2;
+        const cp1x = current.x + (next.x - prev.x) * smoothness;
+        const cp1y = current.y + (next.y - prev.y) * smoothness;
+        const cp2x = next.x - (nextNext.x - current.x) * smoothness;
+        const cp2y = next.y - (nextNext.y - current.y) * smoothness;
+
+        newPathD += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${next.x} ${next.y}`;
+      }
+
+      const lastPoint = animatedPoints[animatedPoints.length - 1];
+      newPathD += ` L ${lastPoint.x} ${viewBoxHeight - padding.bottom}`;
+      newPathD += ` Z`;
+
+      setAnimatedPathD(newPathD);
+      animationFrameRef.current = requestAnimationFrame(animate);
+    };
+
+    animationFrameRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [points, viewBoxHeight, padding.bottom]);
 
   return (
     <div className={styles.riverContainer}>
@@ -109,13 +177,14 @@ const HourlyActivityRiver = ({ hourlyStats, mostActiveHour }) => {
           </linearGradient>
         </defs>
 
-        <path
-          d={pathD}
-          fill="url(#riverGradient)"
-          stroke="rgba(234, 66, 95, 0.6)"
-          strokeWidth="1.5"
-          className={styles.riverPath}
-        />
+        <g className={styles.riverPath}>
+          <path
+            d={animatedPathD}
+            fill="url(#riverGradient)"
+            stroke="rgba(234, 66, 95, 0.6)"
+            strokeWidth="1.5"
+          />
+        </g>
 
         {peakPoint && (
           <g className={styles.peakMarker}>
