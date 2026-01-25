@@ -554,14 +554,14 @@ const Preview = forwardRef(
               <FaSearch />
             </button>
 
-            {/* <button
+            <button
               className={styles.reportButton}
               onClick={handleReportButtonClick}
               title="年度报告"
             >
               <FaChartBar />
               <span className={styles.reportButtonText}>年度报告</span>
-            </button> */}
+            </button>
           </div>
           <div
             className={styles.contentArea}

@@ -153,6 +153,24 @@
   }
 }
 
+// 打字机光标闪烁动画
+.cursor {
+  display: inline-block;
+  animation: blink 1s infinite;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
 // 响应式设计：在小屏幕上调整布局
 @media (max-width: 480px) {
   .chapter6Content {

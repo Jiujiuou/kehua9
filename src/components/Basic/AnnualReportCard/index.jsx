@@ -319,9 +319,9 @@ const AnnualReportCard = ({
       } else if (index === 5) {
         content = <Chapter5 dynamics={dynamics} />;
       } else if (index === 6) {
-        content = <Chapter6 dynamics={dynamics} />;
+        content = <Chapter7 dynamics={dynamics} />; // 交换：index 6 渲染 Chapter7
       } else if (index === 7) {
-        content = <Chapter7 dynamics={dynamics} />;
+        content = <Chapter6 dynamics={dynamics} />; // 交换：index 7 渲染 Chapter6
       } else if (index === 8) {
         content = (
           <Chapter8

@@ -297,6 +297,21 @@
   }
 }
 
+.timelineCanvasContainer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 0;
+  overflow: hidden;
+}
+
+.timelineCanvas {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
 .silenceTextList {
   display: flex;
   flex-direction: column;
@@ -623,6 +638,24 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+// 打字机光标闪烁动画
+.cursor {
+  display: inline-block;
+  animation: blink 1s infinite;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
   }
 }
 

@@ -274,9 +274,7 @@ const Chapter9 = ({ userNickname = "" }) => {
           <div className={styles.noticeCard}>
             <div className={styles.noticeTitle}>⚠️ 请知悉</div>
             <ol className={styles.noticeList}>
-              <li>
-                你的这段内容将匿名存入公开数据库，用于为其他用户提供共鸣。
-              </li>
+              <li>你的这段内容将存入公开数据库，用于为其他用户提供共鸣。</li>
               <li>它将无法删除，请避免包含任何个人身份信息。</li>
               <li>发布后，你将随机看到 10 条他人留下的话。</li>
             </ol>
@@ -348,7 +346,7 @@ const Chapter9 = ({ userNickname = "" }) => {
 
           <div className={styles.editorHint}>
             ⚠️
-            你的这段内容将匿名存入公开数据库，并且无法删除，请勿包含个人身份信息。
+            你的这段内容将存入公开数据库，并且无法删除，请勿包含个人身份信息。
           </div>
         </div>
       )}
