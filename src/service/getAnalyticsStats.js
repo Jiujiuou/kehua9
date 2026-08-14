@@ -1,3 +1,9 @@
+// ============================================================
+// 【已退役】本文件是 Laf(Sealos) 平台的云函数参考实现。
+// 埋点平台已于 2026-08 迁移到 Supabase（纯 REST 直连，无需后端函数）。
+// 现在埋点查询走：前端 src/components/Analytics/AnalyticsPanel -> GET Supabase /rest/v1/analytics
+// 本文件仅保留作参考，不再部署使用。如需删除可直接删除。
+// ============================================================
 import cloud from '@lafjs/cloud'
 const db = cloud.mongo.db
 

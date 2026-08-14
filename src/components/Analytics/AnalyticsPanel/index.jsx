@@ -2,8 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import styles from "./index.module.less";
 import UserPreviewCard from "@/components/Analytics/UserPreviewCard";
 import { FaUsers } from "react-icons/fa";
-
-const API_URL = "https://v9fq463tb8.hzh.sealos.run/getAnalyticsStats";
+import { SUPABASE_URL, SUPABASE_ANON_KEY, ANALYTICS_TABLE } from "@/config/supabase";
 
 function AnalyticsPanel() {
   const [data, setData] = useState([]);
@@ -42,22 +41,45 @@ function AnalyticsPanel() {
     setEndDate(defaultEndDate);
   }, []);
 
-  // 获取数据
+  // 获取数据（Supabase REST 查询）
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(API_URL, {
-        method: "POST",
+      // 构建查询参数：按时间倒序，可选日期范围过滤
+      const rangeParams = [];
+      if (startDate) {
+        rangeParams.push(`time=gte.${encodeURIComponent(startDate)}`);
+      }
+      if (endDate) {
+        // time 是 "YYYY-MM-DD hh:mm:ss" 文本格式，lte 需带上当天 23:59:59
+        rangeParams.push(
+          `time=lte.${encodeURIComponent(`${endDate} 23:59:59`)}`
+        );
+      }
+
+      // 用别名把 snake_case 列映射回 camelCase，保持前端统计逻辑不变
+      const select = [
+        "id",
+        "eventName:event_name",
+        "params",
+        "city",
+        "userId:user_id",
+        "time",
+        "sessionId:session_id",
+        "created_at",
+      ].join(",");
+
+      const url = `${SUPABASE_URL}/rest/v1/${ANALYTICS_TABLE}?select=${select}&order=time.desc${
+        rangeParams.length > 0 ? "&" + rangeParams.join("&") : ""
+      }`;
+
+      const response = await fetch(url, {
+        method: "GET",
         headers: {
-          "Content-Type": "application/json",
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         },
-        body: JSON.stringify({
-          options: {
-            startDate: startDate || undefined,
-            endDate: endDate || undefined,
-          },
-        }),
       });
 
       if (!response.ok) {
@@ -65,11 +87,7 @@ function AnalyticsPanel() {
       }
 
       const result = await response.json();
-      if (result.success) {
-        setData(result.data || []);
-      } else {
-        throw new Error(result.message || "获取数据失败");
-      }
+      setData(result || []);
     } catch (err) {
       setError(err.message);
       console.error("获取分析数据失败:", err);

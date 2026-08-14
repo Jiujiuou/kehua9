@@ -21,3 +21,19 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Supabase CLI local cache
+supabase/.temp*
+supabase/project-ref
+supabase/linked-project.json
+supabase/gotrue-version
+supabase/pooler-url
+supabase/postgres-version
+supabase/rest-version
+supabase/storage-version
+supabase/storage-migration
+supabase/pgdelta
+
+# 环境构建备份（可删除）
+dist_old_backup/
+index.html_old

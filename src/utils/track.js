@@ -1,13 +1,13 @@
 /**
  * 埋点追踪工具
  * 用于收集用户行为数据
+ * 数据平台：Supabase（REST 直连，原 Laf 已废弃）
  */
+
+import { SUPABASE_URL, SUPABASE_ANON_KEY, ANALYTICS_TABLE } from "@/config/supabase";
 
 const USER_ID_KEY = "kehua-user-id";
 const CITY_KEY = "kehua-user-city";
-
-// 埋点 API 地址
-const API_URL = "https://v9fq463tb8.hzh.sealos.run/updateAnalytics";
 
 /**
  * 生成浏览器指纹作为 userId
@@ -129,7 +129,7 @@ function getCurrentTime() {
 }
 
 /**
- * 发送埋点数据到服务器
+ * 发送埋点数据到服务器（Supabase REST API）
  * @param {Array} events - 事件数据数组
  * @returns {Promise<void>}
  */
@@ -141,27 +141,26 @@ async function sendAnalytics(events) {
   }
 
   try {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        data: events,
-      }),
-    });
+    const response = await fetch(
+      `${SUPABASE_URL}/rest/v1/${ANALYTICS_TABLE}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          Prefer: "return=minimal",
+        },
+        body: JSON.stringify(events),
+      }
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
     }
 
-    const result = await response.json();
-    if (result.success) {
-      console.log("埋点数据发送成功:", result);
-    } else {
-      console.error("埋点数据发送失败:", result);
-    }
+    console.log(`埋点数据发送成功: ${events.length} 条`);
   } catch (error) {
     console.error("发送埋点数据失败:", error);
     // 不抛出错误，避免影响主流程
@@ -203,12 +202,12 @@ export async function track(eventName, params = {}) {
     const city = await getUserCity();
     const time = getCurrentTime();
 
-    // 构建事件数据
+    // 构建事件数据（字段名与 Supabase analytics 表 snake_case 列对应）
     const eventData = {
-      eventName,
+      event_name: eventName,
       params,
       city,
-      userId,
+      user_id: userId,
       time,
     };
 
@@ -242,12 +241,12 @@ export async function trackBatch(events) {
     const city = await getUserCity();
     const time = getCurrentTime();
 
-    // 为每个事件添加用户信息
+    // 为每个事件添加用户信息（字段名与 Supabase analytics 表 snake_case 列对应）
     const eventDataList = events.map((event) => ({
-      eventName: event.eventName,
+      event_name: event.eventName,
       params: event.params || {},
       city,
-      userId,
+      user_id: userId,
       time: event.time || time, // 允许每个事件有自己的时间
     }));
 
